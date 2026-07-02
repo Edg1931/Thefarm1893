@@ -1,0 +1,32 @@
+{
+  "name": "thefarm1893",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Farm 1893 — Wedding & Gathering Venue. Conversion-focused marketing site + AI-powered venue CRM.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "@supabase/supabase-js": "^2.48.1",
+    "@supabase/ssr": "^0.6.1",
+    "lucide-react": "^0.469.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.5.1"
+  }
+}

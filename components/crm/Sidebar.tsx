@@ -1,0 +1,105 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import {
+  LayoutDashboard, Users, KanbanSquare, CalendarDays, Megaphone,
+  Bot, Settings, Menu, X, Sparkles,
+} from "lucide-react";
+import { business } from "@/lib/content";
+
+const links = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/leads", label: "Lead Pipeline", icon: KanbanSquare },
+  { href: "/dashboard/bookings", label: "Bookings & Calendar", icon: CalendarDays },
+  { href: "/dashboard/contacts", label: "Contacts", icon: Users },
+  { href: "/dashboard/marketing", label: "AI Marketing Studio", icon: Megaphone },
+  { href: "/dashboard/receptionist", label: "AI Receptionist", icon: Bot },
+  { href: "/dashboard/settings", label: "Integrations", icon: Settings },
+];
+
+export function Sidebar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  const Nav = (
+    <nav className="flex flex-col gap-1">
+      {links.map((l) => {
+        const active = l.href === "/dashboard" ? pathname === l.href : pathname.startsWith(l.href);
+        return (
+          <Link
+            key={l.href}
+            href={l.href}
+            onClick={() => setOpen(false)}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
+              active
+                ? "bg-brass/15 font-medium text-parchment ring-1 ring-brass/30"
+                : "text-parchment/60 hover:bg-white/5 hover:text-parchment"
+            }`}
+          >
+            <l.icon size={18} className={active ? "text-brass-soft" : ""} />
+            {l.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
+  return (
+    <>
+      {/* Mobile bar */}
+      <div className="flex items-center justify-between border-b border-white/10 bg-[color:var(--color-ink)] px-4 py-3 text-parchment lg:hidden">
+        <span className="font-display text-xl">The Farm 1893</span>
+        <button onClick={() => setOpen(true)} aria-label="Menu"><Menu /></button>
+      </div>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden w-72 shrink-0 flex-col bg-[color:var(--color-ink)] p-5 lg:flex">
+        <SidebarHeader />
+        <div className="mt-8 flex-1">{Nav}</div>
+        <UpgradeCard />
+      </aside>
+
+      {/* Mobile drawer */}
+      {open && (
+        <div className="fixed inset-0 z-[80] lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
+          <aside className="absolute left-0 top-0 flex h-full w-72 flex-col bg-[color:var(--color-ink)] p-5">
+            <div className="flex items-center justify-between">
+              <SidebarHeader />
+              <button onClick={() => setOpen(false)} aria-label="Close"><X className="text-parchment" /></button>
+            </div>
+            <div className="mt-8 flex-1">{Nav}</div>
+          </aside>
+        </div>
+      )}
+    </>
+  );
+}
+
+function SidebarHeader() {
+  return (
+    <div>
+      <Link href="/dashboard" className="flex items-center gap-2">
+        <div className="grid h-9 w-9 place-items-center rounded-lg bg-brass/20 ring-1 ring-brass/40">
+          <Sparkles size={18} className="text-brass-soft" />
+        </div>
+        <div className="leading-none">
+          <p className="font-display text-lg text-parchment">{business.name}</p>
+          <p className="text-[0.65rem] uppercase tracking-widest text-parchment/40">Venue OS</p>
+        </div>
+      </Link>
+    </div>
+  );
+}
+
+function UpgradeCard() {
+  return (
+    <div className="mt-6 rounded-xl bg-gradient-to-br from-brass/20 to-sage/10 p-4 ring-1 ring-brass/20">
+      <p className="text-sm font-medium text-parchment">AI Copilot active</p>
+      <p className="mt-1 text-xs text-parchment/60">Insights refresh in real time as leads and bookings change.</p>
+      <Link href="/" className="mt-3 inline-block text-xs font-medium text-brass-soft hover:underline">← Back to website</Link>
+    </div>
+  );
+}

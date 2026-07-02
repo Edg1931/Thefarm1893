@@ -1,0 +1,107 @@
+import Link from "next/link";
+import { DollarSign, Users, CalendarCheck, Zap, TrendingUp, Clock } from "lucide-react";
+import { StatCard, InsightCard, RevenueChart, PriorityBadge, ScoreRing, Panel } from "@/components/crm/widgets";
+import { leads, upcomingEvents, dashboardStats, revenueByMonth, aiInsights } from "@/lib/crm/sample-data";
+import { formatCurrency, formatDate } from "@/lib/utils";
+
+export default function DashboardOverview() {
+  const hot = leads.filter((l) => l.priority === "hot" && l.stage !== "booked").slice(0, 4);
+
+  return (
+    <div className="space-y-8">
+      {/* Greeting + AI copilot line */}
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h1 className="font-display text-4xl text-ink">Good morning, Farm Team 🌾</h1>
+          <p className="mt-1 text-stone">Here's what your AI copilot noticed overnight.</p>
+        </div>
+        <Link href="/dashboard/leads" className="btn btn-primary !py-3">View Pipeline</Link>
+      </div>
+
+      {/* AI Insights strip */}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {aiInsights.map((ins) => (
+          <InsightCard key={ins.title} {...ins} />
+        ))}
+      </div>
+
+      {/* KPIs */}
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Pipeline value" value={formatCurrency(dashboardStats.pipelineValue)} delta="+18%" icon={DollarSign} accent="brass" />
+        <StatCard label="Booked revenue YTD" value={formatCurrency(dashboardStats.bookedRevenueYTD)} delta="+24%" icon={TrendingUp} accent="sage" />
+        <StatCard label="New leads this month" value={String(dashboardStats.leadsThisMonth)} delta="+9" icon={Users} accent="ink" />
+        <StatCard label="Avg. response time" value={`${dashboardStats.avgResponseMins} min`} delta="Fast" icon={Zap} accent="terracotta" />
+      </div>
+
+      <div className="grid gap-8 xl:grid-cols-3">
+        {/* Revenue chart */}
+        <Panel title="Revenue & bookings" className="xl:col-span-2"
+          action={<span className="text-sm text-stone">This year · in thousands</span>}>
+          <RevenueChart data={revenueByMonth} />
+          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-ink/8 pt-5 text-center">
+            <div><p className="font-display text-2xl text-ink">{dashboardStats.conversionRate}%</p><p className="text-xs text-stone">Lead → booking</p></div>
+            <div><p className="font-display text-2xl text-ink">{dashboardStats.toursScheduled}</p><p className="text-xs text-stone">Tours scheduled</p></div>
+            <div><p className="font-display text-2xl text-ink">{formatCurrency(19800)}</p><p className="text-xs text-stone">Avg. booking value</p></div>
+          </div>
+        </Panel>
+
+        {/* Upcoming events */}
+        <Panel title="Upcoming" action={<Link href="/dashboard/bookings" className="text-sm text-brass hover:underline">Calendar</Link>}>
+          <ul className="space-y-3">
+            {[...upcomingEvents].sort((a, b) => a.date.localeCompare(b.date)).map((e) => (
+              <li key={e.title + e.date} className="flex items-center gap-3 rounded-xl bg-bone p-3">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-ink text-parchment">
+                  <span className="font-display text-lg leading-none">{new Date(e.date).getDate()}</span>
+                  <span className="text-[0.55rem] uppercase">{new Date(e.date).toLocaleDateString("en-US", { month: "short" })}</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-ink">{e.title}</p>
+                  <p className="text-xs text-stone">{e.type}</p>
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-[0.65rem] font-medium ${
+                  e.status === "confirmed" ? "bg-sage/15 text-sage-deep" :
+                  e.status === "tentative" ? "bg-brass/15 text-brass" : "bg-ink/8 text-ink-soft"
+                }`}>{e.status}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      </div>
+
+      {/* Hot leads needing attention */}
+      <Panel title="🔥 Hot leads to close"
+        action={<Link href="/dashboard/leads" className="text-sm text-brass hover:underline">All leads</Link>}>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="text-xs uppercase tracking-wider text-stone">
+              <tr className="border-b border-ink/8">
+                <th className="pb-3 font-medium">Score</th>
+                <th className="pb-3 font-medium">Lead</th>
+                <th className="pb-3 font-medium">Event</th>
+                <th className="pb-3 font-medium">Value</th>
+                <th className="pb-3 font-medium">AI recommendation</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-ink/6">
+              {hot.map((l) => (
+                <tr key={l.id} className="group transition hover:bg-bone/60">
+                  <td className="py-3"><ScoreRing score={l.score} /></td>
+                  <td className="py-3">
+                    <p className="font-medium text-ink">{l.name}</p>
+                    <p className="text-xs text-stone">{l.source} · {l.lastActivity}</p>
+                  </td>
+                  <td className="py-3">
+                    <p className="text-ink-soft">{l.eventType}</p>
+                    <p className="text-xs text-stone">{formatDate(l.eventDate)} · {l.guestCount} guests</p>
+                  </td>
+                  <td className="py-3 font-medium text-ink">{formatCurrency(l.budget)}</td>
+                  <td className="max-w-xs py-3 text-xs text-ink-soft">{l.aiSummary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
+    </div>
+  );
+}

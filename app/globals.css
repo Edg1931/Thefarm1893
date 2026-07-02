@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   THE FARM 1893 — DESIGN SYSTEM
+   Rustic-refined. Editorial. Warm. Inspired by the black-and-white sketched
+   barn logo, the historic 1893 orchard, and modern luxury wedding editorial.
+   ============================================================================ */
+
+@theme {
+  /* — Brand palette — */
+  --color-ink: #1c1a17;        /* soft near-black, from the logo linework */
+  --color-ink-soft: #35312b;
+  --color-bone: #f7f3ec;       /* warm cream — primary background */
+  --color-linen: #efe7d9;      /* deeper cream for panels */
+  --color-parchment: #fbf9f4;
+  --color-sage: #7c8768;       /* orchard leaf green */
+  --color-sage-deep: #4c5741;
+  --color-terracotta: #b0563b; /* muted apple red accent */
+  --color-brass: #b18f57;      /* aged gold / luxe accent */
+  --color-brass-soft: #cbb488;
+  --color-stone: #8b8175;      /* muted taupe text */
+  --color-stone-soft: #b7ad9f;
+
+  /* — Fonts (wired to next/font CSS vars) — */
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-script: var(--font-script), "Great Vibes", cursive;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* — Radii / shadows — */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 18px;
+  --shadow-soft: 0 24px 60px -30px rgba(28, 26, 23, 0.35);
+  --shadow-lift: 0 30px 80px -40px rgba(28, 26, 23, 0.45);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-color: var(--color-bone);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "kern", "liga", "calt";
+  }
+  ::selection {
+    background: var(--color-sage);
+    color: var(--color-parchment);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+}
+
+/* — Reusable expressive classes — */
+@layer components {
+  .font-script { font-family: var(--font-script); }
+  .font-display { font-family: var(--font-display); }
+
+  .eyebrow {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-brass);
+  }
+
+  .container-x { width: 100%; margin-inline: auto; max-width: 80rem; padding-inline: 1.5rem; }
+  @media (min-width: 768px) { .container-x { padding-inline: 2.5rem; } }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.95rem 1.9rem; border-radius: 999px;
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--color-ink); color: var(--color-parchment); }
+  .btn-primary:hover { background: var(--color-sage-deep); transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+  .btn-ghost { background: transparent; color: var(--color-ink); border: 1px solid rgba(28,26,23,0.22); }
+  .btn-ghost:hover { background: var(--color-ink); color: var(--color-parchment); border-color: var(--color-ink); }
+  .btn-light { background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(6px); }
+  .btn-light:hover { background: #fff; color: var(--color-ink); }
+
+  .hairline { height: 1px; background: linear-gradient(90deg, transparent, rgba(28,26,23,0.25), transparent); }
+
+  .card-hover { transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s; }
+  .card-hover:hover { transform: translateY(-6px); box-shadow: var(--shadow-lift); }
+
+  .link-underline { position: relative; }
+  .link-underline::after {
+    content: ""; position: absolute; left: 0; bottom: -3px; height: 1px; width: 0;
+    background: currentColor; transition: width 0.4s ease;
+  }
+  .link-underline:hover::after { width: 100%; }
+}
+
+/* — Entrance animations — */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slowZoom { from { transform: scale(1.08); } to { transform: scale(1); } }
+@keyframes shimmer { 0% { background-position: -800px 0; } 100% { background-position: 800px 0; } }
+
+.animate-rise { animation: riseIn 1s cubic-bezier(0.22,1,0.36,1) both; }
+.animate-fade { animation: fadeIn 1.4s ease both; }
+.animate-zoom { animation: slowZoom 8s ease-out both; }
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.3s; }
+.delay-3 { animation-delay: 0.45s; }
+.delay-4 { animation-delay: 0.6s; }
+
+/* Scroll-reveal (progressively enhanced by IntersectionObserver) */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22,1,0.36,1); }
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-linen) 25%, var(--color-parchment) 50%, var(--color-linen) 75%);
+  background-size: 800px 100%; animation: shimmer 1.6s infinite linear;
+}
