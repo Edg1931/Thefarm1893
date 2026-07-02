@@ -31,6 +31,7 @@ export const nav: NavLink[] = [
   { label: "Gatherings", href: "/gatherings" },
   { label: "The Stay", href: "/accommodations" },
   { label: "Gallery", href: "/gallery" },
+  { label: "Vendors", href: "/vendors" },
   { label: "Investment", href: "/pricing" },
   { label: "Our Story", href: "/about" },
 ];
@@ -235,4 +236,57 @@ export const faqs = [
     q: "How far in advance do dates book?",
     a: "Peak Saturdays (May–October) typically book 12–18 months out. Use the date checker on this page and we'll confirm availability right away.",
   },
+];
+
+/* ============================================================================
+   VENDOR MARKETPLACE — a curated ecosystem of trusted local partners.
+   The twist: this is a two-sided revenue engine. Vendors apply to be listed,
+   "Preferred" partners pay a membership or referral commission, and the venue
+   becomes the hub of the local wedding economy. Couples get a vetted dream team;
+   the venue earns referral income AND becomes stickier (one-stop planning).
+   ============================================================================ */
+
+export type VendorTier = "preferred" | "featured" | "listed";
+
+export type VendorCategory = {
+  slug: string;
+  name: string;
+  icon: string; // lucide icon name, resolved in the page
+  blurb: string;
+};
+
+export const vendorCategories: VendorCategory[] = [
+  { slug: "photography", name: "Photography & Video", icon: "Camera", blurb: "Storytellers who know our light." },
+  { slug: "catering", name: "Catering & Bar", icon: "UtensilsCrossed", blurb: "Farm-to-table menus & mixology." },
+  { slug: "florals", name: "Florals & Design", icon: "Flower2", blurb: "Blooms that echo the orchard." },
+  { slug: "music", name: "Music & Entertainment", icon: "Music", blurb: "DJs, bands & ceremony strings." },
+  { slug: "planning", name: "Planners & Coordinators", icon: "ClipboardList", blurb: "Day-of and full-service pros." },
+  { slug: "beauty", name: "Hair & Makeup", icon: "Sparkles", blurb: "Get-ready-glam on-site." },
+  { slug: "cake", name: "Cake & Sweets", icon: "Cake", blurb: "Showstoppers & dessert tables." },
+  { slug: "rentals", name: "Rentals & Decor", icon: "Armchair", blurb: "Lounges, lighting & the extras." },
+];
+
+export type Vendor = {
+  id: string;
+  name: string;
+  category: string; // category slug
+  tier: VendorTier;
+  tagline: string;
+  location: string;
+  rating: number;
+  reviews: number;
+  priceBand: "$" | "$$" | "$$$";
+  image: string;
+  bookedWithUs: number; // how many Farm 1893 couples used them — trust signal
+};
+
+export const vendors: Vendor[] = [
+  { id: "V-01", name: "Amberlight Photography", category: "photography", tier: "preferred", tagline: "Golden-hour specialists who've shot 40+ weddings here.", location: "Sandusky, OH", rating: 5.0, reviews: 128, priceBand: "$$", image: "https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&w=800&q=80", bookedWithUs: 41 },
+  { id: "V-02", name: "Harvest & Hearth Catering", category: "catering", tier: "preferred", tagline: "Seasonal farm-to-table menus sourced from local growers.", location: "Berlin Heights, OH", rating: 4.9, reviews: 96, priceBand: "$$", image: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=800&q=80", bookedWithUs: 33 },
+  { id: "V-03", name: "Wildbloom Floral Co.", category: "florals", tier: "featured", tagline: "Garden-style arrangements that echo the heritage orchard.", location: "Huron, OH", rating: 5.0, reviews: 74, priceBand: "$$", image: "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?auto=format&fit=crop&w=800&q=80", bookedWithUs: 27 },
+  { id: "V-04", name: "The Northcoast DJs", category: "music", tier: "preferred", tagline: "Reading the room since 2009 — barns are our specialty.", location: "Cleveland, OH", rating: 4.8, reviews: 152, priceBand: "$$", image: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?auto=format&fit=crop&w=800&q=80", bookedWithUs: 38 },
+  { id: "V-05", name: "Ever After Planning", category: "planning", tier: "featured", tagline: "Full-service planners who know every inch of the farm.", location: "Toledo, OH", rating: 5.0, reviews: 61, priceBand: "$$$", image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80", bookedWithUs: 22 },
+  { id: "V-06", name: "Gilded Grace Beauty", category: "beauty", tier: "listed", tagline: "On-site hair & makeup for the whole party.", location: "Sandusky, OH", rating: 4.9, reviews: 88, priceBand: "$$", image: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=800&q=80", bookedWithUs: 19 },
+  { id: "V-07", name: "Sugar Maple Bakehouse", category: "cake", tier: "featured", tagline: "Heirloom-recipe cakes & orchard-fruit dessert tables.", location: "Norwalk, OH", rating: 5.0, reviews: 54, priceBand: "$", image: "https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&w=800&q=80", bookedWithUs: 24 },
+  { id: "V-08", name: "Lantern & Co. Rentals", category: "rentals", tier: "listed", tagline: "Vintage lounges, festoon lighting & statement pieces.", location: "Cleveland, OH", rating: 4.7, reviews: 43, priceBand: "$$", image: "https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=800&q=80", bookedWithUs: 15 },
 ];

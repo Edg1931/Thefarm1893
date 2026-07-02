@@ -118,6 +118,39 @@ export const revenueByMonth = [
   { month: "Oct", value: 79 }, { month: "Nov", value: 34 }, { month: "Dec", value: 46 },
 ];
 
+/* --- Vendor CRM: the venue's referral revenue engine --- */
+export type VendorRecord = {
+  id: string;
+  name: string;
+  category: string;
+  tier: "preferred" | "featured" | "listed";
+  status: "active" | "pending" | "review";
+  referralsSent: number;   // leads the venue sent them
+  bookedFromReferrals: number;
+  commissionRate: number;  // % the venue earns on referred bookings
+  commissionEarnedYTD: number;
+  rating: number;
+  membershipFee: number;   // annual preferred-partner fee ($/yr)
+};
+
+export const vendorRecords: VendorRecord[] = [
+  { id: "V-01", name: "Amberlight Photography", category: "Photography", tier: "preferred", status: "active", referralsSent: 47, bookedFromReferrals: 31, commissionRate: 10, commissionEarnedYTD: 8400, rating: 5.0, membershipFee: 1200 },
+  { id: "V-02", name: "Harvest & Hearth Catering", category: "Catering", tier: "preferred", status: "active", referralsSent: 52, bookedFromReferrals: 28, commissionRate: 8, commissionEarnedYTD: 12600, rating: 4.9, membershipFee: 1200 },
+  { id: "V-04", name: "The Northcoast DJs", category: "Music", tier: "preferred", status: "active", referralsSent: 44, bookedFromReferrals: 26, commissionRate: 10, commissionEarnedYTD: 5200, rating: 4.8, membershipFee: 1200 },
+  { id: "V-03", name: "Wildbloom Floral Co.", category: "Florals", tier: "featured", status: "active", referralsSent: 33, bookedFromReferrals: 19, commissionRate: 8, commissionEarnedYTD: 4100, rating: 5.0, membershipFee: 600 },
+  { id: "V-05", name: "Ever After Planning", category: "Planning", tier: "featured", status: "active", referralsSent: 21, bookedFromReferrals: 14, commissionRate: 12, commissionEarnedYTD: 6800, rating: 5.0, membershipFee: 600 },
+  { id: "V-07", name: "Sugar Maple Bakehouse", category: "Cake", tier: "featured", status: "active", referralsSent: 29, bookedFromReferrals: 20, commissionRate: 8, commissionEarnedYTD: 1900, rating: 5.0, membershipFee: 600 },
+  { id: "V-06", name: "Gilded Grace Beauty", category: "Beauty", tier: "listed", status: "review", referralsSent: 18, bookedFromReferrals: 9, commissionRate: 6, commissionEarnedYTD: 1100, rating: 4.9, membershipFee: 0 },
+  { id: "V-09", name: "Bluebird Bartending", category: "Bar Service", tier: "listed", status: "pending", referralsSent: 0, bookedFromReferrals: 0, commissionRate: 6, commissionEarnedYTD: 0, rating: 0, membershipFee: 0 },
+];
+
+export const vendorStats = {
+  activePartners: vendorRecords.filter((v) => v.status === "active").length,
+  referralRevenueYTD: vendorRecords.reduce((s, v) => s + v.commissionEarnedYTD, 0),
+  membershipRevenue: vendorRecords.reduce((s, v) => s + v.membershipFee, 0),
+  totalReferrals: vendorRecords.reduce((s, v) => s + v.referralsSent, 0),
+};
+
 export const aiInsights = [
   {
     icon: "trend",

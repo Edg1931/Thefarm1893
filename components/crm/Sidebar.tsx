@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, Users, KanbanSquare, CalendarDays, Megaphone,
-  Bot, Settings, Menu, X, Sparkles,
+  Bot, Settings, Menu, X, Sparkles, Handshake,
 } from "lucide-react";
 import { business } from "@/lib/content";
 
@@ -14,6 +14,7 @@ const links = [
   { href: "/dashboard/leads", label: "Lead Pipeline", icon: KanbanSquare },
   { href: "/dashboard/bookings", label: "Bookings & Calendar", icon: CalendarDays },
   { href: "/dashboard/contacts", label: "Contacts", icon: Users },
+  { href: "/dashboard/vendors", label: "Vendor Network", icon: Handshake },
   { href: "/dashboard/marketing", label: "AI Marketing Studio", icon: Megaphone },
   { href: "/dashboard/receptionist", label: "AI Receptionist", icon: Bot },
   { href: "/dashboard/settings", label: "Integrations", icon: Settings },
