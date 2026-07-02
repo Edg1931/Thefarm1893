@@ -127,7 +127,9 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
               </div>
               <button type="button" className="btn bg-parchment text-ink w-full"><Check size={16} /> Send RSVP</button>
             </form>
-            {c.registryUrl && <a href={c.registryUrl} className="mt-6 inline-block text-sm text-brass-soft underline-offset-4 hover:underline">View our registry →</a>}
+            <Link href={`/registry/${slug}`} className="mt-6 inline-flex items-center gap-2 rounded-full bg-parchment/10 px-5 py-2.5 text-sm text-brass-soft ring-1 ring-brass/30 transition hover:bg-parchment/20">
+              <Gift size={15} /> View our registry &amp; gift funds →
+            </Link>
           </Reveal>
         </div>
       </section>

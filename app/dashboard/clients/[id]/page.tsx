@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { getDossier } from "@/lib/crm/bookings";
 import { getBudget, summarize } from "@/lib/crm/lodging";
+import { getRegistry, summarizeRegistry } from "@/lib/crm/registry";
 import { Panel, PriorityBadge } from "@/components/crm/widgets";
 import { goldenHourPlan } from "@/lib/services/golden-hour";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -25,6 +26,8 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
   const gh = goldenHourPlan(lead.eventDate);
   const budget = dossier.micrositeSlug ? getBudget(dossier.micrositeSlug) : null;
   const lodging = budget ? summarize(budget.items, budget.rooms) : null;
+  const registry = dossier.micrositeSlug ? getRegistry(dossier.micrositeSlug) : null;
+  const gifts = registry ? summarizeRegistry(registry.funds) : null;
   const paid = dossier.payments.filter((p) => p.paid).reduce((s, p) => s + p.amount, 0);
   const balance = dossier.contractValue - paid;
   const done = dossier.checklist.filter((c) => c.done).length;
@@ -176,6 +179,28 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
                 ))}
               </tbody>
             </table>
+          </div>
+        </Panel>
+      )}
+
+      {/* Registry */}
+      {registry && gifts && (
+        <Panel title="Registry & gift funds"
+          action={<Link href={`/registry/${registry.slug}`} target="_blank" className="btn btn-ghost !py-2 !px-4 !text-xs">View registry ↗</Link>}>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <SplitStat label="Total gifted" value={formatCurrency(gifts.totalGifted)} accent="brass" />
+            <SplitStat label="Applied to their costs" value={formatCurrency(gifts.costOffset)} accent="sage" />
+            <SplitStat label="Funds fully gifted" value={String(gifts.fullyFunded)} accent="ink" />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {registry.funds.map((f) => {
+              const pct = f.goal > 0 ? Math.min(100, Math.round((f.contributed / f.goal) * 100)) : null;
+              return (
+                <span key={f.id} className="rounded-full bg-bone px-3 py-1.5 text-xs text-ink-soft">
+                  {f.title} · <span className="font-medium text-ink">{formatCurrency(f.contributed)}{pct !== null ? ` (${pct}%)` : ""}</span>
+                </span>
+              );
+            })}
           </div>
         </Panel>
       )}
