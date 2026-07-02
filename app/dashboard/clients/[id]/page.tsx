@@ -5,6 +5,7 @@ import {
   ExternalLink, Sun, Check, Clock, CircleAlert, Sparkles, StickyNote, UserCog,
 } from "lucide-react";
 import { getDossier } from "@/lib/crm/bookings";
+import { getBudget, summarize } from "@/lib/crm/lodging";
 import { Panel, PriorityBadge } from "@/components/crm/widgets";
 import { goldenHourPlan } from "@/lib/services/golden-hour";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -22,6 +23,8 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
   const { lead, dossier } = data;
 
   const gh = goldenHourPlan(lead.eventDate);
+  const budget = dossier.micrositeSlug ? getBudget(dossier.micrositeSlug) : null;
+  const lodging = budget ? summarize(budget.items, budget.rooms) : null;
   const paid = dossier.payments.filter((p) => p.paid).reduce((s, p) => s + p.amount, 0);
   const balance = dossier.contractValue - paid;
   const done = dossier.checklist.filter((c) => c.done).length;
@@ -143,6 +146,40 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
+      {/* Lodging cost split */}
+      {budget && lodging && (
+        <Panel title="Lodging & cost split"
+          action={<Link href={`/plan/${budget.slug}`} target="_blank" className="btn btn-ghost !py-2 !px-4 !text-xs">Open Cost Planner ↗</Link>}>
+          <div className="grid gap-4 sm:grid-cols-4">
+            <SplitStat label="Full wedding cost" value={formatCurrency(lodging.fullTotal)} />
+            <SplitStat label="Couple's total" value={formatCurrency(lodging.coupleTotal)} accent="ink" />
+            <SplitStat label="Delegated to guests" value={formatCurrency(lodging.delegated)} accent="sage" />
+            <SplitStat label="Paid by guests" value={formatCurrency(lodging.guestPaid)} accent="brass" />
+          </div>
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left text-sm">
+              <thead className="text-xs uppercase tracking-wider text-stone">
+                <tr className="border-b border-ink/8"><th className="pb-2 font-medium">Room</th><th className="pb-2 font-medium">Covered by</th><th className="pb-2 font-medium">Price</th><th className="pb-2 font-medium">Payment</th></tr>
+              </thead>
+              <tbody className="divide-y divide-ink/6">
+                {budget.rooms.map((r) => (
+                  <tr key={r.id}>
+                    <td className="py-2.5 font-medium text-ink">{r.name}</td>
+                    <td className="py-2.5 text-ink-soft">{r.coveredBy === "guest" ? (r.guestName ?? "A guest") : `${lead.name.split(" ")[0]} (couple)`}</td>
+                    <td className="py-2.5 text-ink-soft">{formatCurrency(r.price)}</td>
+                    <td className="py-2.5">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${r.paid ? "bg-sage/15 text-sage-deep" : r.coveredBy === "guest" ? "bg-brass/15 text-brass" : "bg-ink/8 text-ink-soft"}`}>
+                        {r.paid ? "Paid" : r.coveredBy === "guest" ? "Awaiting payment" : "On couple's tab"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      )}
+
       {/* Notes */}
       <Panel title="Notes & AI summary">
         <div className="flex gap-3 rounded-xl bg-brass/8 p-4">
@@ -150,6 +187,16 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
           <p className="text-sm leading-relaxed text-ink-soft">{dossier.notes}</p>
         </div>
       </Panel>
+    </div>
+  );
+}
+
+function SplitStat({ label, value, accent }: { label: string; value: string; accent?: "ink" | "sage" | "brass" }) {
+  const color = accent === "sage" ? "text-sage-deep" : accent === "brass" ? "text-brass" : "text-ink";
+  return (
+    <div className="rounded-xl bg-bone p-4">
+      <p className="text-xs uppercase tracking-wider text-stone">{label}</p>
+      <p className={`mt-1 font-display text-2xl ${color}`}>{value}</p>
     </div>
   );
 }

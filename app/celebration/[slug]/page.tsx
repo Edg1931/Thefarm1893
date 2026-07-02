@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Heart, Gift, BedDouble, CalendarHeart, Check } from "lucide-react";
 import { getCelebration } from "@/lib/celebrations";
+import { getBudget } from "@/lib/crm/lodging";
+import { GuestRoomBooking } from "@/components/GuestRoomBooking";
 import { Countdown } from "@/components/site/Countdown";
 import { Reveal } from "@/components/site/Reveal";
 import { Logo } from "@/components/site/Logo";
@@ -19,6 +21,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
   const { slug } = await params;
   const c = getCelebration(slug);
   if (!c) notFound();
+  const budget = getBudget(slug);
 
   return (
     <div className="bg-bone">
@@ -87,6 +90,24 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
           </ul>
         </Reveal>
       </section>
+
+      {/* Reserve your room — guests pay individually for their stay */}
+      {budget && (
+        <section className="bg-[color:var(--color-ink)] py-20 text-parchment md:py-28">
+          <div className="container-x max-w-4xl">
+            <Reveal className="text-center">
+              <BedDouble className="mx-auto text-brass-soft" />
+              <p className="eyebrow mt-4 !text-brass-soft">Stay on the farm</p>
+              <h2 className="mt-3 font-display text-4xl md:text-5xl">Reserve your room</h2>
+              <p className="mx-auto mt-3 max-w-lg text-parchment/70">
+                Make a weekend of it! The farmhouse sleeps everyone on-site. Claim a room and pay
+                for just your own stay — no rushing home after the last dance.
+              </p>
+            </Reveal>
+            <div className="mt-10"><GuestRoomBooking rooms={budget.rooms} /></div>
+          </div>
+        </section>
+      )}
 
       {/* RSVP */}
       <section id="rsvp" className="bg-[color:var(--color-sage-deep)] py-20 text-parchment md:py-28">
