@@ -42,7 +42,7 @@ export const nav: NavLink[] = [
 export const navPrimary: NavLink[] = [
   { label: "The Venue", href: "/venue" },
   { label: "Weddings", href: "/weddings" },
-  { label: "Gatherings", href: "/gatherings" },
+  { label: "Gallery", href: "/gallery" },
   { label: "Design My Day", href: "/design-my-day" },
   { label: "Vendors", href: "/vendors" },
   { label: "Investment", href: "/pricing" },

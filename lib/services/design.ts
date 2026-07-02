@@ -11,26 +11,31 @@
 import { generateText } from "./ai";
 import { generateImages } from "./image";
 
+// The six most-loved wedding palettes, hand-tuned for The Farm 1893.
 export const PALETTES: Record<string, { name: string; mood: string; colors: { hex: string; label: string }[] }> = {
   "blush-sage": { name: "Blush & Sage", mood: "soft, romantic, garden-fresh", colors: [
-    { hex: "#e8c4c0", label: "Blush" }, { hex: "#a7b59a", label: "Sage" },
-    { hex: "#efe7d9", label: "Linen" }, { hex: "#b18f57", label: "Antique Gold" },
+    { hex: "#e7c6c4", label: "Blush" }, { hex: "#a6b69a", label: "Sage" },
+    { hex: "#ebdfcc", label: "Champagne" }, { hex: "#b6935c", label: "Antique Gold" },
   ]},
   "ivory-gold": { name: "Ivory & Gold", mood: "elegant, timeless, candlelit", colors: [
-    { hex: "#f4ede0", label: "Ivory" }, { hex: "#d9c7a3", label: "Champagne" },
-    { hex: "#c9a86a", label: "Gold" }, { hex: "#7c6f57", label: "Bronze" },
+    { hex: "#f4ede1", label: "Ivory" }, { hex: "#e0cda6", label: "Champagne" },
+    { hex: "#c6a15b", label: "Gold" }, { hex: "#7c6b4c", label: "Bronze" },
   ]},
-  "terracotta-rust": { name: "Terracotta & Rust", mood: "warm, earthy, sun-baked", colors: [
-    { hex: "#c07a54", label: "Terracotta" }, { hex: "#a4442f", label: "Rust" },
-    { hex: "#e0c9a6", label: "Wheat" }, { hex: "#6b4a34", label: "Cocoa" },
+  "dusty-blue": { name: "Dusty Blue & Navy", mood: "refined, classic, serene", colors: [
+    { hex: "#9db4c4", label: "Dusty Blue" }, { hex: "#33465b", label: "Navy" },
+    { hex: "#ede6d8", label: "Cream" }, { hex: "#aeb6a6", label: "Silver Sage" },
   ]},
-  "plum-emerald": { name: "Moody Plum & Emerald", mood: "moody, dramatic, jewel-toned", colors: [
-    { hex: "#5b3a4b", label: "Plum" }, { hex: "#2f4739", label: "Emerald" },
-    { hex: "#b08d57", label: "Brass" }, { hex: "#d8cfc2", label: "Fog" },
+  "terracotta-sage": { name: "Terracotta & Sage", mood: "warm, earthy, organic", colors: [
+    { hex: "#c07a54", label: "Terracotta" }, { hex: "#a4553a", label: "Sienna" },
+    { hex: "#97a585", label: "Sage" }, { hex: "#e3cda9", label: "Wheat" },
   ]},
-  "sky-wildflower": { name: "Sky & Wildflower", mood: "airy, bright, whimsical", colors: [
-    { hex: "#bcd0d6", label: "Sky" }, { hex: "#d8a7b1", label: "Wildflower" },
-    { hex: "#e9e2cf", label: "Cream" }, { hex: "#7c8768", label: "Meadow" },
+  "emerald-gold": { name: "Emerald & Gold", mood: "moody, opulent, jewel-toned", colors: [
+    { hex: "#2f5044", label: "Emerald" }, { hex: "#1e3a30", label: "Forest" },
+    { hex: "#c6a15b", label: "Gold" }, { hex: "#e3d6bc", label: "Champagne" },
+  ]},
+  "mauve-champagne": { name: "Mauve & Champagne", mood: "modern, romantic, understated", colors: [
+    { hex: "#b491a0", label: "Mauve" }, { hex: "#c9a2a6", label: "Dusty Rose" },
+    { hex: "#e7d8c3", label: "Champagne" }, { hex: "#8c8177", label: "Taupe" },
   ]},
 };
 
@@ -39,27 +44,32 @@ const POOLS: Record<string, string[]> = {
   "blush-sage": [
     "photo-1519225421980-715cb0215aed", "photo-1465495976277-4387d4b0b4c6",
     "photo-1519378058457-4c29a0a2efac", "photo-1522673607200-164d1b6ce486",
-    "photo-1502635385003-ee1e6a1a742d", "photo-1523438885200-e635ba2c371e",
+    "photo-1502635385003-ee1e6a1a742d", "photo-1470259078422-826894b933ad",
   ],
   "ivory-gold": [
     "photo-1519741497674-611481863552", "photo-1511285560929-80b456fea0bc",
     "photo-1525258946800-98cfd641d0de", "photo-1487530811176-3780de880c2d",
     "photo-1511795409834-ef04bbd61622", "photo-1519671482749-fd09be7ccebf",
   ],
-  "terracotta-rust": [
+  "dusty-blue": [
+    "photo-1470259078422-826894b933ad", "photo-1487530811176-3780de880c2d",
+    "photo-1519671482749-fd09be7ccebf", "photo-1522673607200-164d1b6ce486",
+    "photo-1465495976277-4387d4b0b4c6", "photo-1519225421980-715cb0215aed",
+  ],
+  "terracotta-sage": [
     "photo-1464366400600-7168b8af9bc3", "photo-1478146896981-b80fe463b330",
     "photo-1525772764200-be829a350797", "photo-1460978812857-470ed1c77af0",
-    "photo-1509316785289-025f5b846b35", "photo-1522413452208-996ff3f3e740",
+    "photo-1519378058457-4c29a0a2efac", "photo-1522413452208-996ff3f3e740",
   ],
-  "plum-emerald": [
+  "emerald-gold": [
     "photo-1522413452208-996ff3f3e740", "photo-1460978812857-470ed1c77af0",
     "photo-1519741497674-611481863552", "photo-1478146896981-b80fe463b330",
     "photo-1525258946800-98cfd641d0de", "photo-1511285560929-80b456fea0bc",
   ],
-  "sky-wildflower": [
-    "photo-1470259078422-826894b933ad", "photo-1487530811176-3780de880c2d",
-    "photo-1519671482749-fd09be7ccebf", "photo-1465495976277-4387d4b0b4c6",
-    "photo-1519225421980-715cb0215aed", "photo-1522673607200-164d1b6ce486",
+  "mauve-champagne": [
+    "photo-1519378058457-4c29a0a2efac", "photo-1502635385003-ee1e6a1a742d",
+    "photo-1465495976277-4387d4b0b4c6", "photo-1519225421980-715cb0215aed",
+    "photo-1511795409834-ef04bbd61622", "photo-1522673607200-164d1b6ce486",
   ],
 };
 

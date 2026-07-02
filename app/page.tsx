@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Star, Check, Quote, Clock, Sparkles } from "lucide-react";
+import { ArrowRight, Star, Check, Quote, Clock, Sparkles, Wand2, CalendarCheck, Handshake, MessageCircle } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Reveal } from "@/components/site/Reveal";
 import { DateChecker } from "@/components/site/DateChecker";
@@ -153,6 +153,38 @@ export default function Home() {
                 <h3 className="mt-4 font-display text-3xl">{w.title}</h3>
                 <p className="mt-3 leading-relaxed text-parchment/70">{w.body}</p>
                 {i < weekend.length - 1 && <div className="mt-8 hidden h-px bg-gradient-to-r from-brass/50 to-transparent md:block" />}
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ PLANNING TOOLS ============ */}
+      <section className="bg-bone py-24 md:py-32">
+        <div className="container-x">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">Planning, reimagined</p>
+            <h2 className="mt-4 font-display text-4xl text-ink md:text-5xl">A smarter way to plan your wedding</h2>
+            <p className="mt-4 text-ink-soft">Tools you won&apos;t find at any other venue — designed to make the whole journey feel effortless.</p>
+          </Reveal>
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: Wand2, title: "Design My Day", body: "See your wedding in your exact colors with our AI design studio — mood boards in seconds.", href: "/design-my-day", cta: "Visualize it" },
+              { icon: CalendarCheck, title: "Instant Availability", body: "Check your date and get real-time pricing and a golden-hour ceremony time — no waiting.", href: "/pricing", cta: "Check your date" },
+              { icon: Handshake, title: "Your Dream Team", body: "Our AI matchmaker assembles a vetted vendor team proven right here at the farm.", href: "/vendors", cta: "Meet the vendors" },
+              { icon: MessageCircle, title: "Rosie, 24/7", body: "Our AI concierge answers questions, checks dates, and helps you plan any hour of the day.", href: "/contact", cta: "Say hello" },
+            ].map((t, i) => (
+              <Reveal key={t.title} delay={(i % 4) * 90}>
+                <Link href={t.href} className="card-hover group flex h-full flex-col rounded-2xl bg-parchment p-7 shadow-[var(--shadow-soft)]">
+                  <div className="grid h-13 w-13 place-items-center rounded-full bg-sage/12 p-3 text-sage-deep transition group-hover:bg-brass/15 group-hover:text-brass">
+                    <t.icon size={24} />
+                  </div>
+                  <h3 className="mt-5 font-display text-2xl text-ink">{t.title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-soft">{t.body}</p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brass">
+                    {t.cta} <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+                  </span>
+                </Link>
               </Reveal>
             ))}
           </div>
