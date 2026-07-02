@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarCheck, CalendarX, Loader2, ArrowRight } from "lucide-react";
+import { CalendarCheck, CalendarX, Loader2, ArrowRight, Sun, Tag } from "lucide-react";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatCurrency } from "@/lib/utils";
 
+type Quote = { price: number; base: number; tier: string; label: string; reason: string; savings?: number };
+type GoldenHour = { sunset: string; goldenStart: string; ceremonyStart: string; note: string };
 type Result = {
   available: boolean;
   alternatives: string[];
   message: string;
+  quote?: Quote | null;
+  goldenHour?: GoldenHour | null;
 };
 
 export function DateChecker({ compact = false }: { compact?: boolean }) {
@@ -68,6 +72,39 @@ export function DateChecker({ compact = false }: { compact?: boolean }) {
                 </p>
               </div>
               <p className="mt-2 text-sm text-ink-soft">{result.message}</p>
+
+              {(result.quote || result.goldenHour) && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {result.quote && (
+                    <div className="rounded-lg bg-white/70 p-4">
+                      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-brass">
+                        <Tag size={13} /> {result.quote.label}
+                      </p>
+                      <p className="mt-1 font-display text-3xl text-ink">
+                        {formatCurrency(result.quote.price)}
+                        <span className="ml-1 align-middle text-xs text-stone">est. weekend</span>
+                      </p>
+                      {result.quote.savings ? (
+                        <p className="text-xs font-medium text-sage-deep">Save {formatCurrency(result.quote.savings)} vs. peak</p>
+                      ) : null}
+                      <p className="mt-1 text-xs text-stone">{result.quote.reason}</p>
+                    </div>
+                  )}
+                  {result.goldenHour && (
+                    <div className="rounded-lg bg-white/70 p-4">
+                      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-brass">
+                        <Sun size={13} /> Golden-hour plan
+                      </p>
+                      <p className="mt-1 text-sm text-ink-soft">
+                        Sunset <span className="font-medium text-ink">{result.goldenHour.sunset}</span> · suggested ceremony{" "}
+                        <span className="font-medium text-ink">{result.goldenHour.ceremonyStart}</span>
+                      </p>
+                      <p className="mt-1 text-xs text-stone">Say “I do” in soft light, portraits in golden hour.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <Link href={`/contact?date=${date}`} className="btn btn-primary mt-4 !py-2.5">
                 Reserve a Tour <ArrowRight size={16} />
               </Link>

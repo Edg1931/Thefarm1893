@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
-import { nav, business } from "@/lib/content";
+import { nav, navPrimary, business } from "@/lib/content";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -30,8 +30,8 @@ export function Header() {
           <Logo />
         </div>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {nav.map((l) => (
+        <nav className="hidden items-center gap-6 lg:flex">
+          {navPrimary.map((l) => (
             <Link
               key={l.href}
               href={l.href}

@@ -30,10 +30,22 @@ export const nav: NavLink[] = [
   { label: "Weddings", href: "/weddings" },
   { label: "Gatherings", href: "/gatherings" },
   { label: "The Stay", href: "/accommodations" },
+  { label: "Retreats", href: "/stay" },
+  { label: "Design My Day", href: "/design-my-day" },
   { label: "Gallery", href: "/gallery" },
   { label: "Vendors", href: "/vendors" },
   { label: "Investment", href: "/pricing" },
   { label: "Our Story", href: "/about" },
+];
+
+/** Curated subset for the top header (the footer shows the full nav). */
+export const navPrimary: NavLink[] = [
+  { label: "The Venue", href: "/venue" },
+  { label: "Weddings", href: "/weddings" },
+  { label: "Gatherings", href: "/gatherings" },
+  { label: "Design My Day", href: "/design-my-day" },
+  { label: "Vendors", href: "/vendors" },
+  { label: "Investment", href: "/pricing" },
 ];
 
 /* --- Trust / at-a-glance stats --- */

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { bookedDates } from "@/lib/crm/sample-data";
 import { getServiceClient } from "@/lib/supabase/server";
+import { goldenHourPlan } from "@/lib/services/golden-hour";
+import { priceForDate } from "@/lib/services/pricing";
 
 export const runtime = "nodejs";
 
@@ -42,6 +44,9 @@ export async function POST(req: Request) {
       date,
       available,
       alternatives,
+      // Live intelligence for the couple:
+      quote: available ? priceForDate(date) : null,
+      goldenHour: available ? goldenHourPlan(date) : null,
       message: available
         ? "Good news — that date is open! Reserve a private tour to lock it in."
         : "That date is spoken for, but here are the next open Saturdays.",
