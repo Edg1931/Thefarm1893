@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { Wand2, Loader2, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +14,7 @@ type Result = {
   palette: { hex: string; label: string }[];
   moodboard: string[];
   signatureDetails: string[];
+  aiGenerated?: boolean;
 };
 
 export function DesignStudio() {
@@ -106,10 +106,26 @@ export function DesignStudio() {
 
         {result && (
           <div className="animate-rise space-y-6">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-widest text-brass">Your mood board · {result.paletteName}</p>
+              <span className="rounded-full bg-ink/5 px-3 py-1 text-[0.65rem] font-medium text-ink-soft">
+                {result.aiGenerated ? "✨ AI-generated in your palette" : "Styled in your palette"}
+              </span>
+            </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {result.moodboard.map((src, i) => (
-                <div key={i} className={`relative overflow-hidden rounded-xl ${i === 0 ? "col-span-2 row-span-2 aspect-square sm:aspect-auto" : "aspect-square"}`}>
-                  <Image src={src} alt="Mood board" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
+                <div key={i} className={`group relative overflow-hidden rounded-xl ${i === 0 ? "col-span-2 row-span-2 aspect-square sm:aspect-auto" : "aspect-square"}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="Wedding mood board" className="h-full w-full object-cover" />
+                  {/* Palette wash — makes every board read in the chosen colors */}
+                  <span
+                    className="pointer-events-none absolute inset-0 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-40"
+                    style={{ background: `linear-gradient(140deg, ${result.palette[0].hex}dd 0%, ${result.palette[2].hex}55 45%, ${result.palette[3].hex}cc 100%)`, opacity: 0.62 }}
+                  />
+                  <span
+                    className="pointer-events-none absolute inset-0"
+                    style={{ background: `radial-gradient(circle at 30% 20%, ${result.palette[1].hex}44, transparent 60%)`, mixBlendMode: "soft-light" }}
+                  />
                 </div>
               ))}
             </div>
