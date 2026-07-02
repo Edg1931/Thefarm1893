@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { Panel, PriorityBadge, ScoreRing } from "@/components/crm/widgets";
 import { leads } from "@/lib/crm/sample-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Mail, Phone, Download, Plus } from "lucide-react";
+import { Mail, Phone, Download, Plus, ChevronRight } from "lucide-react";
 
 export default function ContactsPage() {
   return (
@@ -9,7 +10,7 @@ export default function ContactsPage() {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="font-display text-4xl text-ink">Contacts</h1>
-          <p className="mt-1 text-stone">Everyone who has ever inquired — enriched with AI scoring &amp; history.</p>
+          <p className="mt-1 text-stone">Click any client to open their full wedding dossier — vendors, payments &amp; guest microsite.</p>
         </div>
         <div className="flex gap-2">
           <button className="btn btn-ghost !py-2.5 !text-xs"><Download size={15} /> Export</button>
@@ -28,21 +29,22 @@ export default function ContactsPage() {
                 <th className="px-5 py-3.5 font-medium">Score</th>
                 <th className="px-5 py-3.5 font-medium">Status</th>
                 <th className="px-5 py-3.5 font-medium">Reach out</th>
+                <th className="px-5 py-3.5 font-medium sr-only">Open</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
               {leads.map((l) => (
-                <tr key={l.id} className="transition hover:bg-bone/60">
+                <tr key={l.id} className="group transition hover:bg-bone/60">
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
+                    <Link href={`/dashboard/clients/${l.id}`} className="flex items-center gap-3">
                       <div className="grid h-10 w-10 place-items-center rounded-full bg-sage-deep/90 font-display text-sm text-parchment">
                         {l.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                       </div>
                       <div>
-                        <p className="font-medium text-ink">{l.name}</p>
+                        <p className="font-medium text-ink group-hover:text-sage-deep">{l.name}</p>
                         <p className="text-xs text-stone">{l.email}</p>
                       </div>
-                    </div>
+                    </Link>
                   </td>
                   <td className="px-5 py-4">
                     <p className="text-ink-soft">{l.eventType}</p>
@@ -56,6 +58,11 @@ export default function ContactsPage() {
                       <a href={`mailto:${l.email}`} className="grid h-8 w-8 place-items-center rounded-lg bg-bone text-ink-soft hover:bg-linen"><Mail size={15} /></a>
                       <a href={`tel:${l.phone}`} className="grid h-8 w-8 place-items-center rounded-lg bg-bone text-ink-soft hover:bg-linen"><Phone size={15} /></a>
                     </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <Link href={`/dashboard/clients/${l.id}`} className="flex items-center gap-1 text-sm font-medium text-brass hover:underline">
+                      Open <ChevronRight size={15} />
+                    </Link>
                   </td>
                 </tr>
               ))}
