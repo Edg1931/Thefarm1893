@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Farm 1893 — Your Digital Platform at a Glance</title>
+<meta name="description" content="The Farm 1893 digital platform — a lead-generation machine and the software to run the whole venue." />
+<style>
+  :root {
+    --ink: #1c1a17;
+    --ink-soft: #35312b;
+    --bone: #f7f3ec;
+    --linen: #efe7d9;
+    --parchment: #fbf9f4;
+    --sage: #7c8768;
+    --sage-deep: #4c5741;
+    --brass: #b18f57;
+    --brass-soft: #cbb488;
+    --terracotta: #b0563b;
+    --stone: #8b8175;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Helvetica, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bone);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(1.25rem, 4vw, 3rem);
+  }
+  .doc {
+    max-width: 940px; margin: 0 auto; background: var(--parchment);
+    border: 1px solid rgba(28,26,23,0.12);
+    box-shadow: 0 40px 90px -50px rgba(28,26,23,0.45);
+    overflow: hidden; opacity: 0; transform: translateY(14px);
+    animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .doc { animation: none; opacity: 1; transform: none; }
+    .pillar { transition: none; }
+  }
+  h1, h2, h3, .display { font-family: var(--serif); font-weight: 600; letter-spacing: -0.01em; }
+  .eyebrow { font-family: var(--sans); text-transform: uppercase; letter-spacing: 0.26em; font-size: 0.66rem; font-weight: 600; color: var(--brass); }
+
+  .masthead { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: clamp(1.5rem, 4vw, 2.4rem) clamp(1.5rem, 5vw, 3.2rem); background: var(--ink); color: var(--parchment); flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 0.9rem; }
+  .brand .name { font-family: var(--serif); font-size: 1.7rem; font-weight: 600; line-height: 1; }
+  .brand .tag { font-family: var(--serif); font-style: italic; font-size: 0.98rem; color: var(--brass-soft); margin-top: 2px; }
+  .kicker { text-align: right; }
+  .kicker .eyebrow { color: var(--brass-soft); }
+  .kicker .est { font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--parchment); opacity: 0.85; }
+
+  .hero { padding: clamp(2.2rem, 6vw, 3.6rem) clamp(1.5rem, 5vw, 3.2rem) clamp(1.6rem, 4vw, 2.4rem); }
+  .hero h1 { font-size: clamp(1.9rem, 4.6vw, 3rem); line-height: 1.08; margin: 0.5rem 0 0; text-wrap: balance; max-width: 20ch; }
+  .hero h1 .accent { color: var(--sage-deep); }
+  .lede { font-size: 1.06rem; color: var(--ink-soft); max-width: 60ch; margin: 1.1rem 0 0; }
+
+  .claims { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 2rem; background: rgba(28,26,23,0.1); border: 1px solid rgba(28,26,23,0.1); border-radius: 6px; overflow: hidden; }
+  .claim { background: var(--parchment); padding: 1.1rem 1.2rem; }
+  .claim .n { font-family: var(--serif); font-size: 1.85rem; color: var(--ink); line-height: 1; }
+  .claim .l { font-size: 0.78rem; color: var(--stone); margin-top: 0.35rem; }
+
+  .rule { display: flex; align-items: center; gap: 1rem; padding: 0 clamp(1.5rem, 5vw, 3.2rem); }
+  .rule::before, .rule::after { content: ""; height: 1px; flex: 1; background: rgba(28,26,23,0.16); }
+  .rule .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--terracotta); }
+  .rule .dot.sage { background: var(--sage); }
+  .rule .dot.brass { background: var(--brass); }
+
+  .pillars { padding: clamp(1.8rem, 5vw, 2.8rem) clamp(1.5rem, 5vw, 3.2rem); display: grid; gap: 1.1rem; }
+  .pillar { display: grid; grid-template-columns: 190px 1fr; gap: clamp(1rem, 3vw, 2rem); padding: 1.4rem; border: 1px solid rgba(28,26,23,0.1); border-radius: 10px; background: var(--bone); transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s; }
+  .pillar:hover { transform: translateY(-3px); box-shadow: 0 26px 50px -34px rgba(28,26,23,0.4); }
+  .pillar .lead .step { font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--brass); font-weight: 600; }
+  .pillar .lead h2 { font-size: 1.6rem; margin: 0.4rem 0 0; }
+  .pillar .lead p { font-size: 0.9rem; color: var(--ink-soft); margin: 0.5rem 0 0; }
+  .pillar ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.55rem; align-self: center; }
+  .pillar li { display: flex; gap: 0.6rem; font-size: 0.92rem; color: var(--ink-soft); }
+  .pillar li b { color: var(--ink); font-weight: 600; }
+  .pillar li .mk { color: var(--sage-deep); flex: none; margin-top: 0.15rem; }
+
+  .value { background: var(--sage-deep); color: var(--parchment); padding: clamp(1.8rem, 5vw, 2.6rem) clamp(1.5rem, 5vw, 3.2rem); }
+  .value .eyebrow { color: var(--brass-soft); }
+  .value h2 { font-size: clamp(1.4rem, 3.2vw, 2rem); margin: 0.4rem 0 1.4rem; color: var(--parchment); }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.14); border-radius: 8px; overflow: hidden; }
+  .vcard { background: rgba(255,255,255,0.04); padding: 1.2rem; }
+  .vcard h3 { font-size: 1.06rem; margin: 0 0 0.35rem; color: var(--brass-soft); }
+  .vcard p { margin: 0; font-size: 0.85rem; color: rgba(251,249,244,0.78); }
+
+  .cta { padding: clamp(1.8rem, 5vw, 2.6rem) clamp(1.5rem, 5vw, 3.2rem); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+  .cta .headline { font-family: var(--serif); font-size: clamp(1.3rem, 3vw, 1.75rem); max-width: 22ch; }
+  .cta .url { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--ink); color: var(--parchment); padding: 0.85rem 1.5rem; border-radius: 999px; font-size: 0.9rem; text-decoration: none; }
+  .cta .url:hover { background: var(--sage-deep); }
+  .footnote { padding: 1rem clamp(1.5rem, 5vw, 3.2rem) clamp(1.6rem, 4vw, 2.4rem); font-size: 0.75rem; color: var(--stone); border-top: 1px solid rgba(28,26,23,0.08); }
+  .footnote b { color: var(--ink-soft); }
+  a:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+
+  @media (max-width: 720px) {
+    .claims { grid-template-columns: 1fr 1fr; }
+    .pillar { grid-template-columns: 1fr; }
+    .grid4 { grid-template-columns: 1fr 1fr; }
+  }
+  @media print {
+    body { padding: 0; background: #fff; }
+    .doc { box-shadow: none; border: none; animation: none; opacity: 1; transform: none; }
+    .pillar { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+  <article class="doc">
+    <header class="masthead">
+      <div class="brand">
+        <svg width="46" height="46" viewBox="0 0 64 64" aria-hidden="true">
+          <g fill="none" stroke="#f7f3ec" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M12 30 L32 15 L52 30 V50 H12 Z"/>
+            <path d="M25 50 V37 H39 V50"/>
+            <path d="M6 30 L12 30 M52 30 L58 30"/>
+          </g>
+          <circle cx="48" cy="19" r="3.4" fill="#b0563b"/>
+          <circle cx="42" cy="24" r="2.2" fill="#7c8768"/>
+        </svg>
+        <div>
+          <div class="name">The Farm 1893</div>
+          <div class="tag">Wedding &amp; Gathering Venue</div>
+        </div>
+      </div>
+      <div class="kicker">
+        <div class="eyebrow">Your digital platform</div>
+        <div class="est">at a glance</div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">More than a website</p>
+      <h1>A lead-generation machine — and the software to <span class="accent">run the whole venue.</span></h1>
+      <p class="lede">One connected platform that attracts couples, turns them into booked weddings, and automates the business behind the scenes — built around the orchard, the barn, and the weekend that's yours.</p>
+      <div class="claims">
+        <div class="claim"><div class="n">24 / 7</div><div class="l">Leads captured, even at 2 a.m.</div></div>
+        <div class="claim"><div class="n">3&times;</div><div class="l">Higher conversion on fast replies</div></div>
+        <div class="claim"><div class="n">1</div><div class="l">Place to run every event</div></div>
+      </div>
+    </section>
+
+    <div class="rule"><span class="dot sage"></span><span class="dot"></span><span class="dot brass"></span></div>
+
+    <section class="pillars">
+      <div class="pillar">
+        <div class="lead">
+          <div class="step">Pillar 01 — Attract</div>
+          <h2>Get found. Fill the calendar.</h2>
+          <p>A cinematic first impression engineered to keep couples browsing and moving toward a tour.</p>
+        </div>
+        <ul>
+          <li><span class="mk">◆</span><span><b>Design My Day</b> — an AI studio that shows couples their wedding in their own colors before they ever visit.</span></li>
+          <li><span class="mk">◆</span><span><b>Instant availability &amp; pricing</b> with a golden-hour ceremony time for their exact date.</span></li>
+          <li><span class="mk">◆</span><span><b>Vendor marketplace</b> with an AI matchmaker — and a new referral-revenue stream for you.</span></li>
+          <li><span class="mk">◆</span><span><b>Beautiful on every screen</b>, with polished social-share previews for Instagram &amp; texts.</span></li>
+        </ul>
+      </div>
+
+      <div class="pillar">
+        <div class="lead">
+          <div class="step">Pillar 02 — Delight</div>
+          <h2>Turn visitors into booked couples.</h2>
+          <p>The experiences no other venue offers — the moments couples fall for and share.</p>
+        </div>
+        <ul>
+          <li><span class="mk">◆</span><span><b>Rosie, a 24/7 AI concierge</b> that answers questions, checks dates, and captures every lead.</span></li>
+          <li><span class="mk">◆</span><span><b>Guest microsites</b> — each booking gets a branded site that markets you to hundreds of guests.</span></li>
+          <li><span class="mk">◆</span><span><b>Live cost planner</b> — couples delegate lodging to guests and watch their total drop.</span></li>
+          <li><span class="mk">◆</span><span><b>Cash-fund registry</b> — guests pay for rooms &amp; wedding costs directly.</span></li>
+        </ul>
+      </div>
+
+      <div class="pillar">
+        <div class="lead">
+          <div class="step">Pillar 03 — Operate</div>
+          <h2>Run the business on autopilot.</h2>
+          <p>Venue OS — the AI-powered CRM that does the follow-up, the proposals, and the marketing.</p>
+        </div>
+        <ul>
+          <li><span class="mk">◆</span><span><b>AI insights &amp; lead scoring</b> tell you which couples are hot and when to reply.</span></li>
+          <li><span class="mk">◆</span><span><b>One-click AI proposals</b> — a personalized, itemized quote in ten seconds.</span></li>
+          <li><span class="mk">◆</span><span><b>Client dossiers</b> — the whole wedding in one view: vendors, payments, lodging, registry.</span></li>
+          <li><span class="mk">◆</span><span><b>AI marketing studio</b> to generate posts &amp; campaigns that drive traffic back to the site.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="value">
+      <p class="eyebrow">Why it wins</p>
+      <h2>It pays for itself with one extra wedding a year.</h2>
+      <div class="grid4">
+        <div class="vcard"><h3>More bookings</h3><p>24/7 capture and instant answers win couples while they're most excited.</p></div>
+        <div class="vcard"><h3>New revenue</h3><p>Vendor referrals, off-season retreats, and smart upsells add income streams.</p></div>
+        <div class="vcard"><h3>Less work</h3><p>AI handles follow-ups, proposals, and marketing so you can host, not chase.</p></div>
+        <div class="vcard"><h3>A real edge</h3><p>Tools no competitor has — the reason couples choose you and pay a premium.</p></div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="headline">See the whole experience, live.</div>
+      <a class="url" href="https://thefarm1893.vercel.app" target="_blank" rel="noopener">Explore the platform →</a>
+    </section>
+
+    <p class="footnote">
+      <b>thefarm1893.vercel.app</b> &nbsp;·&nbsp; Berlin Heights, Ohio &nbsp;·&nbsp; The site and every feature shown are live today on demonstration data.
+      Turning on the live database and payments — real bookings, gifts, and guest logins — is the planned next phase.
+    </p>
+  </article>
+</body>
+</html>
