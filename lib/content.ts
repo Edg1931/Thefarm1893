@@ -34,6 +34,7 @@ export const nav: NavLink[] = [
   { label: "Design My Day", href: "/design-my-day" },
   { label: "Gallery", href: "/gallery" },
   { label: "Vendors", href: "/vendors" },
+  { label: "Journal", href: "/journal" },
   { label: "Investment", href: "/pricing" },
   { label: "Our Story", href: "/about" },
 ];

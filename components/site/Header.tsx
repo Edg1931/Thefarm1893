@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
@@ -9,6 +10,7 @@ import { nav, navPrimary, business } from "@/lib/content";
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -31,15 +33,19 @@ export function Header() {
         </div>
 
         <nav className="hidden items-center gap-6 lg:flex">
-          {navPrimary.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="link-underline text-[0.82rem] font-medium uppercase tracking-[0.14em] text-ink-soft transition-colors hover:text-ink"
-            >
-              {l.label}
-            </Link>
-          ))}
+          {navPrimary.map((l) => {
+            const active = pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={active ? "page" : undefined}
+                className={`link-underline text-[0.82rem] font-medium uppercase tracking-[0.14em] transition-colors hover:text-ink ${active ? "text-ink" : "text-ink-soft"}`}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">

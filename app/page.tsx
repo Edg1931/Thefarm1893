@@ -4,6 +4,7 @@ import { ArrowRight, Star, Check, Quote, Clock, Sparkles, Wand2, CalendarCheck, 
 import { SiteShell } from "@/components/site/SiteShell";
 import { Reveal } from "@/components/site/Reveal";
 import { DateChecker } from "@/components/site/DateChecker";
+import { GuideCapture } from "@/components/site/GuideCapture";
 import {
   business, stats, spaces, packages, testimonials, gallery, amenities,
 } from "@/lib/content";
@@ -268,6 +269,13 @@ export default function Home() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ============ LEAD MAGNET ============ */}
+      <section className="bg-[color:var(--color-linen)] py-20 md:py-24">
+        <div className="container-x max-w-4xl">
+          <Reveal><GuideCapture /></Reveal>
         </div>
       </section>
 

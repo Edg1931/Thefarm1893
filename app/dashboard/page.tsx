@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DollarSign, Users, CalendarCheck, Zap, TrendingUp, Clock } from "lucide-react";
 import { StatCard, InsightCard, RevenueChart, PriorityBadge, ScoreRing, Panel } from "@/components/crm/widgets";
-import { leads, upcomingEvents, dashboardStats, revenueByMonth, aiInsights } from "@/lib/crm/sample-data";
+import { leads, upcomingEvents, dashboardStats, revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sample-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function DashboardOverview() {
@@ -65,6 +65,46 @@ export default function DashboardOverview() {
               </li>
             ))}
           </ul>
+        </Panel>
+      </div>
+
+      {/* Website funnel + traffic */}
+      <div className="grid gap-8 xl:grid-cols-3">
+        <Panel title="Website funnel" className="xl:col-span-2"
+          action={<span className="text-sm text-stone">Visitors → weddings · this month</span>}>
+          <div className="space-y-2.5">
+            {funnel.map((f, i) => {
+              const pct = Math.round((f.value / funnel[0].value) * 100);
+              return (
+                <div key={f.stage} className="flex items-center gap-4">
+                  <div className="w-40 shrink-0 text-sm text-ink-soft">{f.stage}</div>
+                  <div className="relative h-9 flex-1 overflow-hidden rounded-lg bg-bone">
+                    <div className="flex h-full items-center rounded-lg bg-gradient-to-r from-sage-deep to-sage px-3" style={{ width: `${Math.max(pct, 8)}%` }}>
+                      <span className="font-display text-sm text-parchment">{f.value.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="hidden w-28 shrink-0 text-right text-xs text-stone sm:block">{f.note}</div>
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
+
+        <Panel title="Where they come from">
+          <div className="space-y-3">
+            {trafficSources.map((s) => (
+              <div key={s.source}>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-ink-soft">{s.source}</span>
+                  <span className="font-medium text-ink">{s.pct}%</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-bone">
+                  <div className="h-full rounded-full bg-brass" style={{ width: `${s.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs text-stone">The new Journal &amp; SEO work targets the organic-search channel.</p>
         </Panel>
       </div>
 

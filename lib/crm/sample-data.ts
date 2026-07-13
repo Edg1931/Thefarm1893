@@ -151,6 +151,23 @@ export const vendorStats = {
   totalReferrals: vendorRecords.reduce((s, v) => s + v.referralsSent, 0),
 };
 
+/* --- Website funnel (attract → book) for the CRM overview --- */
+export const funnel = [
+  { stage: "Website visitors", value: 4820, note: "this month" },
+  { stage: "Engaged (2+ min)", value: 1640, note: "34% of visitors" },
+  { stage: "Leads captured", value: 312, note: "forms + Rosie chats" },
+  { stage: "Tours booked", value: 41, note: "13% of leads" },
+  { stage: "Weddings booked", value: 13, note: "32% of tours" },
+];
+
+export const trafficSources = [
+  { source: "Organic search", pct: 38 },
+  { source: "Instagram", pct: 27 },
+  { source: "The Knot / WeddingWire", pct: 18 },
+  { source: "Referrals", pct: 11 },
+  { source: "Direct", pct: 6 },
+];
+
 export const aiInsights = [
   {
     icon: "trend",

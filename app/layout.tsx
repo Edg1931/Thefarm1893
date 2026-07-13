@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, Great_Vibes } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { business } from "@/lib/content";
 
@@ -43,12 +44,43 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "EventVenue",
+    name: business.name,
+    description: business.heroSub,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "12316 Berlin Road",
+      addressLocality: business.city,
+      addressRegion: "OH",
+      postalCode: "44814",
+      addressCountry: "US",
+    },
+    telephone: business.phone,
+    email: business.email,
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://thefarm1893.vercel.app",
+    sameAs: [business.instagram, business.facebook],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "5",
+      reviewCount: "48",
+    },
+  };
+
   return (
     <html
       lang="en"
       className={`${cormorant.variable} ${inter.variable} ${greatVibes.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
