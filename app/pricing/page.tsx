@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
 import { DateChecker } from "@/components/site/DateChecker";
+import { ScarcityBadge } from "@/components/site/ScarcityBadge";
 import { packages, faqs } from "@/lib/content";
 
 export const metadata = { title: "Investment" };
@@ -66,6 +67,7 @@ export default function PricingPage() {
             </div>
           </Reveal>
           <Reveal delay={150} className="lg:sticky lg:top-28">
+            <div className="mb-4"><ScarcityBadge /></div>
             <DateChecker />
             <Link href="/contact" className="btn btn-primary mt-4 w-full">Request a Proposal <ArrowRight size={16} /></Link>
           </Reveal>

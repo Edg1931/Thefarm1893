@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
 import { GalleryGrid } from "@/components/site/GalleryGrid";
+import { InstagramFeed } from "@/components/site/InstagramFeed";
 import { gallery } from "@/lib/content";
 
 export const metadata = { title: "Gallery" };
@@ -26,6 +27,7 @@ export default function GalleryPage() {
           </Reveal>
         </div>
       </section>
+      <InstagramFeed />
     </SiteShell>
   );
 }

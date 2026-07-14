@@ -4,6 +4,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
+import { VirtualTour } from "@/components/site/VirtualTour";
 import { spaces, amenities } from "@/lib/content";
 
 export const metadata = { title: "The Venue" };
@@ -38,6 +39,8 @@ export default function VenuePage() {
           ))}
         </div>
       </section>
+
+      <VirtualTour />
 
       <section className="bg-[color:var(--color-linen)] py-20 md:py-28">
         <div className="container-x">

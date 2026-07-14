@@ -5,6 +5,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { Reveal } from "@/components/site/Reveal";
 import { DateChecker } from "@/components/site/DateChecker";
 import { GuideCapture } from "@/components/site/GuideCapture";
+import { ScarcityBadge } from "@/components/site/ScarcityBadge";
 import {
   business, stats, spaces, packages, testimonials, gallery, amenities,
 } from "@/lib/content";
@@ -285,7 +286,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[color:var(--color-ink)]/70" />
         <div className="container-x relative z-10 grid items-center gap-12 lg:grid-cols-2">
           <Reveal className="text-parchment">
-            <Sparkles className="text-brass-soft" />
+            <ScarcityBadge light />
             <h2 className="mt-4 font-display text-4xl md:text-5xl">Your date could still be open</h2>
             <p className="mt-4 max-w-md text-parchment/75">
               Peak Saturdays book 12–18 months out. Check yours in seconds — then let's
