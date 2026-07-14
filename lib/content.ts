@@ -37,6 +37,7 @@ export const nav: NavLink[] = [
   { label: "Real Weddings", href: "/real-weddings" },
   { label: "Vendors", href: "/vendors" },
   { label: "Journal", href: "/journal" },
+  { label: "Refer a Friend", href: "/refer" },
   { label: "Investment", href: "/pricing" },
   { label: "Our Story", href: "/about" },
 ];

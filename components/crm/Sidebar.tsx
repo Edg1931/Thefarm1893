@@ -6,16 +6,21 @@ import { useState } from "react";
 import {
   LayoutDashboard, Users, KanbanSquare, CalendarDays, Megaphone,
   Bot, Settings, Menu, X, Sparkles, Handshake, FileText,
+  BarChart3, Zap, FileSignature, Share2,
 } from "lucide-react";
 import { business } from "@/lib/content";
 
 const links = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/leads", label: "Lead Pipeline", icon: KanbanSquare },
   { href: "/dashboard/bookings", label: "Bookings & Calendar", icon: CalendarDays },
   { href: "/dashboard/proposals", label: "AI Proposals", icon: FileText },
+  { href: "/dashboard/contracts", label: "Contracts & Deposits", icon: FileSignature },
   { href: "/dashboard/contacts", label: "Contacts", icon: Users },
   { href: "/dashboard/vendors", label: "Vendor Network", icon: Handshake },
+  { href: "/dashboard/referrals", label: "Referrals", icon: Share2 },
+  { href: "/dashboard/automations", label: "AI Automations", icon: Zap },
   { href: "/dashboard/marketing", label: "AI Marketing Studio", icon: Megaphone },
   { href: "/dashboard/receptionist", label: "AI Receptionist", icon: Bot },
   { href: "/dashboard/settings", label: "Integrations", icon: Settings },
