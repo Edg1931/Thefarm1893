@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
 import { posts } from "@/lib/journal";
+import { realWeddings } from "@/lib/real-weddings";
 
 const base = process.env.NEXT_PUBLIC_SITE_URL || "https://thefarm1893.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     "", "/venue", "/weddings", "/gatherings", "/accommodations", "/stay",
-    "/design-my-day", "/gallery", "/vendors", "/journal", "/pricing",
-    "/about", "/contact",
+    "/design-my-day", "/quiz", "/gallery", "/real-weddings", "/vendors",
+    "/journal", "/pricing", "/about", "/contact",
   ].map((path) => ({
     url: `${base}${path}`,
     lastModified: new Date(),
@@ -22,5 +23,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...routes, ...journal];
+  const weddings = realWeddings.map((w) => ({
+    url: `${base}/real-weddings/${w.slug}`,
+    lastModified: new Date(w.date),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...routes, ...journal, ...weddings];
 }
