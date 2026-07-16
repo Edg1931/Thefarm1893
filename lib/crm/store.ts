@@ -1,0 +1,66 @@
+/* ============================================================================
+   CLIENT-SIDE CRM STORE (demo persistence)
+   Until Supabase is connected, added/edited records persist in the browser so
+   the CRM is fully usable in demos. The matching /api routes write to the real
+   database the moment it's configured — same shapes, no rework.
+   ============================================================================ */
+
+import type { Lead, VendorRecord } from "./sample-data";
+
+const K = {
+  vendors: "farm1893:vendorsAdded",
+  contactsAdded: "farm1893:contactsAdded",
+  contactOverrides: "farm1893:contactOverrides",
+};
+
+function read<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const v = window.localStorage.getItem(key);
+    return v ? (JSON.parse(v) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function write(key: string, val: unknown) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(val));
+  } catch { /* ignore quota/private-mode errors */ }
+}
+
+/* --- Vendors --- */
+export const getAddedVendors = (): VendorRecord[] => read(K.vendors, []);
+export function addVendorLocal(v: VendorRecord) {
+  write(K.vendors, [v, ...getAddedVendors()]);
+}
+
+/* --- Contacts (added) --- */
+export const getAddedContacts = (): Lead[] => read(K.contactsAdded, []);
+export function addContactLocal(c: Lead) {
+  write(K.contactsAdded, [c, ...getAddedContacts()]);
+}
+
+/* --- Contacts (edits to existing/sample records) --- */
+export const getContactOverrides = (): Record<string, Partial<Lead>> => read(K.contactOverrides, {});
+export function setContactOverride(id: string, patch: Partial<Lead>) {
+  const all = getContactOverrides();
+  all[id] = { ...all[id], ...patch };
+  write(K.contactOverrides, all);
+}
+export function applyOverride<T extends { id: string }>(record: T): T {
+  const patch = getContactOverrides()[record.id];
+  return patch ? { ...record, ...patch } : record;
+}
+
+/** Fire-and-forget sync to the API (writes to Supabase when configured). */
+export function syncToApi(path: string, method: "POST" | "PATCH", body: unknown) {
+  try {
+    void fetch(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  } catch { /* demo mode — localStorage is the source of truth */ }
+}
+
+export function newId(prefix: string) {
+  // App-runtime only (not the workflow sandbox), so Date.now is available.
+  return `${prefix}-${Date.now().toString(36).toUpperCase()}`;
+}
