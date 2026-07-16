@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { MapPin, Heart, Gift, BedDouble, CalendarHeart, Check } from "lucide-react";
 import { getCelebration } from "@/lib/celebrations";
 import { getBudget } from "@/lib/crm/lodging";
+import { getRegistry } from "@/lib/crm/registry";
 import { GuestRoomBooking } from "@/components/GuestRoomBooking";
+import { RegistryBoard } from "@/components/RegistryBoard";
 import { Countdown } from "@/components/site/Countdown";
 import { Reveal } from "@/components/site/Reveal";
 import { Logo } from "@/components/site/Logo";
@@ -22,6 +24,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
   const c = getCelebration(slug);
   if (!c) notFound();
   const budget = getBudget(slug);
+  const registry = getRegistry(slug);
 
   return (
     <div className="bg-bone">
@@ -109,6 +112,21 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
+      {/* Registry — gift toward the wedding, right on the site */}
+      {registry && (
+        <section id="registry" className="bg-bone py-20 md:py-28">
+          <div className="container-x">
+            <Reveal className="mx-auto max-w-2xl text-center">
+              <Gift className="mx-auto text-brass" />
+              <p className="eyebrow mt-4">The registry</p>
+              <h2 className="mt-3 font-display text-4xl text-ink md:text-5xl">Give a gift that matters</h2>
+              <p className="mx-auto mt-3 max-w-lg text-ink-soft">{registry.intro}</p>
+            </Reveal>
+            <div className="mt-12"><RegistryBoard funds={registry.funds} /></div>
+          </div>
+        </section>
+      )}
+
       {/* RSVP */}
       <section id="rsvp" className="bg-[color:var(--color-sage-deep)] py-20 text-parchment md:py-28">
         <div className="container-x max-w-xl text-center">
@@ -127,9 +145,9 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
               </div>
               <button type="button" className="btn bg-parchment text-ink w-full"><Check size={16} /> Send RSVP</button>
             </form>
-            <Link href={`/registry/${slug}`} className="mt-6 inline-flex items-center gap-2 rounded-full bg-parchment/10 px-5 py-2.5 text-sm text-brass-soft ring-1 ring-brass/30 transition hover:bg-parchment/20">
-              <Gift size={15} /> View our registry &amp; gift funds →
-            </Link>
+            <a href="#registry" className="mt-6 inline-flex items-center gap-2 rounded-full bg-parchment/10 px-5 py-2.5 text-sm text-brass-soft ring-1 ring-brass/30 transition hover:bg-parchment/20">
+              <Gift size={15} /> Browse our registry &amp; gift funds →
+            </a>
           </Reveal>
         </div>
       </section>

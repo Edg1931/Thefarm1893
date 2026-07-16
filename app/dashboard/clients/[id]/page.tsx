@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft, Mail, Phone, CalendarDays, Users, Package, DollarSign,
-  ExternalLink, Sun, Check, Clock, CircleAlert, Sparkles, StickyNote, UserCog,
+  ArrowLeft, Package, DollarSign, Sun, Check, Clock, CircleAlert, UserCog,
 } from "lucide-react";
 import { getDossier } from "@/lib/crm/bookings";
 import { getBudget, summarize } from "@/lib/crm/lodging";
 import { getRegistry, summarizeRegistry } from "@/lib/crm/registry";
-import { Panel, PriorityBadge } from "@/components/crm/widgets";
+import { Panel } from "@/components/crm/widgets";
+import { DossierHeader, EditableNotes } from "@/components/crm/DossierEdit";
 import { goldenHourPlan } from "@/lib/services/golden-hour";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -39,36 +39,8 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
         <ArrowLeft size={15} /> Back to contacts
       </Link>
 
-      {/* Header */}
-      <div className="rounded-2xl bg-[color:var(--color-ink)] p-7 text-parchment shadow-[var(--shadow-soft)]">
-        <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
-          <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-brass/20 font-display text-2xl text-brass-soft ring-1 ring-brass/40">
-              {lead.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-            </div>
-            <div>
-              <h1 className="font-display text-4xl">{lead.name}</h1>
-              <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-parchment/70">
-                <span>{lead.eventType}</span>
-                <span className="flex items-center gap-1.5"><CalendarDays size={14} /> {formatDate(lead.eventDate)}</span>
-                <span className="flex items-center gap-1.5"><Users size={14} /> {lead.guestCount} guests</span>
-                <PriorityBadge priority={lead.stage === "booked" ? "booked" : lead.priority} />
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <a href={`mailto:${lead.email}`} className="btn btn-light !py-2.5 !text-xs"><Mail size={14} /> Email</a>
-            <a href={`tel:${lead.phone}`} className="btn btn-light !py-2.5 !text-xs"><Phone size={14} /> Call</a>
-            {dossier.micrositeSlug ? (
-              <Link href={`/celebration/${dossier.micrositeSlug}`} target="_blank" className="btn bg-parchment text-ink !py-2.5 !text-xs">
-                <ExternalLink size={14} /> View Guest Microsite
-              </Link>
-            ) : (
-              <button className="btn bg-brass text-ink !py-2.5 !text-xs"><Sparkles size={14} /> Generate Guest Microsite</button>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Header (editable) */}
+      <DossierHeader lead={lead} micrositeSlug={dossier.micrositeSlug} />
 
       {/* Quick facts */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -205,13 +177,8 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
         </Panel>
       )}
 
-      {/* Notes */}
-      <Panel title="Notes & AI summary">
-        <div className="flex gap-3 rounded-xl bg-brass/8 p-4">
-          <StickyNote size={18} className="mt-0.5 shrink-0 text-brass" />
-          <p className="text-sm leading-relaxed text-ink-soft">{dossier.notes}</p>
-        </div>
-      </Panel>
+      {/* Notes (editable) */}
+      <EditableNotes id={lead.id} initial={dossier.notes} />
     </div>
   );
 }
