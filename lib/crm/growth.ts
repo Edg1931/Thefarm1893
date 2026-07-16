@@ -44,6 +44,16 @@ export const sequences: Sequence[] = [
     ],
   },
   {
+    id: "S5", name: "Silo Stays — Come Back", trigger: "VRBO guest, 11 months after checkout", status: "active",
+    enrolled: 137, booked: 34,
+    steps: [
+      { channel: "Email", delay: "3 days after checkout", subject: "Thank you for staying! How was your silo? ⭐ (quick review)" },
+      { channel: "Email", delay: "11 months later", subject: "It's almost that time again — your silo is waiting 🌾" },
+      { channel: "SMS", delay: "+1 week", subject: "Book direct and save 10% on your return stay, {{first}}" },
+      { channel: "Email", delay: "Seasonal", subject: "Fall at the farm is unreal — grab a weekend before they're gone" },
+    ],
+  },
+  {
     id: "S4", name: "Slow-Week Filler", trigger: "Open date within 60 days", status: "paused",
     enrolled: 0, booked: 0,
     steps: [

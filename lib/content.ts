@@ -30,6 +30,7 @@ export const nav: NavLink[] = [
   { label: "Weddings", href: "/weddings" },
   { label: "Gatherings", href: "/gatherings" },
   { label: "The Stay", href: "/accommodations" },
+  { label: "Silo Stays", href: "/silos" },
   { label: "Retreats", href: "/stay" },
   { label: "Design My Day", href: "/design-my-day" },
   { label: "Style Quiz", href: "/quiz" },
