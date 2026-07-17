@@ -30,8 +30,8 @@ export default async function PlanPage({ params }: { params: Promise<{ slug: str
         <p className="font-script text-3xl text-brass">plan together, save together</p>
         <h1 className="mt-1 font-display text-5xl text-ink">Your Wedding Cost Planner</h1>
         <p className="mt-2 max-w-xl text-ink-soft">
-          {budget.coupleName} · {formatDate(budget.eventDate)}. See your full wedding cost live, and
-          delegate any overnight room to a guest to bring your total down.
+          {budget.coupleName} · {formatDate(budget.eventDate)}. See your full wedding cost live. Assign each
+          room and silo to a guest couple, cover it yourself, or add it to your registry — and watch your total drop.
         </p>
 
         <div className="mt-10">

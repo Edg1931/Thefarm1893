@@ -125,26 +125,39 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
       {budget && lodging && (
         <Panel title="Lodging & cost split"
           action={<Link href={`/plan/${budget.slug}`} target="_blank" className="btn btn-ghost !py-2 !px-4 !text-xs">Open Cost Planner ↗</Link>}>
-          <div className="grid gap-4 sm:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <SplitStat label="Full wedding cost" value={formatCurrency(lodging.fullTotal)} />
             <SplitStat label="Couple's total" value={formatCurrency(lodging.coupleTotal)} accent="ink" />
-            <SplitStat label="Delegated to guests" value={formatCurrency(lodging.delegated)} accent="sage" />
+            <SplitStat label="Assigned to guests" value={formatCurrency(lodging.delegated)} accent="sage" />
+            <SplitStat label="On the registry" value={formatCurrency(lodging.onRegistry)} accent="brass" />
             <SplitStat label="Paid by guests" value={formatCurrency(lodging.guestPaid)} accent="brass" />
           </div>
           <div className="mt-5 overflow-x-auto">
             <table className="w-full min-w-[520px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wider text-stone">
-                <tr className="border-b border-ink/8"><th className="pb-2 font-medium">Room</th><th className="pb-2 font-medium">Covered by</th><th className="pb-2 font-medium">Price</th><th className="pb-2 font-medium">Payment</th></tr>
+                <tr className="border-b border-ink/8"><th className="pb-2 font-medium">Unit</th><th className="pb-2 font-medium">Type</th><th className="pb-2 font-medium">Covered by</th><th className="pb-2 font-medium">Price</th><th className="pb-2 font-medium">Payment</th></tr>
               </thead>
               <tbody className="divide-y divide-ink/6">
                 {budget.rooms.map((r) => (
                   <tr key={r.id}>
                     <td className="py-2.5 font-medium text-ink">{r.name}</td>
-                    <td className="py-2.5 text-ink-soft">{r.coveredBy === "guest" ? (r.guestName ?? "A guest") : `${lead.name.split(" ")[0]} (couple)`}</td>
+                    <td className="py-2.5 text-xs text-stone">{r.type === "silo" ? "Silo" : "Farmhouse"}</td>
+                    <td className="py-2.5 text-ink-soft">
+                      {r.coveredBy === "guest" ? (r.guestName ?? "A guest")
+                        : r.coveredBy === "registry" ? "Registry gift"
+                        : `${lead.name.split(" ")[0]} (couple)`}
+                    </td>
                     <td className="py-2.5 text-ink-soft">{formatCurrency(r.price)}</td>
                     <td className="py-2.5">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${r.paid ? "bg-sage/15 text-sage-deep" : r.coveredBy === "guest" ? "bg-brass/15 text-brass" : "bg-ink/8 text-ink-soft"}`}>
-                        {r.paid ? "Paid" : r.coveredBy === "guest" ? "Awaiting payment" : "On couple's tab"}
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                        r.paid ? "bg-sage/15 text-sage-deep"
+                        : r.coveredBy === "guest" ? "bg-brass/15 text-brass"
+                        : r.coveredBy === "registry" ? "bg-brass/15 text-brass"
+                        : "bg-ink/8 text-ink-soft"}`}>
+                        {r.paid ? "Paid"
+                          : r.coveredBy === "guest" ? "Awaiting payment"
+                          : r.coveredBy === "registry" ? "Gift-funded"
+                          : "On couple's tab"}
                       </span>
                     </td>
                   </tr>

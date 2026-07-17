@@ -35,6 +35,7 @@ export const registries: Record<string, Registry> = {
     funds: [
       { id: "F-room-orchard", title: "Sponsor the Orchard Suite", blurb: "Cover a night in the farmhouse for our parents.", goal: 480, contributed: 120, category: "lodging", icon: "BedDouble", coversCost: true },
       { id: "F-room-loft", title: "Sponsor a Loft Room", blurb: "Help put our wedding party up on-site.", goal: 340, contributed: 340, category: "lodging", icon: "BedDouble", coversCost: true },
+      { id: "F-silo-harvest", title: "Sponsor The Harvest Silo", blurb: "Gift a whole silo for our family's weekend stay.", goal: 498, contributed: 150, category: "lodging", icon: "BedDouble", coversCost: true },
       { id: "F-bar", title: "The Bar Tab", blurb: "Signature cider cocktails & a toast on us.", goal: 2500, contributed: 900, category: "experience", icon: "Wine", coversCost: true },
       { id: "F-photo", title: "Golden-Hour Photography", blurb: "An extra hour of orchard portraits at sunset.", goal: 800, contributed: 300, category: "experience", icon: "Camera", coversCost: true },
       { id: "F-pizza", title: "Late-Night Pizza Party", blurb: "Wood-fired pizzas when the dancing gets hungry.", goal: 800, contributed: 800, category: "experience", icon: "Pizza", coversCost: true },

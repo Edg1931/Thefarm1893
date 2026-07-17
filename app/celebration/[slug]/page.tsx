@@ -109,7 +109,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
                 for just your own stay — no rushing home after the last dance.
               </p>
             </Reveal>
-            <div className="mt-10"><GuestRoomBooking rooms={budget.rooms} /></div>
+            <div className="mt-10"><GuestRoomBooking rooms={budget.rooms.filter((r) => r.type !== "silo")} /></div>
           </div>
         </section>
       )}

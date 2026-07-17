@@ -13,15 +13,18 @@ export type CostItem = {
   category: "venue" | "addon";
 };
 
+export type CoveredBy = "couple" | "guest" | "registry";
+
 export type Room = {
   id: string;
   name: string;
   description: string;
   sleeps: number;
   price: number; // whole-weekend price for the room
-  coveredBy: "couple" | "guest";
+  coveredBy: CoveredBy;
   guestName?: string;
   paid: boolean;
+  type?: "farmhouse" | "silo"; // silos are assignable, individually-rentable units
 };
 
 export type WeddingBudget = {
@@ -51,8 +54,13 @@ export const budgets: Record<string, WeddingBudget> = {
       { id: "R4", name: "The Garden Room 1", description: "Queen bed · garden patio", sleeps: 2, price: 360, coveredBy: "couple", paid: false },
       { id: "R5", name: "The Garden Room 2", description: "Queen bed · garden patio", sleeps: 2, price: 360, coveredBy: "couple", paid: false },
       { id: "R6", name: "The Bunk Room", description: "Four bunks · great for the crew", sleeps: 4, price: 420, coveredBy: "guest", guestName: "Bridesmaids", paid: false },
-      { id: "R7", name: "The Cottage", description: "King + sofa bed · full kitchenette", sleeps: 3, price: 450, coveredBy: "couple", paid: false },
-      { id: "R8", name: "The Roost", description: "Cozy queen · top of the farmhouse", sleeps: 2, price: 300, coveredBy: "couple", paid: false },
+      { id: "R7", name: "The Cottage", description: "King + sofa bed · full kitchenette", sleeps: 3, price: 450, coveredBy: "couple", paid: false, type: "farmhouse" },
+      { id: "R8", name: "The Roost", description: "Cozy queen · top of the farmhouse", sleeps: 2, price: 300, coveredBy: "couple", paid: false, type: "farmhouse" },
+      // The silos — assign each to a guest couple, cover it yourself, or put it on the registry.
+      { id: "S1", name: "The Orchard Silo", description: "Romantic round retreat · sleeps 2", sleeps: 2, price: 378, coveredBy: "guest", guestName: "Aunt Carol & Uncle Jim", paid: false, type: "silo" },
+      { id: "S2", name: "The Harvest Silo", description: "Family silo w/ loft · sleeps 4", sleeps: 4, price: 498, coveredBy: "registry", paid: false, type: "silo" },
+      { id: "S3", name: "The Copper Silo", description: "Luxe silo · soaking tub · sleeps 2", sleeps: 2, price: 558, coveredBy: "couple", paid: false, type: "silo" },
+      { id: "S4", name: "The Meadow Silo", description: "3-bedroom silo · sleeps 6", sleeps: 6, price: 658, coveredBy: "guest", guestName: "The college crew", paid: false, type: "silo" },
     ],
   },
 };
@@ -67,7 +75,9 @@ export function summarize(items: CostItem[], rooms: Room[]) {
   const lodgingTotal = rooms.reduce((s, r) => s + r.price, 0);
   const fullTotal = base + lodgingTotal;
   const delegated = rooms.filter((r) => r.coveredBy === "guest").reduce((s, r) => s + r.price, 0);
+  const onRegistry = rooms.filter((r) => r.coveredBy === "registry").reduce((s, r) => s + r.price, 0);
   const guestPaid = rooms.filter((r) => r.coveredBy === "guest" && r.paid).reduce((s, r) => s + r.price, 0);
-  const coupleTotal = fullTotal - delegated;
-  return { base, lodgingTotal, fullTotal, delegated, guestPaid, coupleTotal };
+  // Anything a guest covers OR the registry gifts comes off the couple's total.
+  const coupleTotal = fullTotal - delegated - onRegistry;
+  return { base, lodgingTotal, fullTotal, delegated, onRegistry, guestPaid, coupleTotal };
 }
