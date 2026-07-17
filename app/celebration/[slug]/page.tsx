@@ -1,13 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Heart, Gift, BedDouble, CalendarHeart, Check } from "lucide-react";
+import { MapPin, Heart, Gift, BedDouble, CalendarHeart } from "lucide-react";
 import { getCelebration } from "@/lib/celebrations";
 import { getBudget } from "@/lib/crm/lodging";
 import { getRegistry } from "@/lib/crm/registry";
 import { GuestRoomBooking } from "@/components/GuestRoomBooking";
 import { RegistryBoard } from "@/components/RegistryBoard";
 import { SiloCrossPromo } from "@/components/site/CrossPromo";
+import { RsvpForm } from "@/components/site/RsvpForm";
 import { Countdown } from "@/components/site/Countdown";
 import { Reveal } from "@/components/site/Reveal";
 import { Logo } from "@/components/site/Logo";
@@ -138,17 +139,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
             <Gift className="mx-auto text-brass-soft" />
             <h2 className="mt-4 font-display text-4xl md:text-5xl">Will you join us?</h2>
             <p className="mt-3 text-parchment/75">Kindly reply by August 1, 2026.</p>
-            <form className="mt-8 space-y-3 text-left">
-              <input placeholder="Your name" className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
-              <div className="grid grid-cols-2 gap-3">
-                <input type="number" placeholder="# attending" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
-                <select className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none focus:border-brass">
-                  <option className="text-ink">Joyfully accepts</option>
-                  <option className="text-ink">Regretfully declines</option>
-                </select>
-              </div>
-              <button type="button" className="btn bg-parchment text-ink w-full"><Check size={16} /> Send RSVP</button>
-            </form>
+            <RsvpForm coupleName={c.couple} />
             <a href="#registry" className="mt-6 inline-flex items-center gap-2 rounded-full bg-parchment/10 px-5 py-2.5 text-sm text-brass-soft ring-1 ring-brass/30 transition hover:bg-parchment/20">
               <Gift size={15} /> Browse our registry &amp; gift funds →
             </a>

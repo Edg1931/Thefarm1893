@@ -7,14 +7,15 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, eventDate, guestCount, eventType, message, source } = body;
+    const { name, email, phone, eventDate, guestCount, eventType, message, source,
+      budget, heardAbout, style, segment } = body;
 
     if (!name || (!email && !phone)) {
       return NextResponse.json({ error: "Name and a contact method are required." }, { status: 400 });
     }
 
     // AI lead scoring (pluggable — heuristic today, model-backed when key added).
-    const score = scoreLead({ eventDate, guestCount, eventType, message });
+    const score = scoreLead({ eventDate, guestCount, eventType, message, budget });
 
     const lead = {
       name,
@@ -25,6 +26,11 @@ export async function POST(req: Request) {
       event_type: eventType ?? "wedding",
       message: message ?? null,
       source: source ?? "website",
+      // Richer intake — powers catering prep, attribution, and segmentation.
+      budget: budget ?? null,
+      heard_about: heardAbout ?? null,   // marketing attribution
+      style: style ?? null,               // vibe for catering/design + targeting
+      segment: segment ?? "wedding",      // wedding | vrbo | future-couple | corporate
       stage: "new",
       score: score.score,
       ai_priority: score.priority,

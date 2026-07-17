@@ -12,6 +12,7 @@ export type LeadSignals = {
   guestCount?: number | string | null;
   eventType?: string | null;
   message?: string | null;
+  budget?: string | null;
 };
 
 /** Transparent, explainable lead score (0-100) + priority + one-line summary. */
@@ -39,6 +40,12 @@ export function scoreLead(s: LeadSignals) {
     score += 12; reasons.push("high-intent language");
   }
   if ((s.eventType || "wedding") === "wedding") { score += 6; }
+
+  // Budget signal — higher stated budget = stronger fit.
+  const b = (s.budget || "").toString();
+  if (/\$30|\$20/.test(b)) { score += 14; reasons.push("strong budget"); }
+  else if (/\$10/.test(b)) { score += 8; reasons.push("solid budget"); }
+  else if (/\$5/.test(b)) { score += 3; }
 
   score = Math.max(5, Math.min(99, score));
   const priority = score >= 78 ? "hot" : score >= 55 ? "warm" : "nurture";

@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Loader2, CheckCircle2, Heart } from "lucide-react";
 
 const EVENT_TYPES = ["Wedding", "Corporate / Retreat", "Anniversary", "Shower", "Celebration of Life", "Other"];
+const BUDGETS = ["Not sure yet", "Under $5,000", "$5,000–$10,000", "$10,000–$20,000", "$20,000–$30,000", "$30,000+"];
+const HEARD_ABOUT = ["Instagram", "Google search", "The Knot / WeddingWire", "Pinterest", "Friend or family", "A wedding vendor", "TikTok", "Drove by", "Other"];
+const STYLES = ["Not sure yet", "Timeless & elegant", "Rustic & cozy", "Modern & minimal", "Boho & whimsical", "Moody & dramatic"];
 
 export function LeadForm({ defaultDate = "" }: { defaultDate?: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -60,13 +63,16 @@ export function LeadForm({ defaultDate = "" }: { defaultDate?: string }) {
           </select>
         </div>
         <Field label="Estimated guests" name="guestCount" type="number" placeholder="e.g. 150" />
+        <SelectField label="Budget range" name="budget" options={BUDGETS} />
+        <SelectField label="How did you hear about us?" name="heardAbout" options={HEARD_ABOUT} />
+        <SelectField label="Your style / vibe" name="style" options={STYLES} />
       </div>
       <div className="mt-4 flex flex-col gap-1.5">
-        <label className="text-xs font-medium uppercase tracking-wider text-stone">Tell us about your celebration</label>
+        <label className="text-xs font-medium uppercase tracking-wider text-stone">Your vision &amp; must-haves</label>
         <textarea
           name="message"
           rows={3}
-          placeholder="Your vision, questions, must-haves…"
+          placeholder="Ceremony spot, overnight stays, food dreams, anything on your wish list…"
           className="rounded-xl border border-ink/15 bg-bone px-4 py-3 text-ink outline-none focus:border-sage"
         />
       </div>
@@ -83,6 +89,17 @@ export function LeadForm({ defaultDate = "" }: { defaultDate?: string }) {
         We reply fast. Your details are private and never shared.
       </p>
     </form>
+  );
+}
+
+function SelectField({ label, name, options }: { label: string; name: string; options: string[] }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-medium uppercase tracking-wider text-stone">{label}</label>
+      <select name={name} className="rounded-xl border border-ink/15 bg-bone px-4 py-3 text-ink outline-none focus:border-sage">
+        {options.map((o) => <option key={o}>{o}</option>)}
+      </select>
+    </div>
   );
 }
 

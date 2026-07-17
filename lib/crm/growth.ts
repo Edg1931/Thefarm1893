@@ -54,6 +54,15 @@ export const sequences: Sequence[] = [
     ],
   },
   {
+    id: "S6", name: "Guest → Future Couple", trigger: "Wedding guest RSVPs (esp. 'planning our own')", status: "active",
+    enrolled: 214, booked: 9,
+    steps: [
+      { channel: "Email", delay: "1 week after the wedding", subject: "Wasn't {{couple}}'s day beautiful? 🌾 (a little something for you)" },
+      { channel: "Email", delay: "3 months later", subject: "Recently engaged? You already know how magic the farm is 💍" },
+      { channel: "SMS", delay: "When a season opens", subject: "Hi {{first}} — thought of you. A few 2027 dates just opened at the farm." },
+    ],
+  },
+  {
     id: "S4", name: "Slow-Week Filler", trigger: "Open date within 60 days", status: "paused",
     enrolled: 0, booked: 0,
     steps: [
