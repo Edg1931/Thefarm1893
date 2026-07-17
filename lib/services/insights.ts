@@ -50,30 +50,70 @@ export function scoreLead(s: LeadSignals) {
   return { score, priority, summary, reasons };
 }
 
-/** Marketing copy generator for the AI Marketing Studio. */
+/* --- Audience personas & goals for targeted ad generation --- */
+const PERSONA_ANGLE: Record<string, string> = {
+  "budget-couple": "an affordable, all-inclusive weekend that stretches every dollar",
+  "luxury-couple": "an elevated, exclusive weekend estate experience",
+  "destination-couple": "a weekend where 25 guests stay on-site — no one rushes home",
+  "corporate": "a distraction-free retreat with lodging and space to connect",
+  "milestone": "a warm, memorable celebration in a one-of-a-kind setting",
+  "silo-guest": "a cozy silo getaway in the Ohio countryside near Cedar Point",
+};
+const GOAL_CTA: Record<string, string> = {
+  tour: "Book a private tour →",
+  inquiry: "Check your date in 30 seconds →",
+  "fill-date": "Grab one of our last open weekends →",
+  awareness: "Follow along & fall in love →",
+  silos: "Book your silo stay direct & save →",
+};
+
+/** Multi-channel, persona-aware marketing copy for the Ad Studio. */
 export async function generateMarketingCopy(opts: {
-  kind: "instagram" | "email" | "ad" | "blog";
+  channel?: string; // instagram | facebook | pinterest | tiktok | x | linkedin | google-ads | email | sms | blog
+  kind?: string; // legacy alias for channel
   topic: string;
+  profile?: string;
+  goal?: string;
   tone?: string;
 }) {
+  const channel = (opts.channel || opts.kind || "instagram").toLowerCase();
   const tone = opts.tone || "warm, elegant, rustic-luxe";
-  const system = `You are the marketing director for The Farm 1893, a historic-orchard wedding venue in Berlin Heights, Ohio.
-Write ${opts.kind} content that is ${tone}, emotionally resonant, and drives tour bookings. Include a clear call to action.`;
+  const angle = PERSONA_ANGLE[opts.profile ?? ""] || "an all-inclusive weekend wedding in a historic orchard";
+  const cta = GOAL_CTA[opts.goal ?? ""] || "Book a private tour →";
 
+  const system = `You are the marketing director for The Farm 1893, a historic-orchard wedding & gathering venue in Berlin Heights, Ohio.
+Write a ${channel} ${channel === "google-ads" ? "responsive search ad" : "post"} for this audience: ${angle}.
+Tone: ${tone}. Topic/angle: ${opts.topic}. Goal: ${opts.goal ?? "drive tour bookings"}.
+Follow ${channel} best practices (length, hashtags, format). Include a clear call to action and, where natural, tasteful emojis.`;
+
+  const tags = "#TheFarm1893 #OhioWeddingVenue #BarnWedding #OrchardWedding #RusticElegance";
   const mock = () => {
-    const map: Record<string, string> = {
-      instagram: `✨ Golden hour in the orchard hits different. ✨\n\nThere's a moment — just after "I do," when the light slips through the apple trees and everyone you love is standing right there — that you'll remember forever. That's the magic of ${opts.topic} at The Farm 1893. 🌾🍎\n\n📍 Berlin Heights, OH · Weekends still open for 2026\n💌 Tap the link to check your date.\n\n#TheFarm1893 #OhioWeddingVenue #BarnWedding #OrchardWedding #RusticElegance`,
-      email: `Subject: Your date at The Farm 1893 is closer than you think 🌾\n\nHi {{first_name}},\n\nImagine it: your closest people, gathered under our heritage orchard, a bonfire crackling as the sun goes down — and no one rushing home, because the whole weekend is yours.\n\nWe still have a few ${opts.topic} weekends open for 2026, and they're going quickly. Would you like us to hold a private tour for you this month?\n\n→ Check your date in 30 seconds\n\nWarmly,\nThe Farm 1893 Team`,
-      ad: `Headline: Your Whole Wedding Weekend, One Magical Farm\nBody: Ceremony under the orchard. Dinner in the restored barn. 25 guests staying on-site. ${opts.topic} at The Farm 1893 — Ohio's all-in-one wedding venue. Tours filling fast for 2026.\nCTA: Check Your Date →`,
-      blog: `# ${opts.topic}: Why an All-Inclusive Weekend Venue Changes Everything\n\nMost couples don't realize how much of their wedding day is spent watching the clock. At The Farm 1893, we designed the entire experience around one radical idea: what if you never had to rush?\n\nFrom the Friday rehearsal dinner to the Sunday farewell brunch, here's how a weekend at the farm unfolds…`,
-    };
-    return map[opts.kind] ?? map.instagram;
+    switch (channel) {
+      case "google-ads":
+        return `Headlines:\n• Your Whole Wedding Weekend\n• All-Inclusive Ohio Barn Venue\n• Sleeps 25 · One Magical Farm\n\nDescriptions:\n• Ceremony in the orchard, dinner in the barn, 25 guests on-site. ${cta}\n• ${angle[0].toUpperCase() + angle.slice(1)}. Tours filling fast for 2026.`;
+      case "pinterest":
+        return `Title: ${opts.topic} at an Ohio Orchard Barn Venue\n\nDescription: Dreaming of ${angle}? The Farm 1893 in Berlin Heights, OH blends a restored barn, heritage orchard, and on-site lodging for 25. Save this for your planning board 📌🌾\n\n${tags} #WeddingInspiration`;
+      case "tiktok":
+        return `HOOK: "POV: you never have to rush your wedding day." 🌾\n\n• Friday: rehearsal + bonfire\n• Saturday: orchard ceremony at golden hour\n• Sunday: farewell brunch, no goodbyes at midnight\n\nThat's ${angle}. ${cta}\n\n${tags} #WeddingTok`;
+      case "x":
+        return `Golden hour in the orchard hits different. 🌾\n\n${angle}. A few 2026 weekends left. ${cta}\n\n${tags}`;
+      case "linkedin":
+        return `Planning an off-site or team retreat? 🌾\n\nThe Farm 1893 offers ${angle} — a restored barn, 40 private acres, and on-site lodging just outside Sandusky. Room to connect, unplug, and get real work done.\n\n${cta}`;
+      case "email":
+        return `Subject: Your date at The Farm 1893 is closer than you think 🌾\n\nHi {{first_name}},\n\nImagine ${angle} — your closest people gathered under the orchard, a bonfire as the sun goes down, and no one rushing home.\n\nA few 2026 weekends are still open, and they're going quickly.\n\n${cta}\n\nWarmly,\nThe Farm 1893 Team`;
+      case "sms":
+        return `Hi {{first}}! It's The Farm 1893 🌾 A couple of 2026 weekends just opened up — want us to hold a private tour for you? ${cta}`;
+      case "blog":
+        return `# ${opts.topic}\n\nMost couples don't realize how much of their wedding day is spent watching the clock. At The Farm 1893 we asked: what if you never had to rush? Here's how ${angle} unfolds, from Friday's bonfire to Sunday's farewell brunch…`;
+      default: // instagram / facebook
+        return `✨ Golden hour in the orchard hits different. ✨\n\nThere's a moment — just after "I do" — when the light slips through the apple trees and everyone you love is right there. That's ${angle} at The Farm 1893. 🌾🍎\n\n📍 Berlin Heights, OH · A few 2026 weekends left\n💌 ${cta}\n\n${tags}`;
+    }
   };
 
   const { text, mocked } = await generateText({
     system,
-    messages: [{ role: "user", content: `Write a ${opts.kind} post about: ${opts.topic}` }],
-    maxTokens: 600,
+    messages: [{ role: "user", content: `Write a ${channel} post. Angle: ${opts.topic}. Audience: ${angle}. Goal: ${opts.goal ?? "tour bookings"}.` }],
+    maxTokens: 650,
     mock,
   });
   return { content: text, mocked };

@@ -5,11 +5,11 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const { kind, topic, tone } = await req.json();
+    const { kind, channel, topic, tone, profile, goal } = await req.json();
     const result = await generateMarketingCopy({
-      kind: kind ?? "instagram",
+      channel: channel ?? kind ?? "instagram",
       topic: topic ?? "a summer orchard wedding",
-      tone,
+      tone, profile, goal,
     });
     return NextResponse.json(result);
   } catch {
