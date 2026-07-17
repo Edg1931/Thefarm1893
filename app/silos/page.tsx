@@ -4,6 +4,7 @@ import { Star, Users, BedDouble, Bath, ArrowRight, ShieldCheck, Tag, Headset, Tr
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
+import { VenueCrossLink } from "@/components/site/CrossPromo";
 import { silos, siloReviews } from "@/lib/silos";
 import { formatCurrency } from "@/lib/utils";
 
@@ -94,6 +95,8 @@ export default function SilosPage() {
           </div>
         </div>
       </section>
+
+      <VenueCrossLink />
     </SiteShell>
   );
 }

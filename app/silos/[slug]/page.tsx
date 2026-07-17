@@ -5,6 +5,7 @@ import { ArrowLeft, Star, Users, BedDouble, Bath, Check, ShieldCheck } from "luc
 import { SiteShell } from "@/components/site/SiteShell";
 import { Reveal } from "@/components/site/Reveal";
 import { SiloBooking } from "@/components/site/SiloBooking";
+import { VenueCrossLink } from "@/components/site/CrossPromo";
 import { getSilo, silos } from "@/lib/silos";
 
 export function generateStaticParams() {
@@ -85,6 +86,8 @@ export default async function SiloPage({ params }: { params: Promise<{ slug: str
           </div>
         </div>
       </section>
+
+      <VenueCrossLink />
     </SiteShell>
   );
 }

@@ -4,6 +4,7 @@ import { ArrowRight, BedDouble, Coffee, Flame, Sun } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
+import { SiloCrossPromo } from "@/components/site/CrossPromo";
 import { gallery } from "@/lib/content";
 
 export const metadata = { title: "The Stay" };
@@ -54,6 +55,8 @@ export default function AccommodationsPage() {
           </Reveal>
         </div>
       </section>
+
+      <SiloCrossPromo heading="Or stay in a silo" />
     </SiteShell>
   );
 }

@@ -7,6 +7,7 @@ import { getBudget } from "@/lib/crm/lodging";
 import { getRegistry } from "@/lib/crm/registry";
 import { GuestRoomBooking } from "@/components/GuestRoomBooking";
 import { RegistryBoard } from "@/components/RegistryBoard";
+import { SiloCrossPromo } from "@/components/site/CrossPromo";
 import { Countdown } from "@/components/site/Countdown";
 import { Reveal } from "@/components/site/Reveal";
 import { Logo } from "@/components/site/Logo";
@@ -111,6 +112,9 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
           </div>
         </section>
       )}
+
+      {/* Cross-promo: guests can book a silo for the weekend (subtle) */}
+      <SiloCrossPromo heading="Make a weekend of it" />
 
       {/* Registry — gift toward the wedding, right on the site */}
       {registry && (
