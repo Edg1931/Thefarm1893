@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Lock, ArrowLeft } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
@@ -15,8 +15,21 @@ export default function LoginPage() {
   );
 }
 
+function friendlyError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  const m = msg.toLowerCase();
+  if (m.includes("timeout"))
+    return "That took too long. Check your internet connection and try again.";
+  if (m.includes("email not confirmed") || m.includes("not confirmed"))
+    return "This account isn't confirmed yet. In Supabase → Authentication → Users, open the user and confirm it (or add the user with “Auto Confirm” on).";
+  if (m.includes("invalid login") || m.includes("invalid_grant") || m.includes("invalid credentials"))
+    return "Email or password is incorrect.";
+  if (m.includes("failed to fetch") || m.includes("networkerror"))
+    return "Couldn't reach the server. Check the Supabase URL in Vercel and try again.";
+  return msg || "Sign-in failed. Check your email and password.";
+}
+
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,12 +43,22 @@ function LoginForm() {
     setError(null);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      // Guard: never let the button spin forever if the network stalls.
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 20000)
+      );
+      const { error } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeout,
+      ]);
       if (error) throw error;
-      router.push(params.get("next") || "/dashboard");
-      router.refresh();
+
+      // Hard navigation guarantees the freshly-set auth cookie is sent to the
+      // middleware on a clean request — avoids the sign-in → bounce-back loop.
+      const next = params.get("next") || "/dashboard";
+      window.location.assign(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign-in failed. Check your email and password.");
+      setError(friendlyError(err));
       setStatus("idle");
     }
   }
