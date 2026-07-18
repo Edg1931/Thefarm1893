@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { createClient, supabaseConfigured } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Users, KanbanSquare, CalendarDays, Megaphone,
   Bot, Settings, Menu, X, Sparkles, Handshake, FileText,
-  BarChart3, Zap, FileSignature, Share2, Home,
+  BarChart3, Zap, FileSignature, Share2, Home, LogOut,
 } from "lucide-react";
 import { business } from "@/lib/content";
 
@@ -107,7 +108,25 @@ function UpgradeCard() {
     <div className="mt-6 rounded-xl bg-gradient-to-br from-brass/20 to-sage/10 p-4 ring-1 ring-brass/20">
       <p className="text-sm font-medium text-parchment">AI Copilot active</p>
       <p className="mt-1 text-xs text-parchment/60">Insights refresh in real time as leads and bookings change.</p>
-      <Link href="/" className="mt-3 inline-block text-xs font-medium text-brass-soft hover:underline">← Back to website</Link>
+      <div className="mt-3 flex items-center justify-between">
+        <Link href="/" className="text-xs font-medium text-brass-soft hover:underline">← Back to website</Link>
+        <SignOut />
+      </div>
     </div>
+  );
+}
+
+function SignOut() {
+  const router = useRouter();
+  if (!supabaseConfigured()) return null;
+  async function signOut() {
+    try { await createClient().auth.signOut(); } catch { /* ignore */ }
+    router.push("/login");
+    router.refresh();
+  }
+  return (
+    <button onClick={signOut} className="flex items-center gap-1 text-xs text-parchment/60 hover:text-parchment">
+      <LogOut size={13} /> Sign out
+    </button>
   );
 }
