@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/crm/Sidebar";
+import { AccountMenu } from "@/components/crm/AccountMenu";
 import { Bell, Search } from "lucide-react";
 
 export const metadata = { title: "Venue OS — Dashboard" };
@@ -19,13 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Bell size={18} />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-terracotta" />
             </button>
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-sage-deep font-display text-lg text-parchment">F</div>
-              <div className="leading-none">
-                <p className="text-sm font-medium text-ink">Farm Team</p>
-                <p className="text-xs text-stone">Owner</p>
-              </div>
-            </div>
+            <AccountMenu />
           </div>
         </header>
         <div className="flex-1 p-5 md:p-8">{children}</div>

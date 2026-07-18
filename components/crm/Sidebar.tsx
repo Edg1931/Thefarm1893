@@ -11,21 +11,46 @@ import {
 } from "lucide-react";
 import { business } from "@/lib/content";
 
-const links = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/leads", label: "Lead Pipeline", icon: KanbanSquare },
-  { href: "/dashboard/bookings", label: "Bookings & Calendar", icon: CalendarDays },
-  { href: "/dashboard/rentals", label: "Silo Stays · VRBO", icon: Home },
-  { href: "/dashboard/proposals", label: "AI Proposals", icon: FileText },
-  { href: "/dashboard/contracts", label: "Contracts & Deposits", icon: FileSignature },
-  { href: "/dashboard/contacts", label: "Contacts", icon: Users },
-  { href: "/dashboard/vendors", label: "Vendor Network", icon: Handshake },
-  { href: "/dashboard/referrals", label: "Referrals", icon: Share2 },
-  { href: "/dashboard/automations", label: "AI Automations", icon: Zap },
-  { href: "/dashboard/marketing", label: "AI Marketing Studio", icon: Megaphone },
-  { href: "/dashboard/receptionist", label: "AI Receptionist", icon: Bot },
-  { href: "/dashboard/settings", label: "Integrations", icon: Settings },
+type NavLink = { href: string; label: string; icon: typeof LayoutDashboard };
+type NavSection = { heading?: string; links: NavLink[] };
+
+const sections: NavSection[] = [
+  {
+    links: [
+      { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+      { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    heading: "Clients & Bookings",
+    links: [
+      { href: "/dashboard/leads", label: "Lead Pipeline", icon: KanbanSquare },
+      { href: "/dashboard/bookings", label: "Bookings & Calendar", icon: CalendarDays },
+      { href: "/dashboard/rentals", label: "Silo Stays · VRBO", icon: Home },
+      { href: "/dashboard/contacts", label: "Contacts", icon: Users },
+      { href: "/dashboard/contracts", label: "Contracts & Deposits", icon: FileSignature },
+    ],
+  },
+  {
+    heading: "AI Center",
+    links: [
+      { href: "/dashboard/ai", label: "AI Center", icon: Sparkles },
+      { href: "/dashboard/proposals", label: "AI Proposals", icon: FileText },
+      { href: "/dashboard/marketing", label: "Marketing Studio", icon: Megaphone },
+      { href: "/dashboard/automations", label: "Automations", icon: Zap },
+      { href: "/dashboard/receptionist", label: "AI Receptionist", icon: Bot },
+    ],
+  },
+  {
+    heading: "Growth",
+    links: [
+      { href: "/dashboard/vendors", label: "Vendor Network", icon: Handshake },
+      { href: "/dashboard/referrals", label: "Referrals", icon: Share2 },
+    ],
+  },
+  {
+    links: [{ href: "/dashboard/settings", label: "Integrations", icon: Settings }],
+  },
 ];
 
 export function Sidebar() {
@@ -33,25 +58,35 @@ export function Sidebar() {
   const [open, setOpen] = useState(false);
 
   const Nav = (
-    <nav className="flex flex-col gap-1">
-      {links.map((l) => {
-        const active = l.href === "/dashboard" ? pathname === l.href : pathname.startsWith(l.href);
-        return (
-          <Link
-            key={l.href}
-            href={l.href}
-            onClick={() => setOpen(false)}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
-              active
-                ? "bg-brass/15 font-medium text-parchment ring-1 ring-brass/30"
-                : "text-parchment/60 hover:bg-white/5 hover:text-parchment"
-            }`}
-          >
-            <l.icon size={18} className={active ? "text-brass-soft" : ""} />
-            {l.label}
-          </Link>
-        );
-      })}
+    <nav className="flex flex-col gap-4">
+      {sections.map((section, i) => (
+        <div key={section.heading ?? `sec-${i}`} className="flex flex-col gap-1">
+          {section.heading && (
+            <p className="px-4 pb-1 pt-1 text-[0.6rem] font-semibold uppercase tracking-[0.15em] text-parchment/35">
+              {section.heading}
+            </p>
+          )}
+          {section.links.map((l) => {
+            const active =
+              l.href === "/dashboard" ? pathname === l.href : pathname.startsWith(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition ${
+                  active
+                    ? "bg-brass/15 font-medium text-parchment ring-1 ring-brass/30"
+                    : "text-parchment/60 hover:bg-white/5 hover:text-parchment"
+                }`}
+              >
+                <l.icon size={18} className={active ? "text-brass-soft" : ""} />
+                {l.label}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 
@@ -66,7 +101,7 @@ export function Sidebar() {
       {/* Desktop sidebar */}
       <aside className="hidden w-72 shrink-0 flex-col bg-[color:var(--color-ink)] p-5 lg:flex">
         <SidebarHeader />
-        <div className="mt-8 flex-1">{Nav}</div>
+        <div className="mt-8 flex-1 overflow-y-auto pr-1">{Nav}</div>
         <UpgradeCard />
       </aside>
 
@@ -79,7 +114,7 @@ export function Sidebar() {
               <SidebarHeader />
               <button onClick={() => setOpen(false)} aria-label="Close"><X className="text-parchment" /></button>
             </div>
-            <div className="mt-8 flex-1">{Nav}</div>
+            <div className="mt-8 flex-1 overflow-y-auto pr-1">{Nav}</div>
           </aside>
         </div>
       )}
