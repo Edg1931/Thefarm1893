@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { DollarSign, Users, CalendarCheck, Zap, TrendingUp, Clock } from "lucide-react";
-import { StatCard, InsightCard, RevenueChart, PriorityBadge, ScoreRing, Panel } from "@/components/crm/widgets";
+import { DollarSign, Users, Zap, TrendingUp, CalendarDays } from "lucide-react";
+import { StatCard, InsightCard, RevenueChart, ScoreRing, Panel } from "@/components/crm/widgets";
+import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
 import { leads, upcomingEvents, dashboardStats, revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sample-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -31,6 +32,15 @@ export default function DashboardOverview() {
         <StatCard label="Booked revenue YTD" value={formatCurrency(dashboardStats.bookedRevenueYTD)} delta="+24%" icon={TrendingUp} accent="sage" />
         <StatCard label="New leads this month" value={String(dashboardStats.leadsThisMonth)} delta="+9" icon={Users} accent="ink" />
         <StatCard label="Avg. response time" value={`${dashboardStats.avgResponseMins} min`} delta="Fast" icon={Zap} accent="terracotta" />
+      </div>
+
+      {/* Availability calendar — weddings + silos + AI open-date suggestions */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 font-display text-2xl text-ink"><CalendarDays size={20} className="text-brass" /> Availability at a glance</h2>
+          <Link href="/dashboard/bookings" className="text-sm font-medium text-brass hover:underline">Full calendar →</Link>
+        </div>
+        <BookingsCalendar />
       </div>
 
       <div className="grid gap-8 xl:grid-cols-3">

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Panel, StatCard } from "@/components/crm/widgets";
+import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
 import { siloGuests, siloStats, silos } from "@/lib/silos";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Home, TrendingUp, Repeat, Star, Mail, Zap } from "lucide-react";
+import { Home, TrendingUp, Repeat, Star, Mail, Zap, CalendarDays } from "lucide-react";
 
 export const metadata = { title: "Silo Stays (VRBO)" };
 
@@ -31,6 +32,15 @@ export default function RentalsPage() {
         <span className="flex items-center gap-2 font-medium text-ink"><Zap size={16} className="text-sage-deep" /> AI Copilot:</span>
         <p className="mt-1">Every silo guest is auto-tagged <b className="text-ink">VRBO</b> and enrolled in the <Link href="/dashboard/automations" className="text-brass hover:underline">Silo Stays — Come Back</Link> drip:
         a review request after checkout, then a "come back" nudge at 11 months. It&apos;s already re-booked <b className="text-ink">34 returning stays</b> this year. Rachel &amp; Mark and 2 other repeat guests are due for their annual invite.</p>
+      </div>
+
+      {/* Shared availability — silos + weddings so no day gets double-booked or left empty */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 font-display text-2xl text-ink"><CalendarDays size={20} className="text-brass" /> Availability · silos + weddings</h2>
+          <Link href="/dashboard/bookings" className="text-sm font-medium text-brass hover:underline">Full calendar →</Link>
+        </div>
+        <BookingsCalendar />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
