@@ -9,6 +9,7 @@ import { GuestRoomBooking } from "@/components/GuestRoomBooking";
 import { RegistryBoard } from "@/components/RegistryBoard";
 import { SiloCrossPromo } from "@/components/site/CrossPromo";
 import { RsvpForm } from "@/components/site/RsvpForm";
+import { PrivacyGate } from "@/components/site/PrivacyGate";
 import { Countdown } from "@/components/site/Countdown";
 import { Reveal } from "@/components/site/Reveal";
 import { Logo } from "@/components/site/Logo";
@@ -27,6 +28,8 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
   if (!c) notFound();
   const budget = getBudget(slug);
   const registry = getRegistry(slug);
+  const priv = (k: string) => (c.privacy?.[k] === "private" ? "pv-private " : "");
+  const defaultPrivate = Object.keys(c.privacy ?? {}).filter((k) => c.privacy[k] === "private");
 
   return (
     <div className="bg-bone">
@@ -53,7 +56,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
       </section>
 
       {/* Schedule */}
-      <section className="bg-[color:var(--color-ink)] py-20 text-parchment md:py-28">
+      <section data-section="schedule" className={`${priv("schedule")}bg-[color:var(--color-ink)] py-20 text-parchment md:py-28`}>
         <div className="container-x">
           <Reveal className="text-center"><p className="eyebrow !text-brass-soft">The weekend</p><h2 className="mt-3 font-display text-4xl md:text-5xl">Schedule of events</h2></Reveal>
           <div className="mx-auto mt-14 max-w-2xl space-y-2">
@@ -69,11 +72,11 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
         </div>
       </section>
 
-      {/* Lodging + Local */}
-      <section className="container-x grid gap-12 py-20 md:grid-cols-2 md:py-28">
-        <Reveal>
+      {/* Room assignments (private by default) */}
+      <section data-section="rooms" className={`${priv("rooms")}container-x py-20 md:py-28`}>
+        <Reveal className="mx-auto max-w-2xl">
           <div className="flex items-center gap-2 text-brass"><BedDouble size={18} /><span className="eyebrow">Staying on-site</span></div>
-          <h2 className="mt-3 font-display text-3xl text-ink">Farmhouse rooms</h2>
+          <h2 className="mt-3 font-display text-3xl text-ink">Farmhouse room assignments</h2>
           <ul className="mt-6 space-y-3">
             {c.rooms.map((r) => (
               <li key={r.name} className="flex items-center justify-between rounded-xl bg-parchment p-4 shadow-[var(--shadow-soft)]">
@@ -82,23 +85,29 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
             ))}
           </ul>
         </Reveal>
-        <Reveal delay={120}>
-          <div className="flex items-center gap-2 text-brass"><MapPin size={18} /><span className="eyebrow">Make a weekend of it</span></div>
-          <h2 className="mt-3 font-display text-3xl text-ink">Around Berlin Heights</h2>
-          <ul className="mt-6 space-y-3">
-            {c.local.map((l) => (
-              <li key={l.name} className="rounded-xl bg-parchment p-4 shadow-[var(--shadow-soft)]">
-                <div className="flex items-center justify-between"><span className="font-medium text-ink">{l.name}</span><span className="rounded-full bg-sage/12 px-2.5 py-0.5 text-xs text-sage-deep">{l.type}</span></div>
-                <p className="mt-1 text-sm text-stone">{l.note}</p>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
+      </section>
+
+      {/* Around town (public) */}
+      <section data-section="local" className={`${priv("local")}bg-[color:var(--color-linen)] py-20 md:py-28`}>
+        <div className="container-x mx-auto max-w-2xl">
+          <Reveal>
+            <div className="flex items-center gap-2 text-brass"><MapPin size={18} /><span className="eyebrow">Make a weekend of it</span></div>
+            <h2 className="mt-3 font-display text-3xl text-ink">Around Berlin Heights</h2>
+            <ul className="mt-6 space-y-3">
+              {c.local.map((l) => (
+                <li key={l.name} className="rounded-xl bg-parchment p-4 shadow-[var(--shadow-soft)]">
+                  <div className="flex items-center justify-between"><span className="font-medium text-ink">{l.name}</span><span className="rounded-full bg-sage/12 px-2.5 py-0.5 text-xs text-sage-deep">{l.type}</span></div>
+                  <p className="mt-1 text-sm text-stone">{l.note}</p>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
       </section>
 
       {/* Reserve your room — guests pay individually for their stay */}
       {budget && (
-        <section className="bg-[color:var(--color-ink)] py-20 text-parchment md:py-28">
+        <section data-section="rooms" className={`${priv("rooms")}bg-[color:var(--color-ink)] py-20 text-parchment md:py-28`}>
           <div className="container-x max-w-4xl">
             <Reveal className="text-center">
               <BedDouble className="mx-auto text-brass-soft" />
@@ -119,7 +128,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
 
       {/* Registry — gift toward the wedding, right on the site */}
       {registry && (
-        <section id="registry" className="bg-bone py-20 md:py-28">
+        <section id="registry" data-section="registry" className={`${priv("registry")}bg-bone py-20 md:py-28`}>
           <div className="container-x">
             <Reveal className="mx-auto max-w-2xl text-center">
               <Gift className="mx-auto text-brass" />
@@ -133,7 +142,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
       )}
 
       {/* RSVP */}
-      <section id="rsvp" className="bg-[color:var(--color-sage-deep)] py-20 text-parchment md:py-28">
+      <section id="rsvp" data-section="rsvp" className={`${priv("rsvp")}bg-[color:var(--color-sage-deep)] py-20 text-parchment md:py-28`}>
         <div className="container-x max-w-xl text-center">
           <Reveal>
             <Gift className="mx-auto text-brass-soft" />
@@ -146,6 +155,8 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
           </Reveal>
         </div>
       </section>
+
+      <PrivacyGate slug={slug} code={c.accessCode} defaultPrivate={defaultPrivate} />
 
       {/* Footer — subtle venue branding = the marketing payload */}
       <footer className="container-x flex flex-col items-center gap-4 py-12 text-center">

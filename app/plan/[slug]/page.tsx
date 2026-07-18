@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getBudget } from "@/lib/crm/lodging";
+import { getCelebration, PRIVACY_SECTIONS } from "@/lib/celebrations";
 import { WeddingCostPlanner } from "@/components/WeddingCostPlanner";
+import { PrivacySettings } from "@/components/site/PrivacySettings";
 import { Logo } from "@/components/site/Logo";
 import { formatDate } from "@/lib/utils";
 
@@ -16,6 +18,7 @@ export default async function PlanPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const budget = getBudget(slug);
   if (!budget) notFound();
+  const celebration = getCelebration(slug);
 
   return (
     <div className="min-h-screen bg-bone">
@@ -37,6 +40,12 @@ export default async function PlanPage({ params }: { params: Promise<{ slug: str
         <div className="mt-10">
           <WeddingCostPlanner items={budget.items} rooms={budget.rooms} coupleName={budget.coupleName} />
         </div>
+
+        {celebration && (
+          <div className="mt-10 max-w-xl">
+            <PrivacySettings slug={slug} accessCode={celebration.accessCode} sections={PRIVACY_SECTIONS} initial={celebration.privacy} />
+          </div>
+        )}
 
         <div className="mt-10 flex items-center gap-2 text-sm text-stone">
           <ArrowLeft size={14} /> This is your private planning link — safe to bookmark and share room links with guests.

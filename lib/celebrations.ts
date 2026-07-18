@@ -17,7 +17,19 @@ export type Celebration = {
   rooms: { name: string; guests: string }[];
   local: { name: string; type: string; note: string }[];
   registryUrl?: string;
+  // Per-section privacy — the couple chooses what's public vs. invited-guests-only.
+  accessCode: string;
+  privacy: Record<string, "public" | "private">;
 };
+
+/** Gate-able microsite sections, in display order — used by the couple's controls. */
+export const PRIVACY_SECTIONS: { key: string; label: string; note: string }[] = [
+  { key: "schedule", label: "Schedule of events", note: "Your weekend timeline" },
+  { key: "rooms", label: "Room assignments & reservations", note: "Who's staying where" },
+  { key: "local", label: "Around town", note: "Local guide for guests" },
+  { key: "registry", label: "Registry & gift funds", note: "" },
+  { key: "rsvp", label: "RSVP", note: "" },
+];
 
 export const celebrations: Record<string, Celebration> = {
   "hannah-and-wes": {
@@ -46,6 +58,14 @@ export const celebrations: Record<string, Celebration> = {
       { name: "Berlin Heights B&Bs", type: "Lodging", note: "Charming stays a few minutes from the farm." },
     ],
     registryUrl: "#",
+    accessCode: "ORCHARD26",
+    privacy: {
+      schedule: "private", // just for invited guests
+      rooms: "private",     // room assignments are private
+      local: "public",
+      registry: "public",
+      rsvp: "public",
+    },
   },
 };
 

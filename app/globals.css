@@ -140,3 +140,6 @@
   background: linear-gradient(90deg, var(--color-linen) 25%, var(--color-parchment) 50%, var(--color-linen) 75%);
   background-size: 800px 100%; animation: shimmer 1.6s infinite linear;
 }
+
+/* Private microsite sections — hidden until an invited guest unlocks with the code. */
+.pv-private { display: none !important; }
