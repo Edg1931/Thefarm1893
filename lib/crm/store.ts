@@ -6,11 +6,13 @@
    ============================================================================ */
 
 import type { Lead, VendorRecord } from "./sample-data";
+import type { VendorAssignment, Payment, ChecklistItem } from "./bookings";
 
 const K = {
   vendors: "farm1893:vendorsAdded",
   contactsAdded: "farm1893:contactsAdded",
   contactOverrides: "farm1893:contactOverrides",
+  dossierOverrides: "farm1893:dossierOverrides",
 };
 
 function read<T>(key: string, fallback: T): T {
@@ -51,6 +53,24 @@ export function setContactOverride(id: string, patch: Partial<Lead>) {
 export function applyOverride<T extends { id: string }>(record: T): T {
   const patch = getContactOverrides()[record.id];
   return patch ? { ...record, ...patch } : record;
+}
+
+/* --- Dossier edits (vendor team, payments, checklist per client) --- */
+export type DossierPatch = {
+  vendors?: VendorAssignment[];
+  payments?: Payment[];
+  checklist?: ChecklistItem[];
+  coordinator?: string;
+  package?: string;
+};
+export const getDossierOverrides = (): Record<string, DossierPatch> => read(K.dossierOverrides, {});
+export function getDossierOverride(leadId: string): DossierPatch | undefined {
+  return getDossierOverrides()[leadId];
+}
+export function setDossierOverride(leadId: string, patch: DossierPatch) {
+  const all = getDossierOverrides();
+  all[leadId] = { ...all[leadId], ...patch };
+  write(K.dossierOverrides, all);
 }
 
 /** Fire-and-forget sync to the API (writes to Supabase when configured). */

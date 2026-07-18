@@ -1,21 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft, Package, DollarSign, Sun, Check, Clock, CircleAlert, UserCog,
+  ArrowLeft, Package, DollarSign, Sun, UserCog,
 } from "lucide-react";
 import { getDossier } from "@/lib/crm/bookings";
 import { getBudget, summarize } from "@/lib/crm/lodging";
 import { getRegistry, summarizeRegistry } from "@/lib/crm/registry";
+import { vendorRecords } from "@/lib/crm/sample-data";
 import { Panel } from "@/components/crm/widgets";
 import { DossierHeader, EditableNotes } from "@/components/crm/DossierEdit";
+import { DossierHub } from "@/components/crm/DossierHub";
 import { goldenHourPlan } from "@/lib/services/golden-hour";
-import { formatCurrency, formatDate } from "@/lib/utils";
-
-const vendorStatus: Record<string, { cls: string; label: string; Icon: typeof Check }> = {
-  confirmed: { cls: "text-sage-deep bg-sage/12", label: "Confirmed", Icon: Check },
-  pending: { cls: "text-brass bg-brass/12", label: "Pending", Icon: Clock },
-  needed: { cls: "text-terracotta bg-terracotta/10", label: "Needed", Icon: CircleAlert },
-};
+import { formatCurrency } from "@/lib/utils";
 
 export default async function ClientDossier({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,10 +24,7 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
   const lodging = budget ? summarize(budget.items, budget.rooms) : null;
   const registry = dossier.micrositeSlug ? getRegistry(dossier.micrositeSlug) : null;
   const gifts = registry ? summarizeRegistry(registry.funds) : null;
-  const paid = dossier.payments.filter((p) => p.paid).reduce((s, p) => s + p.amount, 0);
-  const balance = dossier.contractValue - paid;
-  const done = dossier.checklist.filter((c) => c.done).length;
-  const pct = Math.round((done / dossier.checklist.length) * 100);
+  const vendorOptions = vendorRecords.map((v) => ({ name: v.name, category: v.category }));
 
   return (
     <div className="space-y-6">
@@ -50,76 +43,14 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
         <Fact icon={Sun} label="Suggested ceremony" value={gh ? gh.ceremonyStart : "—"} sub={gh ? `Sunset ${gh.sunset}` : undefined} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        {/* Vendor team */}
-        <Panel title="Vendor team" className="xl:col-span-2"
-          action={<span className="text-xs text-stone">{dossier.vendors.filter((v) => v.name).length}/{dossier.vendors.length} filled</span>}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {dossier.vendors.map((v) => {
-              const s = vendorStatus[v.status];
-              return (
-                <div key={v.role} className="flex items-center justify-between rounded-xl bg-bone p-4">
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-wider text-stone">{v.role}</p>
-                    {v.name ? (
-                      <>
-                        <p className="truncate font-medium text-ink">{v.name}</p>
-                        {v.contact && <p className="truncate text-xs text-stone">{v.contact}</p>}
-                      </>
-                    ) : (
-                      <p className="text-sm italic text-terracotta">Not booked yet</p>
-                    )}
-                  </div>
-                  <span className={`ml-3 flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[0.68rem] font-medium ${s.cls}`}>
-                    <s.Icon size={12} /> {s.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <Link href="/dashboard/vendors" className="mt-4 inline-block text-sm text-brass hover:underline">Manage vendor network →</Link>
-        </Panel>
-
-        {/* Payments + progress */}
-        <div className="space-y-6">
-          <Panel title="Payments">
-            <div className="space-y-2.5">
-              {dossier.payments.map((p) => (
-                <div key={p.label} className="flex items-center justify-between rounded-lg bg-bone px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-ink">{p.label}</p>
-                    <p className="text-xs text-stone">Due {formatDate(p.due)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-ink">{formatCurrency(p.amount)}</p>
-                    <span className={`text-[0.68rem] font-medium ${p.paid ? "text-sage-deep" : "text-terracotta"}`}>{p.paid ? "Paid" : "Due"}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 border-t border-ink/8 pt-4 text-sm">
-              <div className="flex justify-between text-stone"><span>Paid to date</span><span className="font-medium text-sage-deep">{formatCurrency(paid)}</span></div>
-              <div className="flex justify-between text-stone"><span>Balance</span><span className="font-medium text-ink">{formatCurrency(balance)}</span></div>
-            </div>
-          </Panel>
-
-          <Panel title="Planning progress" action={<span className="text-sm font-medium text-ink">{pct}%</span>}>
-            <div className="h-2 overflow-hidden rounded-full bg-linen">
-              <div className="h-full rounded-full bg-gradient-to-r from-sage-deep to-sage" style={{ width: `${pct}%` }} />
-            </div>
-            <ul className="mt-4 space-y-2">
-              {dossier.checklist.map((c) => (
-                <li key={c.label} className="flex items-center gap-2.5 text-sm">
-                  <span className={`grid h-5 w-5 place-items-center rounded-full ${c.done ? "bg-sage text-parchment" : "border border-ink/20"}`}>
-                    {c.done && <Check size={12} />}
-                  </span>
-                  <span className={c.done ? "text-stone line-through" : "text-ink-soft"}>{c.label}</span>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-        </div>
-      </div>
+      <DossierHub
+        leadId={lead.id}
+        contractValue={dossier.contractValue}
+        vendors={dossier.vendors}
+        payments={dossier.payments}
+        checklist={dossier.checklist}
+        vendorOptions={vendorOptions}
+      />
 
       {/* Lodging cost split */}
       {budget && lodging && (
