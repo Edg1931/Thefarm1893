@@ -6,12 +6,14 @@ import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
 import { VenueCrossLink } from "@/components/site/CrossPromo";
 import { silos, siloReviews } from "@/lib/silos";
+import { listPhotos, heroOr } from "@/lib/images";
 import { formatCurrency } from "@/lib/utils";
 
 export const metadata = {
   title: "Silo Stays — Vacation Rentals",
   description: "Stay in one of four restored grain silos at The Farm 1893 — cozy vacation rentals in the Ohio countryside. Book direct and save.",
 };
+export const revalidate = 3600;
 
 const perks = [
   { icon: Tag, title: "Book direct & save", body: "10% below Airbnb & Vrbo — no platform markup." },
@@ -20,7 +22,12 @@ const perks = [
   { icon: Headset, title: "Real hosts", body: "We're on-site and here whenever you need us." },
 ];
 
-export default function SilosPage() {
+export default async function SilosPage() {
+  const [heroImage, siloHeroes] = await Promise.all([
+    heroOr("hero", "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=2100&q=80"),
+    Promise.all(silos.map(async (s) => [s.slug, (await listPhotos(`silos/${s.slug}`))[0] ?? s.hero] as const)),
+  ]);
+  const heroBySlug = Object.fromEntries(siloHeroes);
   return (
     <SiteShell>
       <PageHero
@@ -28,7 +35,7 @@ export default function SilosPage() {
         script="stay a while"
         title="Sleep in a restored silo"
         subtitle="Four one-of-a-kind grain silos, reimagined as cozy countryside getaways — available to rent year-round, wedding or not."
-        image="https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=2100&q=80"
+        image={heroImage}
       />
 
       {/* Perks */}
@@ -55,7 +62,7 @@ export default function SilosPage() {
               <Reveal key={s.slug} delay={(i % 2) * 100}>
                 <Link href={`/silos/${s.slug}`} className="card-hover group flex h-full flex-col overflow-hidden rounded-2xl bg-parchment shadow-[var(--shadow-soft)]">
                   <div className="relative aspect-[16/11] overflow-hidden">
-                    <Image src={s.hero} alt={s.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width:768px) 100vw, 50vw" />
+                    <Image src={heroBySlug[s.slug]} alt={s.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width:768px) 100vw, 50vw" />
                     <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-ink"><Star size={12} className="fill-brass text-brass" /> {s.rating}</span>
                   </div>
                   <div className="flex flex-1 flex-col p-6">

@@ -7,10 +7,13 @@ import { Reveal } from "@/components/site/Reveal";
 import { SiloBooking } from "@/components/site/SiloBooking";
 import { VenueCrossLink } from "@/components/site/CrossPromo";
 import { getSilo, silos } from "@/lib/silos";
+import { listPhotos } from "@/lib/images";
 
 export function generateStaticParams() {
   return silos.map((s) => ({ slug: s.slug }));
 }
+
+export const revalidate = 3600; // refresh silo photos from Storage hourly
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -25,6 +28,11 @@ export default async function SiloPage({ params }: { params: Promise<{ slug: str
   const s = getSilo(slug);
   if (!s) notFound();
 
+  // Real photos from Storage (silos/<slug>/), else the stock set — all-or-nothing so it never mixes.
+  const uploaded = await listPhotos(`silos/${slug}`);
+  const hero = uploaded[0] ?? s.hero;
+  const gallery = uploaded.length ? uploaded.slice(1) : s.gallery;
+
   return (
     <SiteShell>
       {/* Gallery hero */}
@@ -33,9 +41,9 @@ export default async function SiloPage({ params }: { params: Promise<{ slug: str
           <Link href="/silos" className="mb-4 inline-flex items-center gap-2 text-sm text-stone hover:text-ink"><ArrowLeft size={15} /> All silos</Link>
           <div className="grid gap-2 overflow-hidden rounded-2xl md:grid-cols-4 md:grid-rows-2">
             <div className="relative aspect-[16/10] md:col-span-2 md:row-span-2 md:aspect-auto">
-              <Image src={s.hero} alt={s.name} fill priority className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
+              <Image src={hero} alt={s.name} fill priority className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
             </div>
-            {s.gallery.slice(0, 4).map((g, i) => (
+            {gallery.slice(0, 4).map((g, i) => (
               <div key={i} className="relative hidden aspect-[4/3] md:block">
                 <Image src={g} alt={`${s.name} ${i + 1}`} fill className="object-cover" sizes="25vw" />
               </div>

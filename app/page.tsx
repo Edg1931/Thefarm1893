@@ -7,11 +7,14 @@ import { DateChecker } from "@/components/site/DateChecker";
 import { GuideCapture } from "@/components/site/GuideCapture";
 import { ScarcityBadge } from "@/components/site/ScarcityBadge";
 import {
-  business, stats, spaces, packages, testimonials, gallery, amenities,
+  business, stats, spaces, packages, testimonials, gallery as galleryFallback, amenities,
 } from "@/lib/content";
+import { photosOr, heroOr } from "@/lib/images";
 
 const HERO =
   "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=2100&q=80";
+
+export const revalidate = 3600; // refresh homepage photos from Storage hourly
 
 const weekend = [
   { day: "Friday", time: "3:00 PM", title: "Arrive & Rehearse", body: "The whole farm becomes yours. Rehearsal dinner under the string lights, first night in the farmhouse." },
@@ -19,13 +22,19 @@ const weekend = [
   { day: "Sunday", time: "11:00 AM", title: "Slow Farewell", body: "Brunch with your favorite people. No rushing home — just one last morning on the farm." },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const [heroImage, galleryRaw] = await Promise.all([
+    heroOr("hero", HERO),
+    photosOr("gallery", galleryFallback),
+  ]);
+  // Ensure the fixed-position slots always have an image, even with few uploads.
+  const gallery = galleryRaw.length >= 5 ? galleryRaw : [...galleryRaw, ...galleryFallback];
   return (
     <SiteShell>
       {/* ============ HERO ============ */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src={HERO} alt="Golden-hour wedding ceremony in the orchard at The Farm 1893" fill priority className="animate-zoom object-cover" sizes="100vw" />
+          <Image src={heroImage} alt="Golden-hour wedding ceremony in the orchard at The Farm 1893" fill priority className="animate-zoom object-cover" sizes="100vw" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/60" />
         </div>
 
