@@ -69,7 +69,7 @@ export default function RentalsPage() {
                     <td className="py-3 text-ink-soft">{formatDate(g.checkIn)} · {g.nights}n</td>
                     <td className="py-3 font-medium text-ink">{formatCurrency(g.total)}</td>
                     <td className="py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusCls[g.status]}`}>{g.status}</span></td>
-                    <td className="py-3"><a href={`mailto:${g.email}`} className="grid h-8 w-8 place-items-center rounded-lg bg-bone text-ink-soft hover:bg-linen"><Mail size={14} /></a></td>
+                    <td className="py-3"><a href={`mailto:${g.email}`} aria-label={`Email ${g.name}`} className="grid h-8 w-8 place-items-center rounded-lg bg-bone text-ink-soft hover:bg-linen"><Mail size={14} /></a></td>
                   </tr>
                 ))}
               </tbody>

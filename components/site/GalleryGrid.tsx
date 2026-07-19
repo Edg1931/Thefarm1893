@@ -6,8 +6,7 @@ import { X } from "lucide-react";
 
 export function GalleryGrid({ images }: { images: string[] }) {
   const [active, setActive] = useState<number | null>(null);
-  // Repeat to create a fuller wall for the demo.
-  const wall = [...images, ...images];
+  const wall = images;
 
   return (
     <>

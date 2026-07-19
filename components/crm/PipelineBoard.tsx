@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GripVertical, Check } from "lucide-react";
+import { GripVertical, Check, Plus } from "lucide-react";
 import { PriorityBadge, ScoreRing } from "./widgets";
 import { ContactModal } from "./ContactModal";
 import { type Lead, type Stage } from "@/lib/crm/sample-data";
 import {
-  getAddedContacts, getContactOverrides, setContactOverride, syncToApi,
+  getAddedContacts, addContactLocal, getContactOverrides, setContactOverride, syncToApi,
 } from "@/lib/crm/store";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -22,6 +22,7 @@ export function PipelineBoard({ initial }: { initial: Lead[] }) {
   const [items, setItems] = useState(initial);
   const [dragId, setDragId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Lead | null>(null);
+  const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState("");
   const didDrag = useRef(false);
 
@@ -55,8 +56,19 @@ export function PipelineBoard({ initial }: { initial: Lead[] }) {
     flash("Lead updated.");
   }
 
+  function addLead(c: Lead) {
+    addContactLocal(c);
+    syncToApi("/api/contacts", "POST", c);
+    setItems((list) => [c, ...list]);
+    setAdding(false);
+    flash("Lead added.");
+  }
+
   return (
     <>
+      <div className="mb-4 flex justify-end">
+        <button onClick={() => setAdding(true)} className="btn btn-primary !py-2.5 !text-xs"><Plus size={15} /> Add lead</button>
+      </div>
       <div className="flex gap-4 overflow-x-auto pb-4">
         {COLUMNS.map((col) => {
           const colItems = items.filter((l) => l.stage === col.key);
@@ -114,6 +126,7 @@ export function PipelineBoard({ initial }: { initial: Lead[] }) {
       </div>
 
       {editing && <ContactModal contact={editing} onClose={() => setEditing(null)} onSave={saveEdit} />}
+      {adding && <ContactModal isNew onClose={() => setAdding(false)} onSave={addLead} />}
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg">

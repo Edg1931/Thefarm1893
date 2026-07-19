@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase/server";
 import { scoreLead } from "@/lib/services/insights";
+import { rateLimit, clientIp, tooMany } from "@/lib/api/guard";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  if (!rateLimit(`leads:${clientIp(req)}`, 10, 60_000)) return tooMany();
   try {
     const body = await req.json();
     const { name, email, phone, eventDate, guestCount, eventType, message, source,

@@ -9,7 +9,7 @@ import { Check, Loader2 } from "lucide-react";
  * future-couple lead for a gentle down-the-road nurture — the guest→couple loop.
  */
 export function RsvpForm({ coupleName }: { coupleName: string }) {
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -17,7 +17,7 @@ export function RsvpForm({ coupleName }: { coupleName: string }) {
     const fd = new FormData(e.currentTarget);
     const futureCouple = fd.get("futureCouple") === "on";
     try {
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -30,8 +30,11 @@ export function RsvpForm({ coupleName }: { coupleName: string }) {
           message: `RSVP for ${coupleName}'s wedding · ${fd.get("response")}`,
         }),
       });
-    } catch { /* non-blocking in demo */ }
-    setStatus("done");
+      if (!res.ok) throw new Error("bad status");
+      setStatus("done");
+    } catch {
+      setStatus("error");
+    }
   }
 
   if (status === "done") {
@@ -59,6 +62,11 @@ export function RsvpForm({ coupleName }: { coupleName: string }) {
         <input type="checkbox" name="futureCouple" className="mt-0.5" />
         <span>💍 We&apos;re dreaming of our own someday — keep us in mind for a tour of the farm.</span>
       </label>
+      {status === "error" && (
+        <p className="rounded-xl bg-terracotta/15 px-4 py-3 text-sm text-parchment ring-1 ring-terracotta/40">
+          Something went wrong sending your RSVP. Please try again, or email us directly.
+        </p>
+      )}
       <button type="submit" disabled={status === "loading"} className="btn bg-parchment text-ink w-full disabled:opacity-60">
         {status === "loading" ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Send RSVP
       </button>

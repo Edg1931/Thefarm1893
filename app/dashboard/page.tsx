@@ -2,7 +2,7 @@ import Link from "next/link";
 import { DollarSign, Users, Zap, TrendingUp, CalendarDays } from "lucide-react";
 import { StatCard, InsightCard, RevenueChart, ScoreRing, Panel } from "@/components/crm/widgets";
 import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
-import { leads, upcomingEvents, dashboardStats, revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sample-data";
+import { leads, dashboardStats, revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sample-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function DashboardOverview() {
@@ -43,40 +43,16 @@ export default function DashboardOverview() {
         <BookingsCalendar />
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-3">
-        {/* Revenue chart */}
-        <Panel title="Revenue & bookings" className="xl:col-span-2"
-          action={<span className="text-sm text-stone">This year · in thousands</span>}>
-          <RevenueChart data={revenueByMonth} />
-          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-ink/8 pt-5 text-center">
-            <div><p className="font-display text-2xl text-ink">{dashboardStats.conversionRate}%</p><p className="text-xs text-stone">Lead → booking</p></div>
-            <div><p className="font-display text-2xl text-ink">{dashboardStats.toursScheduled}</p><p className="text-xs text-stone">Tours scheduled</p></div>
-            <div><p className="font-display text-2xl text-ink">{formatCurrency(19800)}</p><p className="text-xs text-stone">Avg. booking value</p></div>
-          </div>
-        </Panel>
-
-        {/* Upcoming events */}
-        <Panel title="Upcoming" action={<Link href="/dashboard/bookings" className="text-sm text-brass hover:underline">Calendar</Link>}>
-          <ul className="space-y-3">
-            {[...upcomingEvents].sort((a, b) => a.date.localeCompare(b.date)).map((e) => (
-              <li key={e.title + e.date} className="flex items-center gap-3 rounded-xl bg-bone p-3">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-ink text-parchment">
-                  <span className="font-display text-lg leading-none">{new Date(e.date).getDate()}</span>
-                  <span className="text-[0.55rem] uppercase">{new Date(e.date).toLocaleDateString("en-US", { month: "short" })}</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink">{e.title}</p>
-                  <p className="text-xs text-stone">{e.type}</p>
-                </div>
-                <span className={`rounded-full px-2 py-0.5 text-[0.65rem] font-medium ${
-                  e.status === "confirmed" ? "bg-sage/15 text-sage-deep" :
-                  e.status === "tentative" ? "bg-brass/15 text-brass" : "bg-ink/8 text-ink-soft"
-                }`}>{e.status}</span>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-      </div>
+      {/* Revenue chart */}
+      <Panel title="Revenue & bookings"
+        action={<span className="text-sm text-stone">This year · in thousands</span>}>
+        <RevenueChart data={revenueByMonth} />
+        <div className="mt-6 grid grid-cols-3 gap-4 border-t border-ink/8 pt-5 text-center">
+          <div><p className="font-display text-2xl text-ink">{dashboardStats.conversionRate}%</p><p className="text-xs text-stone">Lead → booking</p></div>
+          <div><p className="font-display text-2xl text-ink">{dashboardStats.toursScheduled}</p><p className="text-xs text-stone">Tours scheduled</p></div>
+          <div><p className="font-display text-2xl text-ink">{formatCurrency(19800)}</p><p className="text-xs text-stone">Avg. booking value</p></div>
+        </div>
+      </Panel>
 
       {/* Website funnel + traffic */}
       <div className="grid gap-8 xl:grid-cols-3">

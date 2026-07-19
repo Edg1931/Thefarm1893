@@ -13,7 +13,7 @@ export function SiloBooking({ silo }: { silo: Silo }) {
   const [guests, setGuests] = useState(2);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   const nights = checkIn && checkOut
     ? Math.max(0, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86_400_000))
@@ -29,7 +29,7 @@ export function SiloBooking({ silo }: { silo: Silo }) {
     setStatus("loading");
     try {
       // Tags the guest as VRBO (not Wedding) in the CRM pipeline.
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -42,8 +42,11 @@ export function SiloBooking({ silo }: { silo: Silo }) {
         }),
       });
       // Pluggable: swap for Stripe/Helcim checkout when configured.
-    } catch { /* non-blocking in demo */ }
-    setStatus("done");
+      if (!res.ok) throw new Error("bad status");
+      setStatus("done");
+    } catch {
+      setStatus("error");
+    }
   }
 
   if (status === "done") {
@@ -98,6 +101,9 @@ export function SiloBooking({ silo }: { silo: Silo }) {
           <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-lg border border-ink/15 bg-bone px-3 py-2.5 text-sm outline-none focus:border-sage" />
         </div>
 
+        {status === "error" && (
+          <p className="rounded-lg bg-terracotta/10 px-3 py-2 text-xs text-terracotta">Couldn&apos;t complete your reservation. Please try again or call us.</p>
+        )}
         <button type="submit" disabled={status === "loading" || !validNights} className="btn btn-primary w-full disabled:opacity-50">
           {status === "loading" ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />}
           Reserve &amp; Pay

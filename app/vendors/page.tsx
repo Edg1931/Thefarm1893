@@ -46,7 +46,7 @@ export default function VendorsPage() {
               const Icon = icons[c.icon] ?? Sparkles;
               return (
                 <Reveal key={c.slug} delay={(i % 4) * 70}>
-                  <div className="card-hover h-full rounded-2xl bg-parchment p-6 text-center shadow-[var(--shadow-soft)]">
+                  <div className="h-full rounded-2xl bg-parchment p-6 text-center shadow-[var(--shadow-soft)]">
                     <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-sage/12 text-sage-deep"><Icon size={24} /></div>
                     <p className="mt-4 font-display text-xl text-ink">{c.name}</p>
                     <p className="mt-1 text-xs text-stone">{c.blurb}</p>

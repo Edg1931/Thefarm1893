@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Loader2, Heart, Check } from "lucide-react";
 
 export function ReferForm() {
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -12,7 +12,7 @@ export function ReferForm() {
     const fd = new FormData(e.currentTarget);
     const data = Object.fromEntries(fd.entries());
     try {
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -22,8 +22,11 @@ export function ReferForm() {
           message: `Referred by ${data.yourName} (${data.yourEmail}).`,
         }),
       });
-    } catch { /* non-blocking */ }
-    setStatus("done");
+      if (!res.ok) throw new Error("bad status");
+      setStatus("done");
+    } catch {
+      setStatus("error");
+    }
   }
 
   if (status === "done") {
@@ -44,6 +47,9 @@ export function ReferForm() {
         <Field name="friendName" label="Your friend's name*" required />
         <Field name="friendEmail" label="Your friend's email*" type="email" required />
       </div>
+      {status === "error" && (
+        <p className="mt-4 rounded-xl bg-terracotta/10 px-4 py-3 text-sm text-terracotta">Something went wrong. Please try again in a moment.</p>
+      )}
       <button type="submit" disabled={status === "loading"} className="btn btn-primary mt-6 w-full disabled:opacity-60">
         {status === "loading" ? <Loader2 size={16} className="animate-spin" /> : <Heart size={16} />}
         Send the Referral

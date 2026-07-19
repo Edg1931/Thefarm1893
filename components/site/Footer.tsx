@@ -16,10 +16,10 @@ export function Footer() {
               day — stay for the whole weekend.
             </p>
             <div className="mt-6 flex gap-3">
-              <a href={business.instagram} className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition hover:bg-white/10" aria-label="Instagram">
+              <a href={business.instagram} target="_blank" rel="noopener noreferrer" className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition hover:bg-white/10" aria-label="Instagram">
                 <Instagram size={17} />
               </a>
-              <a href={business.facebook} className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition hover:bg-white/10" aria-label="Facebook">
+              <a href={business.facebook} target="_blank" rel="noopener noreferrer" className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition hover:bg-white/10" aria-label="Facebook">
                 <Facebook size={17} />
               </a>
             </div>
@@ -65,7 +65,7 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-parchment/40 md:flex-row">
-          <p>© {business.established}–{new Date().getFullYear()} {business.name}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {business.name}. All rights reserved.</p>
           <p className="font-script text-lg text-brass-soft">Est. {business.established}</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-parchment/70">Privacy</Link>

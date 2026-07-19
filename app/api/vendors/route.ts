@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/api/guard";
 
 export const runtime = "nodejs";
 
@@ -7,6 +8,8 @@ export const runtime = "nodejs";
  *  (the browser store is the source of truth until the DB is connected). */
 export async function POST(req: Request) {
   try {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const body = await req.json();
     if (!body?.name || !body?.category) {
       return NextResponse.json({ error: "Name and category are required." }, { status: 400 });

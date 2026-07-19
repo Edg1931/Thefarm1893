@@ -21,6 +21,7 @@ export function DateChecker({ compact = false }: { compact?: boolean }) {
   const [result, setResult] = useState<Result | null>(null);
   const [waitEmail, setWaitEmail] = useState("");
   const [waitlisted, setWaitlisted] = useState(false);
+  const [waitError, setWaitError] = useState(false);
 
   async function check(e: React.FormEvent) {
     e.preventDefault();
@@ -43,13 +44,16 @@ export function DateChecker({ compact = false }: { compact?: boolean }) {
     e.preventDefault();
     if (!waitEmail) return;
     try {
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: "Waitlist", email: waitEmail, eventDate: date, source: "date-waitlist", message: `Waitlist for ${date}` }),
       });
-    } catch { /* non-blocking */ }
-    setWaitlisted(true);
+      if (!res.ok) throw new Error("bad status");
+      setWaitlisted(true);
+    } catch {
+      setWaitError(true);
+    }
   }
 
   return (
@@ -154,17 +158,20 @@ export function DateChecker({ compact = false }: { compact?: boolean }) {
                 {waitlisted ? (
                   <p className="flex items-center gap-2 text-sm font-medium text-sage-deep"><Check size={16} /> You&apos;re on the list — we&apos;ll email you the moment {formatDate(date)} opens up.</p>
                 ) : (
-                  <form onSubmit={joinWaitlist} className="flex flex-col gap-2 sm:flex-row">
-                    <input
-                      type="email"
-                      required
-                      value={waitEmail}
-                      onChange={(e) => setWaitEmail(e.target.value)}
-                      placeholder="Email me if this date opens"
-                      className="flex-1 rounded-full border border-ink/15 bg-white px-4 py-2.5 text-sm outline-none focus:border-sage"
-                    />
-                    <button type="submit" className="btn btn-ghost !py-2.5 !text-xs"><BellRing size={14} /> Join Waitlist</button>
-                  </form>
+                  <div>
+                    <form onSubmit={joinWaitlist} className="flex flex-col gap-2 sm:flex-row">
+                      <input
+                        type="email"
+                        required
+                        value={waitEmail}
+                        onChange={(e) => setWaitEmail(e.target.value)}
+                        placeholder="Email me if this date opens"
+                        className="flex-1 rounded-full border border-ink/15 bg-white px-4 py-2.5 text-sm outline-none focus:border-sage"
+                      />
+                      <button type="submit" className="btn btn-ghost !py-2.5 !text-xs"><BellRing size={14} /> Join Waitlist</button>
+                    </form>
+                    {waitError && <p className="mt-2 text-xs text-terracotta">Couldn&apos;t add you just now — please try again.</p>}
+                  </div>
                 )}
               </div>
             </div>

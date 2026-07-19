@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TrendingUp, AlertTriangle, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,9 +37,9 @@ const toneMap: Record<string, string> = {
   ink: "border-ink/15 bg-ink/5 text-ink",
 };
 export function InsightCard({
-  icon, tone, title, body, cta,
+  icon, tone, title, body, cta, href = "/dashboard/ai",
 }: {
-  icon: string; tone: string; title: string; body: string; cta?: string;
+  icon: string; tone: string; title: string; body: string; cta?: string; href?: string;
 }) {
   const Icon = insightIcons[icon] ?? Sparkles;
   return (
@@ -49,9 +50,9 @@ export function InsightCard({
       </div>
       <h4 className="mt-3 font-display text-xl text-ink">{title}</h4>
       <p className="mt-2 text-sm leading-relaxed text-ink-soft">{body}</p>
-      <button className="mt-4 text-sm font-medium text-ink underline-offset-4 hover:underline">
+      <Link href={href} className="mt-4 inline-block text-sm font-medium text-ink underline-offset-4 hover:underline">
         {cta ?? "Take action"} →
-      </button>
+      </Link>
     </div>
   );
 }
@@ -90,7 +91,8 @@ export function ScoreRing({ score }: { score: number }) {
 
 /* --- Simple SVG bar chart --- */
 export function RevenueChart({ data }: { data: { month: string; value: number }[] }) {
-  const max = Math.max(...data.map((d) => d.value));
+  if (!data.length) return <div className="grid h-56 place-items-center text-sm text-stone">No revenue data yet.</div>;
+  const max = Math.max(...data.map((d) => d.value)) || 1;
   return (
     <div className="flex h-56 items-end gap-2">
       {data.map((d) => (

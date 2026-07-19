@@ -42,6 +42,20 @@ export function ContactsManager() {
   }
   function flash(msg: string) { setToast(msg); setTimeout(() => setToast(""), 2400); }
 
+  function exportCsv() {
+    const cols: (keyof Lead)[] = ["name", "email", "phone", "eventType", "eventDate", "guestCount", "budget", "stage", "source"];
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = [cols.join(","), ...contacts.map((c) => cols.map((k) => esc(c[k])).join(","))];
+    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "farm1893-contacts.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    flash("Contacts exported to CSV.");
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -50,7 +64,7 @@ export function ContactsManager() {
           <p className="mt-1 text-stone">Click a client to open their dossier, or edit details inline.</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-ghost !py-2.5 !text-xs"><Download size={15} /> Export</button>
+          <button onClick={exportCsv} className="btn btn-ghost !py-2.5 !text-xs"><Download size={15} /> Export</button>
           <button onClick={() => setAdding(true)} className="btn btn-primary !py-2.5 !text-xs"><Plus size={15} /> New Contact</button>
         </div>
       </div>

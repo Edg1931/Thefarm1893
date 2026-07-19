@@ -52,7 +52,7 @@ export function DossierHeader({ lead: seed, micrositeSlug }: { lead: Lead; micro
           {micrositeSlug ? (
             <Link href={`/celebration/${micrositeSlug}`} target="_blank" className="btn bg-parchment text-ink !py-2.5 !text-xs"><ExternalLink size={14} /> View Guest Microsite</Link>
           ) : (
-            <button className="btn bg-brass text-ink !py-2.5 !text-xs"><Sparkles size={14} /> Generate Guest Microsite</button>
+            <Link href="/dashboard/marketing" className="btn bg-brass text-ink !py-2.5 !text-xs"><Sparkles size={14} /> Generate Guest Microsite</Link>
           )}
         </div>
       </div>

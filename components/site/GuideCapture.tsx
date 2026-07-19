@@ -5,20 +5,23 @@ import { Download, Loader2, Check } from "lucide-react";
 
 export function GuideCapture() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
     setStatus("loading");
     try {
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: "Guide download", email, source: "pricing-guide-magnet", message: "Requested the pricing & planning guide." }),
       });
-    } catch { /* non-blocking */ }
-    setStatus("done");
+      if (!res.ok) throw new Error("bad status");
+      setStatus("done");
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
@@ -51,7 +54,9 @@ export function GuideCapture() {
               {status === "loading" ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
               Send Me the Guide
             </button>
-            <p className="text-center text-xs text-stone">No spam — just the good stuff.</p>
+            {status === "error"
+              ? <p className="text-center text-xs text-terracotta">Couldn&apos;t send just now — please try again.</p>
+              : <p className="text-center text-xs text-stone">No spam — just the good stuff.</p>}
           </form>
         </div>
       )}

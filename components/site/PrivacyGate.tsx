@@ -80,7 +80,7 @@ export function PrivacyGate({
 
       {open && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-sm rounded-2xl bg-parchment p-7 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full max-w-sm rounded-2xl bg-parchment p-7 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setOpen(false)} aria-label="Close" className="absolute right-4 top-4 text-stone hover:text-ink"><X size={20} /></button>
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brass/15"><Lock className="text-brass" size={26} /></div>
             <h3 className="mt-4 font-display text-2xl text-ink">Just for our guests 💛</h3>

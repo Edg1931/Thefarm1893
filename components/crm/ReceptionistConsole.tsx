@@ -58,7 +58,7 @@ export function ReceptionistTester() {
           placeholder="Type a test message…"
           className="flex-1 bg-transparent px-2 text-sm outline-none"
         />
-        <button onClick={send} disabled={busy} className="grid h-9 w-9 place-items-center rounded-full bg-ink text-parchment disabled:opacity-40"><Send size={16} /></button>
+        <button onClick={send} disabled={busy} aria-label="Send message" className="grid h-9 w-9 place-items-center rounded-full bg-ink text-parchment disabled:opacity-40"><Send size={16} /></button>
       </div>
     </div>
   );
