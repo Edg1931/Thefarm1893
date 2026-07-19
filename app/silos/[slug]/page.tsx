@@ -13,7 +13,7 @@ export function generateStaticParams() {
   return silos.map((s) => ({ slug: s.slug }));
 }
 
-export const revalidate = 3600; // refresh silo photos from Storage hourly
+export const revalidate = 60; // refresh silo photos from Storage hourly
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

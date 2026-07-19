@@ -237,3 +237,10 @@ begin
     execute format('create policy "staff full access" on public.%I for all to authenticated using (true) with check (true);', t);
   end loop;
 end $$;
+
+-- ---- Storage: allow LISTING the public `photos` bucket ----------------------
+-- (Public buckets are downloadable by anyone, but listing folder contents needs
+--  this policy so the website can enumerate hero/, gallery/, and silos/<slug>/.)
+drop policy if exists "Public list photos bucket" on storage.objects;
+create policy "Public list photos bucket" on storage.objects
+  for select to anon, authenticated using (bucket_id = 'photos');

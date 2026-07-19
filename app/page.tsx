@@ -14,7 +14,7 @@ import { photosOr, heroOr } from "@/lib/images";
 const HERO =
   "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=2100&q=80";
 
-export const revalidate = 3600; // refresh homepage photos from Storage hourly
+export const revalidate = 60; // refresh homepage photos from Storage hourly
 
 const weekend = [
   { day: "Friday", time: "3:00 PM", title: "Arrive & Rehearse", body: "The whole farm becomes yours. Rehearsal dinner under the string lights, first night in the farmhouse." },

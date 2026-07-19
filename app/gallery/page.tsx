@@ -9,7 +9,7 @@ import { gallery as galleryFallback } from "@/lib/content";
 import { photosOr, heroOr } from "@/lib/images";
 
 export const metadata = { title: "Gallery" };
-export const revalidate = 3600; // refresh from Storage hourly (no redeploy needed)
+export const revalidate = 60; // refresh from Storage hourly (no redeploy needed)
 
 export default async function GalleryPage() {
   const [images, heroImage] = await Promise.all([

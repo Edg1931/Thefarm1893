@@ -6,10 +6,23 @@
    configured (local/demo), so nothing ever renders blank.
    ============================================================================ */
 
-import { getServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 
 const BUCKET = "photos";
 const IMG_EXT = /\.(jpe?g|png|webp|avif)$/i;
+
+/**
+ * Client used only to LIST the public photos bucket. Prefers the service-role
+ * key (bypasses RLS) but falls back to the anon key so listing still works when
+ * only the public keys are set — the anon path needs the storage list policy
+ * from schema.sql (`Public list photos bucket`).
+ */
+function storageClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
 
 function publicUrl(path: string): string {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -18,7 +31,7 @@ function publicUrl(path: string): string {
 
 /** Public URLs of the images in a folder of the `photos` bucket (empty on any failure). */
 export async function listPhotos(folder: string): Promise<string[]> {
-  const sb = getServiceClient();
+  const sb = storageClient();
   if (!sb) return [];
   try {
     const { data, error } = await sb.storage.from(BUCKET).list(folder, {

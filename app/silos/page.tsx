@@ -13,7 +13,7 @@ export const metadata = {
   title: "Silo Stays — Vacation Rentals",
   description: "Stay in one of four restored grain silos at The Farm 1893 — cozy vacation rentals in the Ohio countryside. Book direct and save.",
 };
-export const revalidate = 3600;
+export const revalidate = 60;
 
 const perks = [
   { icon: Tag, title: "Book direct & save", body: "10% below Airbnb & Vrbo — no platform markup." },
