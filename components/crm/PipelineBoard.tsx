@@ -18,7 +18,7 @@ const COLUMNS: { key: Stage; label: string; hint: string }[] = [
   { key: "lost", label: "Lost / Nurture", hint: "Re-engage" },
 ];
 
-export function PipelineBoard({ initial }: { initial: Lead[] }) {
+export function PipelineBoard({ initial, live = false }: { initial: Lead[]; live?: boolean }) {
   const [items, setItems] = useState(initial);
   const [dragId, setDragId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Lead | null>(null);
@@ -26,13 +26,15 @@ export function PipelineBoard({ initial }: { initial: Lead[] }) {
   const [toast, setToast] = useState("");
   const didDrag = useRef(false);
 
-  // Merge in demo-store additions + saved edits so the board reflects reality.
+  // Demo mode: merge browser-stored additions + edits. Live mode: the DB rows
+  // passed as `initial` are the source of truth — no localStorage merge.
   useEffect(() => {
+    if (live) { setItems(initial); return; }
     const added = getAddedContacts();
     const overrides = getContactOverrides();
     const merged = [...added, ...initial].map((l) => (overrides[l.id] ? { ...l, ...overrides[l.id] } : l));
     setItems(merged);
-  }, [initial]);
+  }, [initial, live]);
 
   function flash(msg: string) { setToast(msg); setTimeout(() => setToast(""), 2200); }
 
@@ -42,14 +44,14 @@ export function PipelineBoard({ initial }: { initial: Lead[] }) {
     if (!current || current.stage === stage) return;
     const patch: Partial<Lead> = { stage, lastActivity: "just now" };
     setItems((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
-    setContactOverride(id, patch);
+    if (!live) setContactOverride(id, patch);
     syncToApi("/api/contacts", "PATCH", { id, ...patch });
     flash(`${current.name} → ${COLUMNS.find((c) => c.key === stage)?.label ?? stage}`);
   }
 
   function saveEdit(updated: Lead) {
     const { id, ...patch } = updated;
-    setContactOverride(id, patch);
+    if (!live) setContactOverride(id, patch);
     syncToApi("/api/contacts", "PATCH", updated);
     setItems((list) => list.map((c) => (c.id === id ? updated : c)));
     setEditing(null);
@@ -57,7 +59,7 @@ export function PipelineBoard({ initial }: { initial: Lead[] }) {
   }
 
   function addLead(c: Lead) {
-    addContactLocal(c);
+    if (!live) addContactLocal(c);
     syncToApi("/api/contacts", "POST", c);
     setItems((list) => [c, ...list]);
     setAdding(false);

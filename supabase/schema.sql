@@ -191,6 +191,20 @@ create table if not exists contracts (
   created_at timestamptz not null default now()
 );
 
+-- ---- dossiers (per-client vendor team / payments / checklist as JSONB) -----
+create table if not exists dossiers (
+  lead_id uuid primary key,
+  data jsonb not null default '{}',
+  updated_at timestamptz not null default now()
+);
+
+-- ---- silo listings (seller-editable pricing/photos/reviews as JSONB) --------
+create table if not exists silo_listings (
+  slug text primary key,
+  data jsonb not null default '{}',
+  updated_at timestamptz not null default now()
+);
+
 -- ---- updated_at trigger ----------------------------------------------------
 create or replace function touch_updated_at() returns trigger as $$
 begin
@@ -214,7 +228,8 @@ begin
   foreach t in array array[
     'contacts','leads','events','tasks','messages','payments',
     'marketing_content','ai_insights','vendors','silo_guests',
-    'room_assignments','registry_contributions','contracts'
+    'room_assignments','registry_contributions','contracts',
+    'dossiers','silo_listings'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);

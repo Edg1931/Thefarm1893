@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft, Package, DollarSign, Sun, UserCog,
 } from "lucide-react";
-import { getDossier } from "@/lib/crm/bookings";
+import { getDossier, dossierForLead } from "@/lib/crm/bookings";
+import { getLeadById, getStoredDossier, liveConfigured } from "@/lib/crm/data";
 import { getBudget, summarize } from "@/lib/crm/lodging";
 import { getRegistry, summarizeRegistry } from "@/lib/crm/registry";
 import { vendorRecords } from "@/lib/crm/sample-data";
@@ -15,9 +16,18 @@ import { formatCurrency } from "@/lib/utils";
 
 export default async function ClientDossier({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const data = getDossier(id);
+  let data = getDossier(id);
+  if (!data) {
+    // Live DB lead (UUID) that isn't in the sample set — build its dossier.
+    const lead = await getLeadById(id);
+    if (lead) data = { lead, dossier: dossierForLead(lead) };
+  }
   if (!data) notFound();
-  const { lead, dossier } = data;
+  const { lead } = data;
+  // Merge any persisted dossier edits (vendor team / payments / checklist) from the DB.
+  const stored = await getStoredDossier(lead.id);
+  const dossier = stored ? { ...data.dossier, ...stored } : data.dossier;
+  const live = liveConfigured();
 
   const gh = goldenHourPlan(lead.eventDate);
   const budget = dossier.micrositeSlug ? getBudget(dossier.micrositeSlug) : null;
@@ -50,6 +60,7 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
         payments={dossier.payments}
         checklist={dossier.checklist}
         vendorOptions={vendorOptions}
+        live={live}
       />
 
       {/* Lodging cost split */}

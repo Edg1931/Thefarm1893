@@ -23,9 +23,10 @@ type Props = {
   payments: Payment[];
   checklist: ChecklistItem[];
   vendorOptions: { name: string; category: string }[];
+  live?: boolean;
 };
 
-export function DossierHub({ leadId, contractValue, vendors: v0, payments: p0, checklist: c0, vendorOptions }: Props) {
+export function DossierHub({ leadId, contractValue, vendors: v0, payments: p0, checklist: c0, vendorOptions, live = false }: Props) {
   const [vendors, setVendors] = useState(v0);
   const [payments, setPayments] = useState(p0);
   const [checklist, setChecklist] = useState(c0);
@@ -34,15 +35,16 @@ export function DossierHub({ leadId, contractValue, vendors: v0, payments: p0, c
   const [toast, setToast] = useState("");
 
   useEffect(() => {
+    if (live) return; // server already merged persisted edits from the DB
     const o = getDossierOverride(leadId);
     if (o?.vendors) setVendors(o.vendors);
     if (o?.payments) setPayments(o.payments);
     if (o?.checklist) setChecklist(o.checklist);
-  }, [leadId]);
+  }, [leadId, live]);
 
   function flash(m: string) { setToast(m); setTimeout(() => setToast(""), 2200); }
   function persist(patch: { vendors?: VendorAssignment[]; payments?: Payment[]; checklist?: ChecklistItem[] }) {
-    setDossierOverride(leadId, patch);
+    if (!live) setDossierOverride(leadId, patch);
     syncToApi("/api/dossier", "PATCH", { leadId, ...patch });
   }
 

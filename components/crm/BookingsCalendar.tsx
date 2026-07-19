@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, CalendarDays, Sparkles, X, Home as HomeIcon, Heart, MapPin } from "lucide-react";
 import { Panel } from "@/components/crm/widgets";
-import { upcomingEvents, bookedDates } from "@/lib/crm/sample-data";
-import { siloGuests } from "@/lib/silos";
+import { upcomingEvents, bookedDates, type BookingEvent } from "@/lib/crm/sample-data";
+import { siloGuests, type SiloGuest } from "@/lib/silos";
 import { formatDate } from "@/lib/utils";
 
 type EvType = "wedding" | "tentative" | "tour" | "silo";
@@ -30,15 +30,15 @@ function addDays(isoStr: string, n: number) {
 }
 
 /** All events expanded to the individual ISO days they occupy. */
-function buildEventMap(): Map<string, CalEvent[]> {
+function buildEventMap(evts: BookingEvent[], guests: SiloGuest[]): Map<string, CalEvent[]> {
   const map = new Map<string, CalEvent[]>();
   const push = (day: string, ev: CalEvent) => map.set(day, [...(map.get(day) ?? []), ev]);
 
-  for (const e of upcomingEvents) {
+  for (const e of evts) {
     const type: EvType = e.status === "confirmed" ? "wedding" : e.status === "tentative" ? "tentative" : "tour";
     push(e.date, { title: e.title, type, subtitle: e.type });
   }
-  for (const g of siloGuests) {
+  for (const g of guests) {
     for (let i = 0; i < g.nights; i++) {
       const first = g.name.split(" ")[0];
       push(addDays(g.checkIn, i), {
@@ -51,12 +51,18 @@ function buildEventMap(): Map<string, CalEvent[]> {
   return map;
 }
 
-export function BookingsCalendar() {
+export function BookingsCalendar({
+  events: evts = upcomingEvents, guests = siloGuests, live = false,
+}: { events?: BookingEvent[]; guests?: SiloGuest[]; live?: boolean } = {}) {
   const now = new Date();
   const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [selected, setSelected] = useState<string | null>(null);
-  const events = useMemo(buildEventMap, []);
-  const bookedSet = useMemo(() => new Set(bookedDates), []);
+  const events = useMemo(() => buildEventMap(evts, guests), [evts, guests]);
+  const upcoming = evts;
+  const bookedSet = useMemo(
+    () => (live ? new Set(evts.filter((e) => e.status === "confirmed").map((e) => e.date)) : new Set(bookedDates)),
+    [live, evts]
+  );
 
   const monthName = new Date(view.y, view.m, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const firstDay = new Date(view.y, view.m, 1).getDay();
@@ -213,7 +219,8 @@ export function BookingsCalendar() {
 
         <Panel title="Upcoming">
           <ul className="space-y-3">
-            {[...upcomingEvents].sort((a, b) => a.date.localeCompare(b.date)).map((e) => (
+            {upcoming.length === 0 && <li className="rounded-xl bg-bone p-4 text-center text-sm text-stone">No upcoming events yet.</li>}
+            {[...upcoming].sort((a, b) => a.date.localeCompare(b.date)).map((e) => (
               <li key={e.title + e.date} className="flex items-center gap-3 rounded-xl bg-bone p-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-ink text-parchment">
                   <span className="font-display text-base leading-none">{new Date(e.date + "T00:00:00").getDate()}</span>

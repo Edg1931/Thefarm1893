@@ -22,8 +22,8 @@ const statusCls: Record<string, string> = {
 const CATEGORIES = ["Photography", "Catering", "Florals", "Music", "Planning", "Beauty", "Cake", "Rentals", "Bar Service", "Other"];
 const MEMBERSHIP: Record<string, number> = { preferred: 1200, featured: 600, listed: 0 };
 
-export function VendorManager() {
-  const [vendors, setVendors] = useState<VendorRecord[]>(seed);
+export function VendorManager({ initial = seed, live = false }: { initial?: VendorRecord[]; live?: boolean }) {
+  const [vendors, setVendors] = useState<VendorRecord[]>(initial);
   const [profiles, setProfiles] = useState<Record<string, VendorProfile>>({});
   const [open, setOpen] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -31,14 +31,14 @@ export function VendorManager() {
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    setVendors([...getAddedVendors(), ...seed]);
-    setProfiles(getVendorProfiles());
-  }, []);
+    setVendors(live ? initial : [...getAddedVendors(), ...initial]);
+    setProfiles(getVendorProfiles()); // profiles are UI enrichment — keep in the browser for now
+  }, [initial, live]);
 
   function flash(m: string) { setToast(m); setTimeout(() => setToast(""), 2600); }
 
   function addVendor(v: VendorRecord) {
-    addVendorLocal(v);
+    if (!live) addVendorLocal(v);
     setVendors((list) => [v, ...list]);
     syncToApi("/api/vendors", "POST", v);
     setOpen(false);
@@ -46,7 +46,7 @@ export function VendorManager() {
   }
 
   function saveImported(v: VendorRecord, profile: VendorProfile) {
-    addVendorLocal(v);
+    if (!live) addVendorLocal(v);
     setVendorProfile(v.id, profile);
     setVendors((list) => [v, ...list]);
     setProfiles((p) => ({ ...p, [v.id]: profile }));

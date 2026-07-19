@@ -12,9 +12,10 @@ Until this is done, the site + CRM keep running in demo mode; nothing breaks.
 
 ## 2. Create the database tables
 1. In the project: **SQL Editor → New query**.
-2. Paste the contents of **`supabase/migrations/0001_init.sql`** → **Run**.
-3. New query → paste **`supabase/migrations/0002_venue_expansion.sql`** → **Run**.
-   *(You should see "Success". These only CREATE tables — safe to re-run.)*
+2. Paste the **entire** contents of **`supabase/schema.sql`** → **Run**.
+   *(You should see "Success. No rows returned." It's one consolidated file with
+   every table — including `dossiers` and `silo_listings` — plus row-level
+   security. Safe to run more than once.)*
 
 ## 3. Grab the API keys
 Project → **Settings → API**. Copy three values:
@@ -48,15 +49,20 @@ Vercel → **Deployments → ⋯ → Redeploy** (so it picks up the new env vars
 ---
 
 ## What turns on automatically once connected
-- **Persistence** — every lead, silo booking, vendor, contact edit, and
-  registry gift saves to the real database (the app already writes to these).
-- **A private dashboard** — `/dashboard` requires staff login.
+- **Live CRM reads** — the pipeline, contacts, vendor network, bookings
+  calendar, silo guests, dashboard KPIs, and client dossiers all read **real
+  rows** from the database (they fall back to demo data only when the keys are
+  absent). Empty tables show friendly "you're live" empty states and fill as
+  real inquiries arrive.
+- **Persistence** — every lead, silo booking, vendor, contact edit, dossier
+  change (vendor team / payments / checklist), and silo-listing edit saves to
+  the database.
+- **A private dashboard** — `/dashboard` requires staff login; the mutation
+  APIs require an authenticated staff user.
 - **Shared data** — no longer per-browser; everyone sees the same records.
 
 ## What's next after this (optional phases)
-- Migrate the CRM's read views from sample data to live queries (so the tables,
-  pipeline, and calendar show real records).
-- Real-time updates + a live availability calendar.
-- Payments (Stripe/Helcim) + QuickBooks sync.
-
-Ping me when the keys are in and I'll switch the CRM read-views over to live data.
+- **Public silo pages from the DB** — the marketing silo pages are pre-rendered;
+  point them at `silo_listings` so seller edits show to visitors too.
+- Real-time updates (Supabase subscriptions) on the calendar + pipeline.
+- Payments (Stripe/Helcim) + QuickBooks sync so deposits auto-log.

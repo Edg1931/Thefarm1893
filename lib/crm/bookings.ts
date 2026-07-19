@@ -100,7 +100,12 @@ const FEATURED: Record<string, Partial<Dossier>> = {
 export function getDossier(leadId: string): { lead: Lead; dossier: Dossier } | null {
   const lead = leads.find((l) => l.id === leadId);
   if (!lead) return null;
+  return { lead, dossier: dossierForLead(lead) };
+}
 
+/** Build a dossier from a Lead object (works for live DB leads too, not just sample). */
+export function dossierForLead(lead: Lead): Dossier {
+  const leadId = lead.id;
   const featured = FEATURED[leadId];
   const booked = lead.stage === "booked" || lead.stage === "proposal";
 
@@ -131,17 +136,14 @@ export function getDossier(leadId: string): { lead: Lead; dossier: Dossier } | n
     ];
 
   return {
-    lead,
-    dossier: {
-      leadId,
-      micrositeSlug: featured?.micrositeSlug ?? null,
-      coordinator: featured?.coordinator ?? "Unassigned",
-      package: featured?.package ?? (lead.guestCount >= 90 ? "The Weekend" : "The Gathering"),
-      contractValue: value,
-      vendors,
-      payments,
-      checklist,
-      notes: featured?.notes ?? lead.aiSummary,
-    },
+    leadId,
+    micrositeSlug: featured?.micrositeSlug ?? null,
+    coordinator: featured?.coordinator ?? "Unassigned",
+    package: featured?.package ?? (lead.guestCount >= 90 ? "The Weekend" : "The Gathering"),
+    contractValue: value,
+    vendors,
+    payments,
+    checklist,
+    notes: featured?.notes ?? lead.aiSummary,
   };
 }

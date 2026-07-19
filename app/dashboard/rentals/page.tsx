@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Panel, StatCard } from "@/components/crm/widgets";
 import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
 import { SiloManager } from "@/components/crm/SiloManager";
-import { siloGuests, siloStats } from "@/lib/silos";
+import { siloStats } from "@/lib/silos";
+import { getSiloGuests, getEvents } from "@/lib/crm/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Home, TrendingUp, Repeat, Star, Mail, Zap, CalendarDays } from "lucide-react";
 
@@ -14,7 +15,8 @@ const statusCls: Record<string, string> = {
   past: "bg-ink/8 text-ink-soft",
 };
 
-export default function RentalsPage() {
+export default async function RentalsPage() {
+  const [{ guests, live }, { events }] = await Promise.all([getSiloGuests(), getEvents()]);
   return (
     <div className="space-y-6">
       <div>
@@ -41,7 +43,7 @@ export default function RentalsPage() {
           <h2 className="flex items-center gap-2 font-display text-2xl text-ink"><CalendarDays size={20} className="text-brass" /> Availability · silos + weddings</h2>
           <Link href="/dashboard/bookings" className="text-sm font-medium text-brass hover:underline">Full calendar →</Link>
         </div>
-        <BookingsCalendar />
+        <BookingsCalendar events={events} guests={guests} live={live} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
@@ -59,7 +61,10 @@ export default function RentalsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink/6">
-                {siloGuests.map((g) => (
+                {guests.length === 0 && (
+                  <tr><td colSpan={6} className="py-8 text-center text-sm text-stone">No silo guests yet — bookings from your site land here.</td></tr>
+                )}
+                {guests.map((g) => (
                   <tr key={g.id} className="hover:bg-bone/60">
                     <td className="py-3">
                       <p className="font-medium text-ink">{g.name} {g.repeat && <span className="ml-1 rounded-full bg-brass/15 px-2 py-0.5 text-[0.6rem] font-medium text-brass">Repeat</span>}</p>

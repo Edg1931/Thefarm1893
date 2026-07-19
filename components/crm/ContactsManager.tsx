@@ -9,31 +9,32 @@ import { leads as seed, type Lead } from "@/lib/crm/sample-data";
 import { getAddedContacts, addContactLocal, getContactOverrides, setContactOverride, syncToApi } from "@/lib/crm/store";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export function ContactsManager() {
-  const [contacts, setContacts] = useState<Lead[]>(seed);
+export function ContactsManager({ initial = seed, live = false }: { initial?: Lead[]; live?: boolean }) {
+  const [contacts, setContacts] = useState<Lead[]>(initial);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<Lead | null>(null);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState("");
 
   useEffect(() => {
+    if (live) { setContacts(initial); return; } // DB is the source of truth
     const added = getAddedContacts();
     const overrides = getContactOverrides();
-    const merged = [...added, ...seed].map((l) => (overrides[l.id] ? { ...l, ...overrides[l.id] } : l));
+    const merged = [...added, ...initial].map((l) => (overrides[l.id] ? { ...l, ...overrides[l.id] } : l));
     setContacts(merged);
     setAddedIds(new Set(added.map((a) => a.id)));
-  }, []);
+  }, [initial, live]);
 
   function saveEdit(updated: Lead) {
     const { id, ...patch } = updated;
-    setContactOverride(id, patch);
+    if (!live) setContactOverride(id, patch);
     syncToApi("/api/contacts", "PATCH", updated);
     setContacts((list) => list.map((c) => (c.id === id ? updated : c)));
     setEditing(null);
     flash("Contact updated.");
   }
   function addContact(c: Lead) {
-    addContactLocal(c);
+    if (!live) addContactLocal(c);
     syncToApi("/api/contacts", "POST", c);
     setContacts((list) => [c, ...list]);
     setAddedIds((s) => new Set(s).add(c.id));

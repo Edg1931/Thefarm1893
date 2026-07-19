@@ -2,10 +2,14 @@ import Link from "next/link";
 import { DollarSign, Users, Zap, TrendingUp, CalendarDays } from "lucide-react";
 import { StatCard, InsightCard, RevenueChart, ScoreRing, Panel } from "@/components/crm/widgets";
 import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
-import { leads, dashboardStats, revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sample-data";
+import { revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sample-data";
+import { getDashboardData, getEvents, getSiloGuests } from "@/lib/crm/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export default function DashboardOverview() {
+export default async function DashboardOverview() {
+  const [{ leads, stats: dashboardStats, live }, { events }, { guests }] = await Promise.all([
+    getDashboardData(), getEvents(), getSiloGuests(),
+  ]);
   const hot = leads.filter((l) => l.priority === "hot" && l.stage !== "booked").slice(0, 4);
 
   return (
@@ -40,7 +44,7 @@ export default function DashboardOverview() {
           <h2 className="flex items-center gap-2 font-display text-2xl text-ink"><CalendarDays size={20} className="text-brass" /> Availability at a glance</h2>
           <Link href="/dashboard/bookings" className="text-sm font-medium text-brass hover:underline">Full calendar →</Link>
         </div>
-        <BookingsCalendar />
+        <BookingsCalendar events={events} guests={guests} live={live} />
       </div>
 
       {/* Revenue chart */}
@@ -109,6 +113,9 @@ export default function DashboardOverview() {
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
+              {hot.length === 0 && (
+                <tr><td colSpan={5} className="py-8 text-center text-sm text-stone">No hot leads right now — new high-intent inquiries will surface here.</td></tr>
+              )}
               {hot.map((l) => (
                 <tr key={l.id} className="group transition hover:bg-bone/60">
                   <td className="py-3"><ScoreRing score={l.score} /></td>
