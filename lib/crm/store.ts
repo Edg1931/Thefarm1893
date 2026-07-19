@@ -7,6 +7,7 @@
 
 import type { Lead, VendorRecord, VendorProfile } from "./sample-data";
 import type { VendorAssignment, Payment, ChecklistItem } from "./bookings";
+import type { Silo } from "../silos";
 
 const K = {
   vendors: "farm1893:vendorsAdded",
@@ -14,6 +15,7 @@ const K = {
   contactOverrides: "farm1893:contactOverrides",
   dossierOverrides: "farm1893:dossierOverrides",
   vendorProfiles: "farm1893:vendorProfiles",
+  siloOverrides: "farm1893:siloOverrides",
 };
 
 function read<T>(key: string, fallback: T): T {
@@ -63,6 +65,24 @@ export function setVendorProfile(id: string, profile: VendorProfile) {
   const all = getVendorProfiles();
   all[id] = { ...all[id], ...profile };
   write(K.vendorProfiles, all);
+}
+
+/* --- Silo listings (seller-editable: pricing, photos, options, reviews) --- */
+export type SiloReview = { name: string; text: string; rating: number };
+export type SiloPatch = Partial<
+  Pick<Silo, "name" | "tagline" | "nightly" | "cleaningFee" | "minNights" | "sleeps" | "beds" | "baths" | "petFriendly" | "hero" | "gallery" | "amenities" | "description">
+> & { guestReviews?: SiloReview[] };
+
+export const getSiloOverrides = (): Record<string, SiloPatch> => read(K.siloOverrides, {});
+export const getSiloOverride = (slug: string): SiloPatch | undefined => getSiloOverrides()[slug];
+export function setSiloOverride(slug: string, patch: SiloPatch) {
+  const all = getSiloOverrides();
+  all[slug] = { ...all[slug], ...patch };
+  write(K.siloOverrides, all);
+}
+export function applySiloOverride(silo: Silo): Silo {
+  const p = getSiloOverrides()[silo.slug];
+  return p ? { ...silo, ...p } : silo;
 }
 
 /* --- Dossier edits (vendor team, payments, checklist per client) --- */

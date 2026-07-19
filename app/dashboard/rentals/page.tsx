@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Panel, StatCard } from "@/components/crm/widgets";
 import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
-import { siloGuests, siloStats, silos } from "@/lib/silos";
+import { SiloManager } from "@/components/crm/SiloManager";
+import { siloGuests, siloStats } from "@/lib/silos";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Home, TrendingUp, Repeat, Star, Mail, Zap, CalendarDays } from "lucide-react";
 
@@ -76,19 +77,7 @@ export default function RentalsPage() {
           </div>
         </Panel>
 
-        <Panel title="Your silos">
-          <div className="space-y-3">
-            {silos.map((s) => (
-              <div key={s.slug} className="flex items-center justify-between rounded-xl bg-bone p-3">
-                <div>
-                  <p className="text-sm font-medium text-ink">{s.name}</p>
-                  <p className="text-xs text-stone">Sleeps {s.sleeps} · {formatCurrency(s.nightly)}/night</p>
-                </div>
-                <Link href={`/silos/${s.slug}`} target="_blank" className="text-xs font-medium text-brass hover:underline">View ↗</Link>
-              </div>
-            ))}
-          </div>
-        </Panel>
+        <SiloManager />
       </div>
     </div>
   );

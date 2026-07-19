@@ -7,7 +7,7 @@ import { createClient, supabaseConfigured } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Users, KanbanSquare, CalendarDays, Megaphone,
   Bot, Settings, Menu, X, Sparkles, Handshake, FileText,
-  BarChart3, Zap, FileSignature, Share2, Home, LogOut,
+  BarChart3, Zap, FileSignature, Share2, Home, LogOut, Layers,
 } from "lucide-react";
 import { business } from "@/lib/content";
 
@@ -37,6 +37,7 @@ const sections: NavSection[] = [
       { href: "/dashboard/ai", label: "AI Center", icon: Sparkles },
       { href: "/dashboard/proposals", label: "AI Proposals", icon: FileText },
       { href: "/dashboard/marketing", label: "Marketing Studio", icon: Megaphone },
+      { href: "/dashboard/content", label: "Content Library", icon: Layers },
       { href: "/dashboard/automations", label: "Automations", icon: Zap },
       { href: "/dashboard/receptionist", label: "AI Receptionist", icon: Bot },
     ],

@@ -111,6 +111,43 @@ export const dashboardStats = {
   avgResponseMins: 4,
 };
 
+/* --- Financials: the money picture for the owner (billing, ROI, margins) --- */
+export const financials = {
+  // Revenue streams (YTD)
+  streams: [
+    { label: "Weddings & events", value: 268000, accent: "sage" as const },
+    { label: "Silo stays (VRBO)", value: 92400, accent: "terracotta" as const },
+    { label: "Vendor commissions", value: 40100, accent: "brass" as const },
+    { label: "Preferred-partner fees", value: 7200, accent: "ink" as const },
+  ],
+  // Cash position
+  bookedRevenueYTD: 342500,
+  collectedYTD: 254900,          // actually received
+  outstandingBalances: 87600,    // contracted but not yet paid
+  depositsHeld: 41250,           // deposits received on future events
+  pipelineValue: 129700,         // weighted open opportunities
+  // Profitability
+  operatingExpensesYTD: 198400,
+  netProfitYTD: 144100,
+  grossMarginPct: 42,
+  avgBookingValue: 19800,
+  // Marketing ROI by channel (spend → attributed revenue)
+  marketingRoi: [
+    { channel: "Organic / SEO", spend: 4800, revenue: 148000 },
+    { channel: "Instagram / social", spend: 7200, revenue: 96000 },
+    { channel: "The Knot / WeddingWire", spend: 11400, revenue: 84000 },
+    { channel: "Referrals & vendors", spend: 2100, revenue: 61000 },
+    { channel: "Google Ads", spend: 6300, revenue: 37000 },
+  ],
+  // Upcoming billing (next payments due) — feeds the owner's cash-flow view
+  upcomingBilling: [
+    { client: "Hannah Whitfield", label: "Final balance", amount: 4225, due: "2026-08-19", status: "due" as const },
+    { client: "The Bauer Company", label: "Final balance", amount: 9000, due: "2026-08-01", status: "due" as const },
+    { client: "Coleman Wedding", label: "Deposit (25%)", amount: 7750, due: "2026-07-28", status: "overdue" as const },
+    { client: "Rivera Wedding", label: "Second installment", amount: 5500, due: "2026-09-02", status: "scheduled" as const },
+  ],
+};
+
 export const revenueByMonth = [
   { month: "Jan", value: 18 }, { month: "Feb", value: 12 }, { month: "Mar", value: 24 },
   { month: "Apr", value: 41 }, { month: "May", value: 68 }, { month: "Jun", value: 82 },
