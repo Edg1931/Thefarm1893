@@ -5,7 +5,7 @@
    database the moment it's configured — same shapes, no rework.
    ============================================================================ */
 
-import type { Lead, VendorRecord } from "./sample-data";
+import type { Lead, VendorRecord, VendorProfile } from "./sample-data";
 import type { VendorAssignment, Payment, ChecklistItem } from "./bookings";
 
 const K = {
@@ -13,6 +13,7 @@ const K = {
   contactsAdded: "farm1893:contactsAdded",
   contactOverrides: "farm1893:contactOverrides",
   dossierOverrides: "farm1893:dossierOverrides",
+  vendorProfiles: "farm1893:vendorProfiles",
 };
 
 function read<T>(key: string, fallback: T): T {
@@ -53,6 +54,15 @@ export function setContactOverride(id: string, patch: Partial<Lead>) {
 export function applyOverride<T extends { id: string }>(record: T): T {
   const patch = getContactOverrides()[record.id];
   return patch ? { ...record, ...patch } : record;
+}
+
+/* --- Vendor mini-profiles (auto-scraped from their websites) --- */
+export const getVendorProfiles = (): Record<string, VendorProfile> => read(K.vendorProfiles, {});
+export const getVendorProfile = (id: string): VendorProfile | undefined => getVendorProfiles()[id];
+export function setVendorProfile(id: string, profile: VendorProfile) {
+  const all = getVendorProfiles();
+  all[id] = { ...all[id], ...profile };
+  write(K.vendorProfiles, all);
 }
 
 /* --- Dossier edits (vendor team, payments, checklist per client) --- */

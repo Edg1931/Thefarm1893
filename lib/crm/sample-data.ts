@@ -133,6 +133,21 @@ export type VendorRecord = {
   membershipFee: number;   // annual preferred-partner fee ($/yr)
 };
 
+/** Auto-scraped mini-profile for a vendor (from their website / Google page). */
+export type VendorProfile = {
+  website?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  instagram?: string;
+  logo?: string;       // favicon / brand mark
+  image?: string;      // hero / og:image
+  blurb?: string;      // short description
+  gallery?: string[];  // portfolio image URLs
+  sourceUrl?: string;
+  fetchedAt?: string;
+};
+
 export const vendorRecords: VendorRecord[] = [
   { id: "V-01", name: "Amberlight Photography", category: "Photography", tier: "preferred", status: "active", referralsSent: 47, bookedFromReferrals: 31, commissionRate: 10, commissionEarnedYTD: 8400, rating: 5.0, membershipFee: 1200 },
   { id: "V-02", name: "Harvest & Hearth Catering", category: "Catering", tier: "preferred", status: "active", referralsSent: 52, bookedFromReferrals: 28, commissionRate: 8, commissionEarnedYTD: 12600, rating: 4.9, membershipFee: 1200 },

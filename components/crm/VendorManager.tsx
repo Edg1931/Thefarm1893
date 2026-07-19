@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Handshake, DollarSign, Send, Award, Star, Plus, X, Check } from "lucide-react";
+import { Handshake, DollarSign, Send, Award, Star, Plus, X, Check, DownloadCloud, Eye, Images } from "lucide-react";
 import { Panel, StatCard } from "@/components/crm/widgets";
-import { vendorRecords as seed, type VendorRecord } from "@/lib/crm/sample-data";
-import { getAddedVendors, addVendorLocal, syncToApi, newId } from "@/lib/crm/store";
+import { vendorRecords as seed, type VendorRecord, type VendorProfile } from "@/lib/crm/sample-data";
+import { getAddedVendors, addVendorLocal, syncToApi, newId, getVendorProfiles, setVendorProfile } from "@/lib/crm/store";
+import { ImportVendorModal, VendorProfileModal } from "@/components/crm/VendorProfiles";
 import { formatCurrency } from "@/lib/utils";
 
 const tierCls: Record<string, string> = {
@@ -23,20 +24,41 @@ const MEMBERSHIP: Record<string, number> = { preferred: 1200, featured: 600, lis
 
 export function VendorManager() {
   const [vendors, setVendors] = useState<VendorRecord[]>(seed);
+  const [profiles, setProfiles] = useState<Record<string, VendorProfile>>({});
   const [open, setOpen] = useState(false);
-  const [toast, setToast] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [viewing, setViewing] = useState<VendorRecord | null>(null);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     setVendors([...getAddedVendors(), ...seed]);
+    setProfiles(getVendorProfiles());
   }, []);
+
+  function flash(m: string) { setToast(m); setTimeout(() => setToast(""), 2600); }
 
   function addVendor(v: VendorRecord) {
     addVendorLocal(v);
     setVendors((list) => [v, ...list]);
     syncToApi("/api/vendors", "POST", v);
     setOpen(false);
-    setToast(true);
-    setTimeout(() => setToast(false), 2600);
+    flash("Vendor invited & added to your roster.");
+  }
+
+  function saveImported(v: VendorRecord, profile: VendorProfile) {
+    addVendorLocal(v);
+    setVendorProfile(v.id, profile);
+    setVendors((list) => [v, ...list]);
+    setProfiles((p) => ({ ...p, [v.id]: profile }));
+    syncToApi("/api/vendors", "POST", { ...v, profile });
+    setImporting(false);
+    flash(`${v.name} imported from their website.`);
+  }
+
+  function refreshProfile(id: string, profile: VendorProfile) {
+    setVendorProfile(id, profile);
+    setProfiles((p) => ({ ...p, [id]: { ...p[id], ...profile } }));
+    flash("Profile refreshed from their site.");
   }
 
   const active = vendors.filter((v) => v.status === "active").length;
@@ -51,7 +73,10 @@ export function VendorManager() {
           <h1 className="font-display text-4xl text-ink">Vendor Network</h1>
           <p className="mt-1 text-stone">Your preferred-partner ecosystem — and a referral revenue stream.</p>
         </div>
-        <button onClick={() => setOpen(true)} className="btn btn-primary !py-2.5 !text-xs"><Plus size={15} /> Invite Vendor</button>
+        <div className="flex gap-2">
+          <button onClick={() => setImporting(true)} className="btn btn-primary !py-2.5 !text-xs"><DownloadCloud size={15} /> Import from website</button>
+          <button onClick={() => setOpen(true)} className="btn btn-ghost !py-2.5 !text-xs"><Plus size={15} /> Invite manually</button>
+        </div>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -73,20 +98,33 @@ export function VendorManager() {
                 <th className="pb-3 font-medium">Earned YTD</th>
                 <th className="pb-3 font-medium">Rating</th>
                 <th className="pb-3 font-medium">Status</th>
+                <th className="pb-3 font-medium">Profile</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
               {vendors.map((v) => {
                 const conv = v.referralsSent ? Math.round((v.bookedFromReferrals / v.referralsSent) * 100) : 0;
+                const prof = profiles[v.id];
                 return (
                   <tr key={v.id} className="hover:bg-bone/60">
-                    <td className="py-3"><p className="font-medium text-ink">{v.name}</p><p className="text-xs text-stone">{v.category}</p></td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-2.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {prof?.logo && <img src={prof.logo} alt="" className="h-8 w-8 shrink-0 rounded-lg object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />}
+                        <div><p className="font-medium text-ink">{v.name}</p><p className="text-xs text-stone">{v.category}</p></div>
+                      </div>
+                    </td>
                     <td className="py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${tierCls[v.tier]}`}>{v.tier}</span></td>
                     <td className="py-3"><p className="text-ink-soft">{v.referralsSent} → {v.bookedFromReferrals}</p>{v.referralsSent > 0 && <p className="text-xs text-sage-deep">{conv}% conversion</p>}</td>
                     <td className="py-3 text-ink-soft">{v.commissionRate}%</td>
                     <td className="py-3 font-medium text-ink">{formatCurrency(v.commissionEarnedYTD)}</td>
                     <td className="py-3">{v.rating > 0 ? <span className="flex items-center gap-1 text-ink-soft"><Star size={13} className="fill-brass text-brass" /> {v.rating.toFixed(1)}</span> : <span className="text-stone">—</span>}</td>
                     <td className="py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusCls[v.status]}`}>{v.status}</span></td>
+                    <td className="py-3">
+                      <button onClick={() => setViewing(v)} className="flex items-center gap-1.5 rounded-lg bg-bone px-2.5 py-1.5 text-xs font-medium text-ink-soft hover:bg-linen">
+                        {prof ? <><Images size={13} className="text-brass" /> View</> : <><Eye size={13} /> Build</>}
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -96,10 +134,12 @@ export function VendorManager() {
       </Panel>
 
       {open && <VendorModal onClose={() => setOpen(false)} onAdd={addVendor} />}
+      {importing && <ImportVendorModal onClose={() => setImporting(false)} onSave={saveImported} />}
+      {viewing && <VendorProfileModal vendor={viewing} profile={profiles[viewing.id]} onClose={() => setViewing(null)} onRefresh={refreshProfile} />}
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg">
-          <Check size={16} /> Vendor invited &amp; added to your roster.
+          <Check size={16} /> {toast}
         </div>
       )}
     </div>
