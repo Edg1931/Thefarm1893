@@ -24,8 +24,15 @@ const greatVibes = Great_Vibes({
   display: "swap",
 });
 
+// Canonical site URL for OG images + schema. Auto-detects the production domain
+// on Vercel so link previews never point at localhost, even if NEXT_PUBLIC_SITE_URL
+// isn't set. Set NEXT_PUBLIC_SITE_URL once a custom domain is live.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "https://thefarm1893.vercel.app");
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: `${business.name} — ${business.tagline}`,
     template: `%s — ${business.name}`,
@@ -59,7 +66,7 @@ export default function RootLayout({
     },
     telephone: business.phone,
     email: business.email,
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://thefarm1893.vercel.app",
+    url: SITE_URL,
     sameAs: [business.instagram, business.facebook],
     aggregateRating: {
       "@type": "AggregateRating",
