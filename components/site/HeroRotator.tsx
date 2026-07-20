@@ -12,6 +12,8 @@ export function HeroRotator({ images, alt }: { images: string[]; alt: string }) 
 
   useEffect(() => {
     if (images.length < 2) return;
+    // Respect users who prefer reduced motion — hold on the first image.
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(() => setActive((v) => (v + 1) % images.length), 6500);
     return () => clearInterval(t);
   }, [images.length]);

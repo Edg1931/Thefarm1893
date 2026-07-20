@@ -33,7 +33,7 @@ export default async function Home() {
     listPhotosDeep("bridal-prep"),
     listPhotosDeep("silos"),
   ]);
-  const heroImages = heroList.slice(0, 6); // rotate through up to 6 venue shots
+  const heroImages = heroList.slice(0, 10); // cross-fade through up to 10 property shots from hero/
   // Ensure the fixed-position slots always have an image, even with few uploads.
   const gallery = galleryRaw.length >= 5 ? galleryRaw : [...galleryRaw, ...galleryFallback];
   // Showcase blocks fall back to the gallery when a category folder is empty.
