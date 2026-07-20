@@ -2,7 +2,7 @@ import Link from "next/link";
 import { XCircle, ArrowLeft } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 
-export const metadata = { title: "Payment cancelled" };
+export const metadata = { title: "Payment cancelled", robots: { index: false } };
 
 export default function PaymentCancelledPage() {
   return (

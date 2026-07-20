@@ -3,7 +3,7 @@ import { Check, ArrowRight } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { business } from "@/lib/content";
 
-export const metadata = { title: "Payment received" };
+export const metadata = { title: "Payment received", robots: { index: false } };
 
 export default async function PaymentSuccessPage({
   searchParams,
