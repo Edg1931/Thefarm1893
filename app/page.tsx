@@ -9,7 +9,10 @@ import { ScarcityBadge } from "@/components/site/ScarcityBadge";
 import {
   business, stats, spaces, packages, testimonials, gallery as galleryFallback, amenities,
 } from "@/lib/content";
-import { photosOr, heroOr } from "@/lib/images";
+import { photosOr, listPhotosDeep } from "@/lib/images";
+import { showcaseCategories } from "@/lib/photo-categories";
+import { HeroRotator } from "@/components/site/HeroRotator";
+import { ExploreShowcase } from "@/components/site/ExploreShowcase";
 
 const HERO =
   "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=2100&q=80";
@@ -23,19 +26,29 @@ const weekend = [
 ];
 
 export default async function Home() {
-  const [heroImage, galleryRaw] = await Promise.all([
-    heroOr("hero", HERO),
+  const [heroList, galleryRaw, venueP, prepP, siloP] = await Promise.all([
+    photosOr("hero", [HERO]),
     photosOr("gallery", galleryFallback),
+    listPhotosDeep("venue"),
+    listPhotosDeep("bridal-prep"),
+    listPhotosDeep("silos"),
   ]);
+  const heroImages = heroList.slice(0, 6); // rotate through up to 6 venue shots
   // Ensure the fixed-position slots always have an image, even with few uploads.
   const gallery = galleryRaw.length >= 5 ? galleryRaw : [...galleryRaw, ...galleryFallback];
+  // Showcase blocks fall back to the gallery when a category folder is empty.
+  const pick = (arr: string[], fb: string[]) => (arr.length ? arr : fb).slice(0, 4);
+  const showcaseBlocks = [
+    { ...showcaseCategories[0], photos: pick(venueP, gallery) },
+    { ...showcaseCategories[1], photos: pick(prepP, gallery) },
+    { ...showcaseCategories[2], photos: pick(siloP, gallery) },
+  ].map((b) => ({ label: b.label, blurb: b.blurb, href: b.href, photos: b.photos }));
   return (
     <SiteShell>
       {/* ============ HERO ============ */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src={heroImage} alt="Golden-hour wedding ceremony in the orchard at The Farm 1893" fill priority className="animate-zoom object-cover" sizes="100vw" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/60" />
+          <HeroRotator images={heroImages} alt="The venue at The Farm 1893" />
         </div>
 
         <div className="container-x relative z-10 text-center text-white">
@@ -115,6 +128,9 @@ export default async function Home() {
           </Reveal>
         </div>
       </section>
+
+      {/* ============ EXPLORE SHOWCASE (venue · prep · silos) ============ */}
+      <ExploreShowcase blocks={showcaseBlocks} />
 
       {/* ============ SPACES ============ */}
       <section className="bg-[color:var(--color-linen)] py-24 md:py-32">

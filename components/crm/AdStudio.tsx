@@ -4,9 +4,10 @@ import { useState } from "react";
 import {
   Instagram, Facebook, Image as ImageIcon, Music2, Twitter, Linkedin,
   Search, Mail, MessageSquare, Sparkles, Loader2, CalendarPlus, Rocket,
-  Check, Users, Target, Palette, Plug, type LucideIcon,
+  Check, Users, Target, Palette, Plug, ImagePlus, X, type LucideIcon,
 } from "lucide-react";
 import { RichTextEditor } from "@/components/crm/RichTextEditor";
+import { PhotoPicker } from "@/components/crm/PhotoPicker";
 
 type Channel = { key: string; label: string; icon: LucideIcon; limit?: number; paid?: boolean };
 
@@ -52,12 +53,14 @@ export function AdStudio() {
   const [draft, setDraft] = useState("");
   const [edited, setEdited] = useState("");
   const [mocked, setMocked] = useState(false);
+  const [photo, setPhoto] = useState("");
+  const [picker, setPicker] = useState(false);
   const [boost, setBoost] = useState(false);
   const [budget, setBudget] = useState(150);
   const [when, setWhen] = useState("");
   const [queue, setQueue] = useState([
-    { platform: "Instagram", text: "Golden hour in the orchard 🌾 A few 2026 weekends left…", when: "Today · 6:00 PM", status: "Scheduled" },
-    { platform: "Facebook", text: "Meet the farmhouse — where 25 of your people stay all weekend.", when: "Thu · 10:00 AM", status: "Scheduled" },
+    { platform: "Instagram", text: "Golden hour in the orchard 🌾 A few 2026 weekends left…", when: "Today · 6:00 PM", status: "Scheduled", image: "" },
+    { platform: "Facebook", text: "Meet the farmhouse — where 25 of your people stay all weekend.", when: "Thu · 10:00 AM", status: "Scheduled", image: "" },
   ]);
   const [toast, setToast] = useState("");
 
@@ -89,6 +92,7 @@ export function AdStudio() {
       text: edited.slice(0, 90),
       when: when ? new Date(when).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }) : "Queued",
       status: launch ? (isPaid ? "Live ad" : "Published") : "Scheduled",
+      image: photo,
     }, ...q]);
     setToast(launch ? (isPaid ? `Ad launched to ${current.label} 🚀` : `Published to ${current.label} ✓`) : `Scheduled to ${current.label} ✓`);
     setTimeout(() => setToast(""), 2600);
@@ -162,6 +166,20 @@ export function AdStudio() {
             </div>
             <RichTextEditor value={draft} onChange={setEdited} charLimit={current.limit} />
 
+            {/* Photo attachment */}
+            <div className="mt-3 flex items-center gap-3">
+              {photo ? (
+                <div className="relative h-16 w-16 overflow-hidden rounded-lg ring-1 ring-ink/10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo} alt="Selected" className="h-full w-full object-cover" />
+                  <button onClick={() => setPhoto("")} aria-label="Remove photo" className="absolute right-0.5 top-0.5 grid h-5 w-5 place-items-center rounded-full bg-ink/70 text-parchment hover:bg-ink"><X size={12} /></button>
+                </div>
+              ) : null}
+              <button onClick={() => setPicker(true)} className="flex items-center gap-2 rounded-xl border border-ink/15 bg-bone px-4 py-2.5 text-sm text-ink-soft hover:border-sage">
+                <ImagePlus size={16} className="text-brass" /> {photo ? "Change photo" : "Insert photo from library"}
+              </button>
+            </div>
+
             {/* Publish controls */}
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-stone">Schedule
@@ -196,7 +214,7 @@ export function AdStudio() {
         <div className="space-y-6">
           <div className="rounded-2xl bg-parchment p-6 shadow-[var(--shadow-soft)]">
             <h3 className="mb-3 font-display text-2xl text-ink">Live preview</h3>
-            <Preview channel={current} text={edited || draft} paid={boost && isPaid} />
+            <Preview channel={current} text={edited || draft} paid={boost && isPaid} image={photo} />
           </div>
 
           <div className="rounded-2xl bg-parchment p-6 shadow-[var(--shadow-soft)]">
@@ -208,7 +226,13 @@ export function AdStudio() {
                     <span className="text-xs font-medium text-brass">{s.platform}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[0.62rem] ${s.status === "Scheduled" ? "bg-sage/15 text-sage-deep" : s.status === "Live ad" ? "bg-terracotta/15 text-terracotta" : "bg-ink/8 text-ink-soft"}`}>{s.status}</span>
                   </div>
-                  <p className="mt-1.5 line-clamp-2 text-sm text-ink-soft">{s.text}</p>
+                  <div className="mt-1.5 flex gap-2.5">
+                    {s.image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={s.image} alt="" className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                    )}
+                    <p className="line-clamp-2 text-sm text-ink-soft">{s.text}</p>
+                  </div>
                   <p className="mt-1.5 text-xs text-stone">{s.when}</p>
                 </li>
               ))}
@@ -217,6 +241,7 @@ export function AdStudio() {
         </div>
       </div>
 
+      {picker && <PhotoPicker onPick={(u) => { setPhoto(u); setPicker(false); }} onClose={() => setPicker(false)} />}
       {toast && <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg"><Check size={16} /> {toast}</div>}
     </div>
   );
@@ -233,10 +258,12 @@ function Select({ label, icon: Icon, value, onChange, options }: { label: string
   );
 }
 
-function Preview({ channel, text, paid }: { channel: Channel; text: string; paid: boolean }) {
+function Preview({ channel, text, paid, image }: { channel: Channel; text: string; paid: boolean; image?: string }) {
   if (!text) {
     return <div className="grid min-h-[220px] place-items-center rounded-xl border border-dashed border-ink/20 bg-bone/50 p-6 text-center text-sm text-stone">Generate content to preview how it looks on {channel.label}.</div>;
   }
+  const isVisual = ["instagram", "facebook", "pinterest", "tiktok"].includes(channel.key);
+  const src = image || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=60";
   return (
     <div className="overflow-hidden rounded-xl border border-ink/10 bg-white">
       <div className="flex items-center gap-2 border-b border-ink/8 px-4 py-2.5">
@@ -246,8 +273,9 @@ function Preview({ channel, text, paid }: { channel: Channel; text: string; paid
           <p className="flex items-center gap-1 text-[0.65rem] text-stone"><channel.icon size={10} /> {paid ? "Sponsored" : channel.label}</p>
         </div>
       </div>
-      {["instagram", "facebook", "pinterest", "tiktok"].includes(channel.key) && (
-        <div className="aspect-[4/3] bg-gradient-to-br from-sage/30 to-brass/20" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=60)", backgroundSize: "cover", backgroundPosition: "center" }} />
+      {isVisual && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" className="aspect-[4/3] w-full object-cover" />
       )}
       <p className="whitespace-pre-wrap px-4 py-3 text-sm leading-relaxed text-ink-soft">{text}</p>
       {paid && <div className="border-t border-ink/8 px-4 py-2"><span className="rounded-md bg-ink px-3 py-1.5 text-xs font-medium text-parchment">Book a Tour</span></div>}

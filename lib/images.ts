@@ -48,6 +48,36 @@ export async function listPhotos(folder: string): Promise<string[]> {
   }
 }
 
+/**
+ * Photos in a folder AND one level of subfolders (e.g. venue/ + venue/inside/ +
+ * venue/outside/). Lets the seller drop photos directly in a category folder or
+ * split them into inside/outside — either way they all show.
+ */
+export async function listPhotosDeep(folder: string): Promise<string[]> {
+  const sb = storageClient();
+  if (!sb) return [];
+  try {
+    const { data, error } = await sb.storage.from(BUCKET).list(folder, { limit: 100, sortBy: { column: "name", order: "asc" } });
+    if (error) throw error;
+    const files: string[] = [];
+    const subfolders: string[] = [];
+    for (const f of data ?? []) {
+      if (f.name && IMG_EXT.test(f.name)) files.push(publicUrl(`${folder}/${f.name}`));
+      else if (f.id === null && f.name) subfolders.push(f.name); // folders have id === null
+    }
+    const nested = await Promise.all(
+      subfolders.map(async (sf) => {
+        const { data: sd } = await sb.storage.from(BUCKET).list(`${folder}/${sf}`, { limit: 100, sortBy: { column: "name", order: "asc" } });
+        return (sd ?? []).filter((x) => x.name && IMG_EXT.test(x.name)).map((x) => publicUrl(`${folder}/${sf}/${x.name}`));
+      })
+    );
+    return [...files, ...nested.flat()];
+  } catch (e) {
+    console.error("[images] listDeep", folder, e);
+    return [];
+  }
+}
+
 /** All photos in a folder, or the provided stock fallback if none are uploaded. */
 export async function photosOr(folder: string, fallback: string[]): Promise<string[]> {
   const live = await listPhotos(folder);
