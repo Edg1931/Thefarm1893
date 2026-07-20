@@ -85,8 +85,12 @@ export function DossierHub({ leadId, contractValue, vendors: v0, payments: p0, c
       });
       const data = await res.json();
       if (!data.url) throw new Error();
-      await navigator.clipboard.writeText(data.url);
-      flash(data.demo ? "Demo link copied (connect Stripe for real links)." : "Payment link copied — send it to the couple.");
+      try {
+        await navigator.clipboard.writeText(data.url);
+        flash(data.demo ? "Demo link copied (connect Stripe for real links)." : "Payment link copied — send it to the couple.");
+      } catch {
+        flash("Link ready — copy it: " + data.url); // clipboard blocked, but the link is valid
+      }
     } catch {
       flash("Couldn't create a payment link.");
     }

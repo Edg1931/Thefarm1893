@@ -22,6 +22,7 @@ export function StyleQuiz() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [saved, setSaved] = useState(false);
+  const [saveErr, setSaveErr] = useState(false);
 
   const total = quiz.length;
 
@@ -42,7 +43,10 @@ export function StyleQuiz() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ season: scored.season, style: scored.style, palette: scored.palette }),
       });
-      setDesign(await res.json());
+      const d = await res.json();
+      setDesign(res.ok && Array.isArray(d?.moodboard) ? d : null); // guard against error payloads
+    } catch {
+      setDesign(null);
     } finally {
       setLoading(false);
     }
@@ -51,14 +55,18 @@ export function StyleQuiz() {
   async function saveLead(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
+    setSaveErr(false);
     try {
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: "Quiz result", email, source: "wedding-style-quiz", message: `Style: ${result?.style}, palette: ${result?.palette}, season: ${result?.season}` }),
       });
-    } catch { /* non-blocking */ }
-    setSaved(true);
+      if (!res.ok) throw new Error("bad status");
+      setSaved(true);
+    } catch {
+      setSaveErr(true);
+    }
   }
 
   function restart() {
@@ -122,8 +130,9 @@ export function StyleQuiz() {
                 <p className="mt-1 text-sm text-parchment/70">Plus open dates that match your season.</p>
               </div>
               <div className="flex flex-col gap-2">
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="rounded-full border border-white/20 bg-white/10 px-5 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" aria-label="Email address" className="rounded-full border border-white/20 bg-white/10 px-5 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
                 <button type="submit" className="btn bg-parchment text-ink">Email My Result</button>
+                {saveErr && <p className="text-xs text-brass-soft">Couldn&apos;t send just now — please try again.</p>}
               </div>
             </form>
           )}

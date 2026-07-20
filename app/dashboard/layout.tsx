@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/crm/Sidebar";
 import { AccountMenu } from "@/components/crm/AccountMenu";
+import { SyncErrorToast } from "@/components/crm/SyncErrorToast";
 import { Bell, Search } from "lucide-react";
 
 export const metadata = { title: "Venue OS — Dashboard" };
@@ -13,7 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="sticky top-0 z-40 hidden items-center justify-between border-b border-ink/10 bg-parchment/90 px-8 py-4 backdrop-blur lg:flex">
           <div className="flex items-center gap-3 rounded-full border border-ink/10 bg-bone px-4 py-2 text-sm text-stone">
             <Search size={16} />
-            <input placeholder="Search leads, events, contacts…" className="w-72 bg-transparent outline-none" />
+            <input aria-label="Search" placeholder="Search leads, events, contacts…" className="w-72 bg-transparent outline-none" />
           </div>
           <div className="flex items-center gap-4">
             <button className="relative grid h-10 w-10 place-items-center rounded-full bg-bone text-ink-soft hover:bg-linen" aria-label="Notifications">
@@ -25,6 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
         <div className="flex-1 p-5 md:p-8">{children}</div>
       </div>
+      <SyncErrorToast />
     </div>
   );
 }

@@ -24,16 +24,23 @@ export function DesignStudio() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
+  const [err, setErr] = useState(false);
+
   async function generate() {
     setLoading(true);
     setResult(null);
+    setErr(false);
     try {
       const res = await fetch("/api/design", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ season, style, palette }),
       });
-      setResult(await res.json());
+      const d = await res.json();
+      if (res.ok && Array.isArray(d?.moodboard)) setResult(d);
+      else setErr(true); // don't crash on an error payload with no moodboard
+    } catch {
+      setErr(true);
     } finally {
       setLoading(false);
     }
@@ -102,6 +109,10 @@ export function DesignStudio() {
               <p className="mt-4 font-script text-2xl text-brass">Designing your day…</p>
             </div>
           </div>
+        )}
+
+        {err && (
+          <p className="rounded-xl bg-terracotta/10 px-4 py-3 text-sm text-terracotta">Couldn&apos;t generate your board just now — please try again.</p>
         )}
 
         {result && (

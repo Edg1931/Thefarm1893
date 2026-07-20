@@ -44,7 +44,7 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
       </Link>
 
       {/* Header (editable) */}
-      <DossierHeader lead={lead} micrositeSlug={dossier.micrositeSlug} />
+      <DossierHeader lead={lead} micrositeSlug={dossier.micrositeSlug} live={live} />
 
       {/* Quick facts */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -137,7 +137,7 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
       )}
 
       {/* Notes (editable) */}
-      <EditableNotes id={lead.id} initial={dossier.notes} />
+      <EditableNotes id={lead.id} initial={dossier.notes} live={live} />
     </div>
   );
 }

@@ -22,19 +22,24 @@ export function DateChecker({ compact = false }: { compact?: boolean }) {
   const [waitEmail, setWaitEmail] = useState("");
   const [waitlisted, setWaitlisted] = useState(false);
   const [waitError, setWaitError] = useState(false);
+  const [checkError, setCheckError] = useState(false);
 
   async function check(e: React.FormEvent) {
     e.preventDefault();
     if (!date) return;
     setLoading(true);
     setResult(null);
+    setCheckError(false);
     try {
       const res = await fetch("/api/availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date }),
       });
+      if (!res.ok) throw new Error("bad status"); // don't render a server error as "date taken"
       setResult(await res.json());
+    } catch {
+      setCheckError(true);
     } finally {
       setLoading(false);
     }
@@ -79,6 +84,12 @@ export function DateChecker({ compact = false }: { compact?: boolean }) {
           Check Date
         </button>
       </form>
+
+      {checkError && (
+        <p className="mt-4 rounded-xl bg-terracotta/10 px-4 py-3 text-sm text-terracotta">
+          We couldn&apos;t check availability just now. Please try again in a moment, or call us.
+        </p>
+      )}
 
       {result && (
         <div className="animate-rise mt-5">

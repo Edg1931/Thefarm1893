@@ -17,21 +17,44 @@ export function RegistryBoard({ funds: initial }: { funds: Fund[] }) {
   const [amount, setAmount] = useState<number | "">("");
   const [paying, setPaying] = useState(false);
   const [thanks, setThanks] = useState<string | null>(null);
+  const [err, setErr] = useState(false);
 
   const totals = summarizeRegistry(funds);
 
   async function give(id: string) {
     const amt = Number(amount);
     if (!amt || amt <= 0) return;
+    const fund = funds.find((f) => f.id === id);
     setPaying(true);
-    // Pluggable: swap for Stripe Checkout when STRIPE_SECRET_KEY is configured.
-    await new Promise((r) => setTimeout(r, 900));
-    setFunds((fs) => fs.map((f) => (f.id === id ? { ...f, contributed: f.contributed + amt } : f)));
-    setPaying(false);
-    setOpenId(null);
-    setAmount("");
-    setThanks(id);
-    setTimeout(() => setThanks(null), 2600);
+    setErr(false);
+    try {
+      // Real Stripe Checkout when configured; demo success otherwise (no charge).
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: amt,
+          description: `Registry gift — ${fund?.title ?? "The Farm 1893"}`,
+          kind: "registry",
+          metadata: { fundId: id },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error();
+      if (data.demo) {
+        setFunds((fs) => fs.map((f) => (f.id === id ? { ...f, contributed: f.contributed + amt } : f)));
+        setOpenId(null);
+        setAmount("");
+        setThanks(id);
+        setTimeout(() => setThanks(null), 2600);
+      } else {
+        window.location.assign(data.url); // hand off to Stripe
+      }
+    } catch {
+      setErr(true);
+    } finally {
+      setPaying(false);
+    }
   }
 
   return (
@@ -80,7 +103,8 @@ export function RegistryBoard({ funds: initial }: { funds: Fund[] }) {
                       <button key={q} onClick={() => setAmount(q)} className={`flex-1 rounded-lg py-2 text-xs transition ${amount === q ? "bg-ink text-parchment" : "bg-bone text-ink-soft hover:bg-linen"}`}>${q}</button>
                     ))}
                   </div>
-                  <input type="number" min={1} value={amount} onChange={(e) => setAmount(e.target.value ? Number(e.target.value) : "")} placeholder="Other amount" className="w-full rounded-lg border border-ink/15 bg-bone px-3 py-2.5 text-sm outline-none focus:border-sage" />
+                  <input type="number" min={1} value={amount} onChange={(e) => setAmount(e.target.value ? Number(e.target.value) : "")} placeholder="Other amount" aria-label="Gift amount" className="w-full rounded-lg border border-ink/15 bg-bone px-3 py-2.5 text-sm outline-none focus:border-sage" />
+                  {err && <p className="text-xs text-terracotta">Couldn&apos;t start checkout — please try again.</p>}
                   <div className="flex gap-2">
                     <button onClick={() => give(f.id)} disabled={paying || !amount} className="btn btn-primary flex-1 !py-2.5 !text-xs disabled:opacity-50">
                       {paying ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />} Give {amount ? formatCurrency(Number(amount)) : ""}

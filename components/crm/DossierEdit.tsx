@@ -5,25 +5,26 @@ import { useEffect, useState } from "react";
 import { Mail, Phone, CalendarDays, Users, ExternalLink, Sparkles, Pencil, X, Check, StickyNote } from "lucide-react";
 import { PriorityBadge, Panel } from "@/components/crm/widgets";
 import { type Lead } from "@/lib/crm/sample-data";
-import { getContactOverrides, setContactOverride, syncToApi } from "@/lib/crm/store";
+import { getContactOverrides, setContactOverride, getDossierOverride, setDossierOverride, syncToApi } from "@/lib/crm/store";
 import { useModalClose } from "@/lib/useModalClose";
 import { formatDate } from "@/lib/utils";
 
 const EVENT_TYPES = ["Wedding", "Corporate Retreat", "Anniversary", "Bridal Shower", "Celebration of Life", "Other"];
 const STAGES = ["new", "toured", "proposal", "booked", "lost"];
 
-export function DossierHeader({ lead: seed, micrositeSlug }: { lead: Lead; micrositeSlug: string | null }) {
+export function DossierHeader({ lead: seed, micrositeSlug, live = false }: { lead: Lead; micrositeSlug: string | null; live?: boolean }) {
   const [lead, setLead] = useState<Lead>(seed);
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
+    if (live) { setLead(seed); return; } // DB is the source of truth
     const o = getContactOverrides()[seed.id];
     if (o) setLead({ ...seed, ...o });
-  }, [seed]);
+  }, [seed, live]);
 
   function save(updated: Lead) {
     const { id, ...patch } = updated;
-    setContactOverride(id, patch);
+    if (!live) setContactOverride(id, patch);
     syncToApi("/api/contacts", "PATCH", updated);
     setLead(updated);
     setEditing(false);
@@ -63,19 +64,20 @@ export function DossierHeader({ lead: seed, micrositeSlug }: { lead: Lead; micro
   );
 }
 
-export function EditableNotes({ id, initial }: { id: string; initial: string }) {
+export function EditableNotes({ id, initial, live = false }: { id: string; initial: string; live?: boolean }) {
   const [notes, setNotes] = useState(initial);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(initial);
 
   useEffect(() => {
-    const o = getContactOverrides()[id];
-    if (o && typeof o.aiSummary === "string") { setNotes(o.aiSummary); setDraft(o.aiSummary); }
-  }, [id]);
+    if (live) { setNotes(initial); setDraft(initial); return; } // server-merged note is source of truth
+    const o = getDossierOverride(id)?.notes;
+    if (typeof o === "string") { setNotes(o); setDraft(o); }
+  }, [id, initial, live]);
 
   function save() {
-    setContactOverride(id, { aiSummary: draft });
-    syncToApi("/api/contacts", "PATCH", { id, aiSummary: draft });
+    if (!live) setDossierOverride(id, { notes: draft });
+    syncToApi("/api/dossier", "PATCH", { leadId: id, notes: draft });
     setNotes(draft);
     setEditing(false);
   }

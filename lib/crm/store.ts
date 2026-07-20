@@ -91,6 +91,7 @@ export type DossierPatch = {
   payments?: Payment[];
   checklist?: ChecklistItem[];
   details?: DossierDetails;
+  notes?: string;
   coordinator?: string;
   package?: string;
 };
@@ -104,11 +105,24 @@ export function setDossierOverride(leadId: string, patch: DossierPatch) {
   write(K.dossierOverrides, all);
 }
 
-/** Fire-and-forget sync to the API (writes to Supabase when configured). */
+function notifySyncError() {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("farm:sync-error"));
+}
+
+/**
+ * Sync a write to the API (persists to Supabase when configured). Optimistic —
+ * callers don't await — but a non-OK response or network error now dispatches a
+ * `farm:sync-error` event so a failed live-mode save isn't silently lost behind
+ * a success toast. (In demo mode the routes return 200, so no false alarms.)
+ */
 export function syncToApi(path: string, method: "POST" | "PATCH", body: unknown) {
   try {
-    void fetch(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  } catch { /* demo mode — localStorage is the source of truth */ }
+    void fetch(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then((res) => { if (!res.ok) notifySyncError(); })
+      .catch(() => notifySyncError());
+  } catch {
+    notifySyncError();
+  }
 }
 
 export function newId(prefix: string) {

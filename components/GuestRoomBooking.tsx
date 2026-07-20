@@ -10,18 +10,40 @@ export function GuestRoomBooking({ rooms: initial }: { rooms: Room[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [paying, setPaying] = useState(false);
+  const [err, setErr] = useState(false);
 
   const claimed = rooms.filter((r) => r.paid).length;
 
   async function pay(id: string) {
     if (!name.trim()) return;
+    const room = rooms.find((r) => r.id === id);
     setPaying(true);
-    // Pluggable: swap for a Stripe Checkout redirect when STRIPE_SECRET_KEY is set.
-    await new Promise((r) => setTimeout(r, 900));
-    setRooms((rs) => rs.map((r) => (r.id === id ? { ...r, coveredBy: "guest", guestName: name, paid: true } : r)));
-    setPaying(false);
-    setOpenId(null);
-    setName("");
+    setErr(false);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: room?.price ?? 0,
+          description: `Room reservation — ${room?.name ?? "The Farm 1893"}`,
+          kind: "room",
+          metadata: { roomId: id, guest: name },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error();
+      if (data.demo) {
+        setRooms((rs) => rs.map((r) => (r.id === id ? { ...r, coveredBy: "guest", guestName: name, paid: true } : r)));
+        setOpenId(null);
+        setName("");
+      } else {
+        window.location.assign(data.url); // hand off to Stripe
+      }
+    } catch {
+      setErr(true);
+    } finally {
+      setPaying(false);
+    }
   }
 
   return (
@@ -57,8 +79,10 @@ export function GuestRoomBooking({ rooms: initial }: { rooms: Room[] }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
+                    aria-label="Your name"
                     className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-parchment outline-none placeholder:text-parchment/40 focus:border-brass"
                   />
+                  {err && <p className="text-xs text-terracotta">Couldn&apos;t start checkout — please try again.</p>}
                   <div className="flex gap-2">
                     <button onClick={() => pay(r.id)} disabled={paying || !name.trim()} className="btn bg-parchment text-ink flex-1 !py-2.5 !text-xs disabled:opacity-50">
                       {paying ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />} Pay {formatCurrency(r.price)}
