@@ -39,22 +39,31 @@ export const showcaseCategories: ShowcaseCategory[] = [
 ];
 
 /**
- * Folders offered in the marketing photo picker. `deep: true` aggregates
- * inside/ + outside/ (and per-silo) subfolders so the whole area is browsable.
+ * Folders offered in the marketing photo picker, grouped for a tidy dropdown.
+ * `deep: true` aggregates inside/ + outside/ (and per-silo) subfolders so the
+ * whole area is browsable; the explicit Inside/Outside rows target one or the other.
  */
-export type PhotoSource = { label: string; folder: string; deep?: boolean };
+export type PhotoSource = { label: string; folder: string; deep?: boolean; group: string };
 export const marketingPhotoSources: PhotoSource[] = [
-  { label: "Hero / venue banners", folder: "hero" },
-  { label: "Gallery", folder: "gallery" },
-  { label: "Venue", folder: "venue", deep: true },
-  { label: "Venue · inside", folder: "venue/inside" },
-  { label: "Venue · outside", folder: "venue/outside" },
-  { label: "Bridal prep", folder: "bridal-prep", deep: true },
-  { label: "Bridal prep · inside", folder: "bridal-prep/inside" },
-  { label: "Bridal prep · outside", folder: "bridal-prep/outside" },
-  { label: "Silos (all)", folder: "silos", deep: true },
-  { label: "The Orchard Silo", folder: "silos/the-orchard-silo" },
-  { label: "The Harvest Silo", folder: "silos/the-harvest-silo" },
-  { label: "The Copper Silo", folder: "silos/the-copper-silo" },
-  { label: "The Meadow Silo", folder: "silos/the-meadow-silo" },
+  { group: "General", label: "Hero / banners", folder: "hero" },
+  { group: "General", label: "Gallery", folder: "gallery" },
+
+  { group: "Venue", label: "Venue — all", folder: "venue", deep: true },
+  { group: "Venue", label: "Venue — inside", folder: "venue/inside" },
+  { group: "Venue", label: "Venue — outside", folder: "venue/outside" },
+
+  { group: "Bridal prep", label: "Bridal prep — all", folder: "bridal-prep", deep: true },
+  { group: "Bridal prep", label: "Bridal prep — inside", folder: "bridal-prep/inside" },
+  { group: "Bridal prep", label: "Bridal prep — outside", folder: "bridal-prep/outside" },
+
+  { group: "Silos", label: "All silos", folder: "silos", deep: true },
+  { group: "Silos", label: "Orchard — all", folder: "silos/the-orchard-silo", deep: true },
+  { group: "Silos", label: "Orchard — inside", folder: "silos/the-orchard-silo/inside" },
+  { group: "Silos", label: "Orchard — outside", folder: "silos/the-orchard-silo/outside" },
+  { group: "Silos", label: "Harvest — all", folder: "silos/the-harvest-silo", deep: true },
+  { group: "Silos", label: "Copper — all", folder: "silos/the-copper-silo", deep: true },
+  { group: "Silos", label: "Meadow — all", folder: "silos/the-meadow-silo", deep: true },
 ];
+
+/** Distinct group names in order, for rendering <optgroup>s. */
+export const marketingPhotoGroups = [...new Set(marketingPhotoSources.map((s) => s.group))];

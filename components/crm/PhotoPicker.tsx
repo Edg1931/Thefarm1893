@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X, Loader2, ImageOff, Images } from "lucide-react";
-import { marketingPhotoSources } from "@/lib/photo-categories";
+import { marketingPhotoSources, marketingPhotoGroups } from "@/lib/photo-categories";
 
 /** Browse the venue's Storage photos by category and pick one for marketing content. */
 export function PhotoPicker({ onPick, onClose }: { onPick: (url: string) => void; onClose: () => void }) {
@@ -37,7 +37,11 @@ export function PhotoPicker({ onPick, onClose }: { onPick: (url: string) => void
             onChange={(e) => setSrcIdx(Number(e.target.value))}
             className="flex-1 rounded-xl border border-ink/15 bg-bone px-3 py-2.5 text-sm outline-none focus:border-sage"
           >
-            {marketingPhotoSources.map((s, i) => <option key={s.folder} value={i}>{s.label}</option>)}
+            {marketingPhotoGroups.map((g) => (
+              <optgroup key={g} label={g}>
+                {marketingPhotoSources.map((s, i) => (s.group === g ? <option key={s.folder} value={i}>{s.label}</option> : null))}
+              </optgroup>
+            ))}
           </select>
         </div>
 
