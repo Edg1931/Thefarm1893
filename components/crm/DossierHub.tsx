@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Check, Clock, CircleAlert, Pencil, X, Plus, DollarSign, CreditCard, Info,
+  Check, Clock, CircleAlert, Pencil, X, Plus, DollarSign, CreditCard, Info, Link2,
 } from "lucide-react";
 import { Panel } from "@/components/crm/widgets";
 import { type VendorAssignment, type Payment, type ChecklistItem } from "@/lib/crm/bookings";
@@ -69,6 +69,27 @@ export function DossierHub({ leadId, contractValue, vendors: v0, payments: p0, c
     persist({ payments: updated });
     setAddingPayment(false);
     flash("Payment logged.");
+  }
+
+  async function sendLink(p: Payment) {
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: p.amount,
+          description: `${p.label} — The Farm 1893`,
+          kind: p.label.toLowerCase().includes("deposit") ? "deposit" : "balance",
+          metadata: { leadId },
+        }),
+      });
+      const data = await res.json();
+      if (!data.url) throw new Error();
+      await navigator.clipboard.writeText(data.url);
+      flash(data.demo ? "Demo link copied (connect Stripe for real links)." : "Payment link copied — send it to the couple.");
+    } catch {
+      flash("Couldn't create a payment link.");
+    }
   }
 
   function toggleCheck(label: string) {
@@ -138,8 +159,13 @@ export function DossierHub({ leadId, contractValue, vendors: v0, payments: p0, c
                   <p className="truncate text-sm font-medium text-ink">{p.label}</p>
                   <p className="text-xs text-stone">Due {p.due ? formatDate(p.due) : "—"}</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className="font-medium text-ink">{formatCurrency(p.amount)}</span>
+                  {!p.paid && (
+                    <button onClick={() => sendLink(p)} title="Copy a payment link to send the couple" className="flex items-center gap-1 rounded-full border border-ink/15 px-2 py-1 text-[0.68rem] font-medium text-ink-soft hover:bg-bone">
+                      <Link2 size={12} /> Link
+                    </button>
+                  )}
                   <button
                     onClick={() => togglePaid(p.label)}
                     className={`rounded-full px-2.5 py-1 text-[0.68rem] font-medium transition ${

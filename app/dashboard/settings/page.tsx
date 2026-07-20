@@ -1,4 +1,5 @@
 import { Panel } from "@/components/crm/widgets";
+import { DemoButton } from "@/components/crm/DemoButton";
 import { Database, Brain, Phone, CreditCard, Share2, Mail, Check, Plug } from "lucide-react";
 
 /** Server component — checks which integrations are wired via env. */
@@ -27,9 +28,9 @@ const integrations = [
   },
   {
     icon: CreditCard, name: "Stripe", category: "Payments",
-    desc: "Collect deposits and send invoices right from a booking.",
+    desc: "Powers silo-stay checkout and one-tap deposit/balance payment links. Paid checkouts auto-log to the CRM via webhook.",
     connected: status("STRIPE_SECRET_KEY"),
-    keys: "STRIPE_SECRET_KEY · NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+    keys: "STRIPE_SECRET_KEY · STRIPE_WEBHOOK_SECRET",
   },
   {
     icon: Share2, name: "Meta / Instagram", category: "Social Auto-posting",
@@ -86,7 +87,7 @@ export default function SettingsPage() {
               <p className="mt-3 text-sm text-ink-soft">{it.desc}</p>
               <p className="mt-3 font-mono text-[0.68rem] text-stone">{it.keys}</p>
               {!it.connected && (
-                <button className="btn btn-ghost mt-4 !py-2 !text-xs">Connect {it.name}</button>
+                <DemoButton className="btn btn-ghost mt-4 !py-2 !text-xs" toast={`Add ${it.name}'s keys in Vercel → Environment Variables, then redeploy to connect.`}>Connect {it.name}</DemoButton>
               )}
             </div>
           ))}

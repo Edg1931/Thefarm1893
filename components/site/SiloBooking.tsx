@@ -28,8 +28,8 @@ export function SiloBooking({ silo }: { silo: Silo }) {
     if (!validNights || !name || !email) return;
     setStatus("loading");
     try {
-      // Tags the guest as VRBO (not Wedding) in the CRM pipeline.
-      const res = await fetch("/api/leads", {
+      // Capture the guest as VRBO (not Wedding) in the CRM — best-effort.
+      fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,10 +40,24 @@ export function SiloBooking({ silo }: { silo: Silo }) {
           guestCount: guests,
           message: `Silo Stays booking · ${silo.name} · ${nights} nights from ${checkIn} · ${formatCurrency(total)}`,
         }),
+      }).catch(() => {});
+
+      // Checkout — real Stripe when configured, demo success otherwise.
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: total,
+          description: `${silo.name} · ${nights} nights from ${checkIn}`,
+          email,
+          kind: "silo",
+          metadata: { silo: silo.name, checkIn, nights: String(nights) },
+        }),
       });
-      // Pluggable: swap for Stripe/Helcim checkout when configured.
-      if (!res.ok) throw new Error("bad status");
-      setStatus("done");
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || "checkout failed");
+      if (data.demo) setStatus("done");            // demo: confirm inline, no charge
+      else window.location.assign(data.url);       // real: hand off to Stripe
     } catch {
       setStatus("error");
     }
