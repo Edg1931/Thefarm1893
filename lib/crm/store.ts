@@ -6,7 +6,7 @@
    ============================================================================ */
 
 import type { Lead, VendorRecord, VendorProfile } from "./sample-data";
-import type { VendorAssignment, Payment, ChecklistItem } from "./bookings";
+import type { VendorAssignment, Payment, ChecklistItem, DossierDetails } from "./bookings";
 import type { Silo } from "../silos";
 
 const K = {
@@ -90,6 +90,7 @@ export type DossierPatch = {
   vendors?: VendorAssignment[];
   payments?: Payment[];
   checklist?: ChecklistItem[];
+  details?: DossierDetails;
   coordinator?: string;
   package?: string;
 };

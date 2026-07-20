@@ -21,6 +21,8 @@ export type VendorAssignment = {
 
 export type Payment = { label: string; amount: number; due: string; paid: boolean };
 export type ChecklistItem = { label: string; done: boolean };
+/** Editable event + day-of logistics — the venue-critical details, keyed by field. */
+export type DossierDetails = Record<string, string>;
 
 export type Dossier = {
   leadId: string;
@@ -31,6 +33,7 @@ export type Dossier = {
   vendors: VendorAssignment[];
   payments: Payment[];
   checklist: ChecklistItem[];
+  details: DossierDetails;
   notes: string;
 };
 
@@ -71,6 +74,32 @@ const FEATURED: Record<string, Partial<Dossier>> = {
       { label: "Balance paid", done: false },
     ],
     notes: "Couple is dreaming of a golden-hour orchard ceremony. Bride's mother is the main contact for the rehearsal dinner. Wants extra bistro lighting in the barn — flag to Rentals.",
+    details: {
+      ceremonyTime: "5:15 PM (golden hour)",
+      cocktailHour: "5:45–6:45 PM on the terrace",
+      receptionStart: "7:00 PM in the barn",
+      lastDance: "10:30 PM · quiet hours 11:00 PM",
+      ceremonyLocation: "Heritage orchard (rain plan: barn)",
+      receptionLocation: "The restored barn",
+      finalGuestCount: "165 confirmed (+ 12 vendor meals)",
+      gettingReady: "Farmhouse bridal suite from 12:00 PM",
+      style: "Rustic-luxe · garden romantic",
+      colors: "Sage, cream, terracotta, brass",
+      rainPlan: "Ceremony under the barn eaves; 40×60 tent on standby",
+      cateringCount: "165 guests + 12 vendors",
+      menuStyle: "Family-style farm-to-table (Harvest & Hearth)",
+      dietary: "6 vegetarian · 2 gluten-free · 1 tree-nut allergy (Table 4)",
+      barPackage: "Open bar — beer, wine + 2 signature cocktails",
+      cake: "Semi-naked 3-tier + dessert table (Sugar Maple)",
+      loadIn: "Vendors 1:00 PM · florals 2:00 PM · band 3:30 PM",
+      parking: "On-site lot; golf-cart shuttle for elderly guests",
+      musicEndsAt: "10:30 PM (county noise ordinance 11:00 PM)",
+      petsKids: "Dog (Biscuit) in ceremony only · 8 kids (kids' table + sitter)",
+      accessibility: "2 wheelchair guests — ramp + reserved front-row seating",
+      specialRequests: "Sparkler send-off · empty chair honoring bride's grandmother",
+      primaryContact: "Hannah (bride) · Linda (mother of the bride) for rehearsal",
+      emergencyContact: "Wes (groom) · (216) 555-0147",
+    },
   },
   "L-1039": {
     coordinator: "Megan (Lead Coordinator)",
@@ -144,6 +173,7 @@ export function dossierForLead(lead: Lead): Dossier {
     vendors,
     payments,
     checklist,
+    details: featured?.details ?? {},
     notes: featured?.notes ?? lead.aiSummary,
   };
 }

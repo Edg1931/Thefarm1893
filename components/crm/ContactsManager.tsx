@@ -9,8 +9,9 @@ import { leads as seed, type Lead } from "@/lib/crm/sample-data";
 import { getAddedContacts, addContactLocal, getContactOverrides, setContactOverride, syncToApi } from "@/lib/crm/store";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export function ContactsManager({ initial = seed, live = false }: { initial?: Lead[]; live?: boolean }) {
+export function ContactsManager({ initial = seed, live = false, examples = [] }: { initial?: Lead[]; live?: boolean; examples?: Lead[] }) {
   const [contacts, setContacts] = useState<Lead[]>(initial);
+  const exampleIds = new Set(examples.map((e) => e.id));
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<Lead | null>(null);
   const [adding, setAdding] = useState(false);
@@ -84,17 +85,21 @@ export function ContactsManager({ initial = seed, live = false }: { initial?: Le
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
-              {contacts.map((l) => {
+              {[...examples, ...contacts].map((l) => {
                 const isNew = addedIds.has(l.id);
+                const isExample = exampleIds.has(l.id);
                 return (
-                  <tr key={l.id} className="group transition hover:bg-bone/60">
+                  <tr key={l.id} className={`group transition hover:bg-bone/60 ${isExample ? "bg-brass/[0.04]" : ""}`}>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="grid h-10 w-10 place-items-center rounded-full bg-sage-deep/90 font-display text-sm text-parchment">
                           {l.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                         </div>
                         <div>
-                          <p className="font-medium text-ink">{l.name}</p>
+                          <p className="flex items-center gap-2 font-medium text-ink">
+                            {l.name}
+                            {isExample && <span className="rounded-full bg-brass/15 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-brass">Example</span>}
+                          </p>
                           <p className="text-xs text-stone">{l.email}</p>
                         </div>
                       </div>

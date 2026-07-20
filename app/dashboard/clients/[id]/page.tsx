@@ -11,6 +11,7 @@ import { vendorRecords } from "@/lib/crm/sample-data";
 import { Panel } from "@/components/crm/widgets";
 import { DossierHeader, EditableNotes } from "@/components/crm/DossierEdit";
 import { DossierHub } from "@/components/crm/DossierHub";
+import { DossierDetails } from "@/components/crm/DossierDetails";
 import { goldenHourPlan } from "@/lib/services/golden-hour";
 import { formatCurrency } from "@/lib/utils";
 
@@ -52,6 +53,9 @@ export default async function ClientDossier({ params }: { params: Promise<{ id: 
         <Fact icon={UserCog} label="Coordinator" value={dossier.coordinator} />
         <Fact icon={Sun} label="Suggested ceremony" value={gh ? gh.ceremonyStart : "—"} sub={gh ? `Sunset ${gh.sunset}` : undefined} />
       </div>
+
+      {/* Event details & day-of logistics (editable) */}
+      <DossierDetails leadId={lead.id} initial={dossier.details} live={live} />
 
       <DossierHub
         leadId={lead.id}
