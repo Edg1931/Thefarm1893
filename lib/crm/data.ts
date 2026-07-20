@@ -171,6 +171,38 @@ export async function getSiloGuests(): Promise<{ live: boolean; guests: SiloGues
   }
 }
 
+/* --- Payments (Stripe checkouts logged via webhook) --- */
+export type PaymentRow = { id: string; amount: number; status: string; stripeId: string | null; createdAt: string };
+
+const samplePayments: PaymentRow[] = [
+  { id: "p1", amount: 2800, status: "paid", stripeId: "cs_demo_1", createdAt: "2026-06-18T15:02:00Z" },
+  { id: "p2", amount: 653, status: "paid", stripeId: "cs_demo_2", createdAt: "2026-06-22T11:20:00Z" },
+  { id: "p3", amount: 4225, status: "paid", stripeId: "cs_demo_3", createdAt: "2026-07-01T09:45:00Z" },
+  { id: "p4", amount: 3000, status: "paid", stripeId: "cs_demo_4", createdAt: "2026-07-08T18:30:00Z" },
+  { id: "p5", amount: 857, status: "paid", stripeId: "cs_demo_5", createdAt: "2026-07-12T13:10:00Z" },
+];
+
+export async function getPayments(): Promise<{ live: boolean; payments: PaymentRow[]; collected: number }> {
+  const sb = getServiceClient();
+  const sum = (rows: PaymentRow[]) => rows.filter((p) => p.status === "paid").reduce((s, p) => s + p.amount, 0);
+  if (!sb) return { live: false, payments: samplePayments, collected: sum(samplePayments) };
+  try {
+    const { data, error } = await sb.from("payments").select("*").order("created_at", { ascending: false }).limit(200);
+    if (error) throw error;
+    const payments: PaymentRow[] = (data ?? []).map((r: Row) => ({
+      id: str(r.id),
+      amount: num(r.amount),
+      status: str(r.status, "paid"),
+      stripeId: r.stripe_id ? str(r.stripe_id) : null,
+      createdAt: str(r.created_at),
+    }));
+    return { live: true, payments, collected: sum(payments) };
+  } catch (e) {
+    console.error("[data] getPayments", e);
+    return { live: true, payments: [], collected: 0 };
+  }
+}
+
 /** Stored dossier overrides (vendor team / payments / checklist) for a client. */
 export async function getStoredDossier(leadId: string): Promise<Record<string, unknown> | null> {
   const sb = getServiceClient();

@@ -25,6 +25,7 @@ export default function GatheringsPage() {
         script="every reason to gather"
         title="More than weddings"
         subtitle="From corporate retreats to milestone celebrations, the farm is built to bring people together."
+        heroKey="gatherings"
         image="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=2100&q=80"
       />
 

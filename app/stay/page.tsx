@@ -32,6 +32,7 @@ export default function StayPage() {
         script="the farm, all to yourself"
         title="Off-season getaways at The Farm 1893"
         subtitle="Not just for weddings. Rent the private farmhouse for retreats, reunions, and restful escapes — year-round."
+        heroKey="stay"
         image="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2100&q=80"
       />
 

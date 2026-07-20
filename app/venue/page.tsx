@@ -17,6 +17,7 @@ export default function VenuePage() {
         script="every corner tells a story"
         title="A restored orchard, made for gathering"
         subtitle="Explore the four spaces that carry your celebration from first look to last dance."
+        heroKey="venue"
         image="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2100&q=80"
       />
 

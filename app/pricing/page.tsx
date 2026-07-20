@@ -17,6 +17,7 @@ export default function PricingPage() {
         script="beautifully all-inclusive"
         title="Transparent packages, no surprises"
         subtitle="Every package includes the whole property. Pick the celebration that fits your story."
+        heroKey="pricing"
         image="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=2100&q=80"
       />
 

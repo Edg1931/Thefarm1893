@@ -22,6 +22,7 @@ export default function AboutPage() {
         script="rooted in history"
         title="More than a venue — a legacy"
         subtitle="A century-old orchard, reimagined for the moments that matter most."
+        heroKey="about"
         image="https://images.unsplash.com/photo-1470259078422-826894b933ad?auto=format&fit=crop&w=2100&q=80"
       />
 

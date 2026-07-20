@@ -16,6 +16,7 @@ export default function DesignMyDayPage() {
         script="see it before you book it"
         title="Design My Day"
         subtitle="The first venue design studio of its kind — craft a mood board and a vision for your wedding at the farm in seconds."
+        heroKey="design-my-day"
         image="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=2100&q=80"
       />
       <section className="bg-bone py-16 md:py-24">

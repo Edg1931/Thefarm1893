@@ -24,6 +24,7 @@ export default function AccommodationsPage() {
         script="stay a little longer"
         title="The Farmhouse"
         subtitle="Your people, together under one roof — from the rehearsal night to the farewell brunch."
+        heroKey="accommodations"
         image="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2100&q=80"
       />
 

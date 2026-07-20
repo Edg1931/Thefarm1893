@@ -16,6 +16,7 @@ export default function QuizPage() {
         script="let's find your look"
         title="What's your wedding style?"
         subtitle="Answer five quick questions and we'll design your palette, mood board, and vision — instantly."
+        heroKey="quiz"
         image="https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?auto=format&fit=crop&w=2100&q=80"
       />
       <section className="bg-bone py-16 md:py-24">

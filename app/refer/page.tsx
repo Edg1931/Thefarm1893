@@ -23,6 +23,7 @@ export default function ReferPage() {
         script="share the love"
         title="Refer a friend, stay the night"
         subtitle="Our happiest couples send us their favorite people — and we say thank you with a night back at the farm."
+        heroKey="refer"
         image="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=2100&q=80"
       />
 

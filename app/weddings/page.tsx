@@ -28,6 +28,7 @@ export default function WeddingsPage() {
         script="to have & to hold"
         title="A wedding weekend, not just a wedding day"
         subtitle="Marry beneath heritage apple trees, feast in a candlelit barn, and stay until the last goodbye Sunday morning."
+        heroKey="weddings"
         image="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=2100&q=80"
       />
 

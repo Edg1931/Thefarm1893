@@ -21,6 +21,7 @@ export default function JournalPage() {
         script="stories & inspiration"
         title="Planning notes from the farm"
         subtitle="Real advice, color inspiration, and guides to help you plan a wedding you'll never want to end."
+        heroKey="journal"
         image="https://images.unsplash.com/photo-1470259078422-826894b933ad?auto=format&fit=crop&w=2100&q=80"
       />
 

@@ -89,3 +89,24 @@ export async function heroOr(folder: string, fallback: string): Promise<string> 
   const live = await listPhotos(folder);
   return live[0] ?? fallback;
 }
+
+/**
+ * Hero image for a named page, from a single `heroes/` folder where the seller
+ * drops one file per page (e.g. heroes/weddings.jpg, heroes/about.jpg). Falls
+ * back to the stock image when the file isn't there.
+ */
+export async function heroFor(name: string, fallback: string): Promise<string> {
+  const sb = storageClient();
+  if (!sb) return fallback;
+  try {
+    const { data, error } = await sb.storage.from(BUCKET).list("heroes", { limit: 100 });
+    if (error) throw error;
+    const match = (data ?? []).find(
+      (f) => f.name && IMG_EXT.test(f.name) && f.name.replace(/\.[^.]+$/, "").toLowerCase() === name.toLowerCase()
+    );
+    return match ? publicUrl(`heroes/${match.name}`) : fallback;
+  } catch (e) {
+    console.error("[images] heroFor", name, e);
+    return fallback;
+  }
+}

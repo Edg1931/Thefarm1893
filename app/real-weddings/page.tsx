@@ -20,6 +20,7 @@ export default function RealWeddingsPage() {
         script="love, celebrated here"
         title="Real weddings at the farm"
         subtitle="Step inside real celebrations — the colors, the details, and the couples who made them unforgettable."
+        heroKey="real-weddings"
         image="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=2100&q=80"
       />
       <section className="bg-bone py-20 md:py-28">

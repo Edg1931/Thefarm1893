@@ -31,6 +31,7 @@ export default function VendorsPage() {
         script="your whole team, vetted"
         title="Preferred Vendors"
         subtitle="A curated circle of trusted local pros who know the farm by heart — so planning feels effortless."
+        heroKey="vendors"
         image="https://images.unsplash.com/photo-1522413452208-996ff3f3e740?auto=format&fit=crop&w=2100&q=80"
       />
 
