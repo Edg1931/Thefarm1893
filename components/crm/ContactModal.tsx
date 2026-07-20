@@ -3,6 +3,7 @@
 import { X, Check } from "lucide-react";
 import { type Lead } from "@/lib/crm/sample-data";
 import { newId } from "@/lib/crm/store";
+import { useModalClose } from "@/lib/useModalClose";
 
 export const EVENT_TYPES = ["Wedding", "Corporate Retreat", "Anniversary", "Bridal Shower", "Celebration of Life", "Other"];
 export const STAGES: Lead["stage"][] = ["new", "toured", "proposal", "booked", "lost"];
@@ -13,6 +14,7 @@ export function ContactModal({
 }: {
   contact?: Lead; onClose: () => void; onSave: (l: Lead) => void; isNew?: boolean;
 }) {
+  useModalClose(onClose);
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);

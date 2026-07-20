@@ -8,6 +8,7 @@ import {
 import {
   contentTemplates, contentCategories, type ContentTemplate, type ContentCategory,
 } from "@/lib/crm/content-templates";
+import { useModalClose } from "@/lib/useModalClose";
 
 const catIcon: Record<ContentCategory, typeof FileText> = {
   Print: FileText, Social: ImageIcon, Email: Mail, Signage: SignpostBig,
@@ -103,6 +104,7 @@ function VisualPreview({ t, thumb, large }: { t: ContentTemplate; thumb?: boolea
 }
 
 function PreviewModal({ t, onClose }: { t: ContentTemplate; onClose: () => void }) {
+  useModalClose(onClose);
   const [copied, setCopied] = useState(false);
 
   async function copy() {

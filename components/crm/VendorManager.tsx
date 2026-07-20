@@ -6,6 +6,7 @@ import { Panel, StatCard } from "@/components/crm/widgets";
 import { vendorRecords as seed, type VendorRecord, type VendorProfile } from "@/lib/crm/sample-data";
 import { getAddedVendors, addVendorLocal, syncToApi, newId, getVendorProfiles, setVendorProfile } from "@/lib/crm/store";
 import { ImportVendorModal, VendorProfileModal } from "@/components/crm/VendorProfiles";
+import { useModalClose } from "@/lib/useModalClose";
 import { formatCurrency } from "@/lib/utils";
 
 const tierCls: Record<string, string> = {
@@ -147,6 +148,7 @@ export function VendorManager({ initial = seed, live = false }: { initial?: Vend
 }
 
 function VendorModal({ onClose, onAdd }: { onClose: () => void; onAdd: (v: VendorRecord) => void }) {
+  useModalClose(onClose);
   const [tier, setTier] = useState<"preferred" | "featured" | "listed">("listed");
 
   function submit(e: React.FormEvent<HTMLFormElement>) {

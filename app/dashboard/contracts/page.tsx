@@ -1,4 +1,5 @@
 import { Panel, StatCard } from "@/components/crm/widgets";
+import { DemoButton } from "@/components/crm/DemoButton";
 import { contracts } from "@/lib/crm/growth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { FileSignature, DollarSign, Clock, Plus, PenLine } from "lucide-react";
@@ -24,7 +25,7 @@ export default function ContractsPage() {
           <h1 className="font-display text-4xl text-ink">Contracts &amp; Deposits</h1>
           <p className="mt-1 text-stone">Send, e-sign, and collect deposits — no paperwork, no chasing.</p>
         </div>
-        <button className="btn btn-primary !py-2.5 !text-xs"><Plus size={15} /> New Contract</button>
+        <DemoButton className="btn btn-primary !py-2.5 !text-xs" toast="New contract drafted from the AI proposal."><Plus size={15} /> New Contract</DemoButton>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
@@ -64,9 +65,12 @@ export default function ContractsPage() {
                   </td>
                   <td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusCls[c.status]}`}>{c.status}</span></td>
                   <td className="px-5 py-4">
-                    <button className="inline-flex items-center gap-1.5 text-sm font-medium text-brass hover:underline">
+                    <DemoButton
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-brass hover:underline"
+                      toast={c.status === "draft" ? `Contract sent to ${c.client}.` : c.status === "sent" ? `Reminder sent to ${c.client}.` : `Opening ${c.client}'s contract…`}
+                    >
                       <PenLine size={14} /> {c.status === "draft" ? "Send" : c.status === "sent" ? "Remind" : "View"}
-                    </button>
+                    </DemoButton>
                   </td>
                 </tr>
               ))}

@@ -6,6 +6,7 @@ import { Mail, Phone, CalendarDays, Users, ExternalLink, Sparkles, Pencil, X, Ch
 import { PriorityBadge, Panel } from "@/components/crm/widgets";
 import { type Lead } from "@/lib/crm/sample-data";
 import { getContactOverrides, setContactOverride, syncToApi } from "@/lib/crm/store";
+import { useModalClose } from "@/lib/useModalClose";
 import { formatDate } from "@/lib/utils";
 
 const EVENT_TYPES = ["Wedding", "Corporate Retreat", "Anniversary", "Bridal Shower", "Celebration of Life", "Other"];
@@ -102,6 +103,7 @@ export function EditableNotes({ id, initial }: { id: string; initial: string }) 
 }
 
 function EditModal({ lead, onClose, onSave }: { lead: Lead; onClose: () => void; onSave: (l: Lead) => void }) {
+  useModalClose(onClose);
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);

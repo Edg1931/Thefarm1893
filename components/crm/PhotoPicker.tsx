@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { X, Loader2, ImageOff, Images } from "lucide-react";
 import { marketingPhotoSources, marketingPhotoGroups } from "@/lib/photo-categories";
+import { useModalClose } from "@/lib/useModalClose";
 
 /** Browse the venue's Storage photos by category and pick one for marketing content. */
 export function PhotoPicker({ onPick, onClose }: { onPick: (url: string) => void; onClose: () => void }) {
+  useModalClose(onClose);
   const [srcIdx, setSrcIdx] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);

@@ -8,6 +8,7 @@ import {
 import { Panel } from "@/components/crm/widgets";
 import { type VendorAssignment, type Payment, type ChecklistItem } from "@/lib/crm/bookings";
 import { getDossierOverride, setDossierOverride, syncToApi } from "@/lib/crm/store";
+import { useModalClose } from "@/lib/useModalClose";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 const vendorStatus: Record<string, { cls: string; label: string; Icon: typeof Check }> = {
@@ -225,6 +226,7 @@ function VendorEditor({ v, options, onCancel, onSave }: {
 }
 
 function PaymentModal({ onClose, onSave }: { onClose: () => void; onSave: (p: Payment) => void }) {
+  useModalClose(onClose);
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);

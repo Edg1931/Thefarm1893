@@ -1,4 +1,5 @@
 import { Panel, StatCard } from "@/components/crm/widgets";
+import { DemoButton } from "@/components/crm/DemoButton";
 import { sequences } from "@/lib/crm/growth";
 import { Zap, Mail, MessageSquare, Users, CheckCircle2, Plus } from "lucide-react";
 
@@ -16,7 +17,7 @@ export default function AutomationsPage() {
           <h1 className="font-display text-4xl text-ink">AI Automations</h1>
           <p className="mt-1 text-stone">Every lead nurtured automatically — email &amp; text, drafted by AI, sent at the perfect time.</p>
         </div>
-        <button className="btn btn-primary !py-2.5 !text-xs"><Plus size={15} /> New Sequence</button>
+        <DemoButton className="btn btn-primary !py-2.5 !text-xs" toast="New automation sequence created."><Plus size={15} /> New Sequence</DemoButton>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">

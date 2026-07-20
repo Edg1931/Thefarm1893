@@ -8,6 +8,7 @@ import {
 import { Panel } from "@/components/crm/widgets";
 import { silos as seed, siloReviews, type Silo } from "@/lib/silos";
 import { applySiloOverride, setSiloOverride, syncToApi, type SiloReview } from "@/lib/crm/store";
+import { useModalClose } from "@/lib/useModalClose";
 import { formatCurrency } from "@/lib/utils";
 
 function seedReviews(silo: Silo): SiloReview[] {
@@ -94,6 +95,7 @@ function SiloEditor({
   silo: Silo; reviews: SiloReview[];
   onClose: () => void; onSave: (slug: string, patch: Partial<Silo>, reviews: SiloReview[]) => void;
 }) {
+  useModalClose(onClose);
   const [f, setF] = useState({
     name: silo.name, tagline: silo.tagline, nightly: silo.nightly, cleaningFee: silo.cleaningFee,
     minNights: silo.minNights, sleeps: silo.sleeps, beds: silo.beds, baths: silo.baths, petFriendly: silo.petFriendly,

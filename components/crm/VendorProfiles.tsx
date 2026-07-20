@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { type VendorRecord, type VendorProfile } from "@/lib/crm/sample-data";
 import { newId } from "@/lib/crm/store";
+import { useModalClose } from "@/lib/useModalClose";
 
 const CATEGORIES = ["Photography", "Videography", "Catering", "Florals", "Music", "Planning", "Beauty", "Cake", "Bar Service", "Rentals", "Other"];
 const MEMBERSHIP: Record<string, number> = { preferred: 1200, featured: 600, listed: 0 };
@@ -277,6 +278,7 @@ function Chip({ icon, children }: { icon: React.ReactNode; children: React.React
   return <span className="flex items-center gap-1 rounded-full bg-bone px-2.5 py-1">{icon}{children}</span>;
 }
 function Shell({ title, icon, children, onClose, wide }: { title: string; icon?: React.ReactNode; children: React.ReactNode; onClose: () => void; wide?: boolean }) {
+  useModalClose(onClose);
   return (
     <div className="fixed inset-0 z-[85] flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm" onClick={onClose}>
       <div className={`max-h-[92vh] w-full overflow-y-auto rounded-2xl bg-parchment p-7 shadow-2xl ${wide ? "max-w-2xl" : "max-w-lg"}`} onClick={(e) => e.stopPropagation()}>
