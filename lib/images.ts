@@ -8,7 +8,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-const BUCKET = "photos";
+const BUCKET = "Photos";
 const IMG_EXT = /\.(jpe?g|png|webp|avif)$/i;
 
 /**

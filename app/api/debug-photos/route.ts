@@ -23,7 +23,7 @@ export async function GET() {
 
   async function probe(folder: string) {
     try {
-      const { data, error } = await sb.storage.from("photos").list(folder, { limit: 100 });
+      const { data, error } = await sb.storage.from("Photos").list(folder, { limit: 100 });
       return { folder, count: data?.length ?? 0, names: (data ?? []).map((f) => f.name).slice(0, 8), error: error?.message ?? null };
     } catch (e) {
       return { folder, error: e instanceof Error ? e.message : String(e) };

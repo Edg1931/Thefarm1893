@@ -243,4 +243,4 @@ end $$;
 --  this policy so the website can enumerate hero/, gallery/, and silos/<slug>/.)
 drop policy if exists "Public list photos bucket" on storage.objects;
 create policy "Public list photos bucket" on storage.objects
-  for select to anon, authenticated using (bucket_id = 'photos');
+  for select to anon, authenticated using (bucket_id = 'Photos');
