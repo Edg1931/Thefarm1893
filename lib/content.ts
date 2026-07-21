@@ -39,7 +39,7 @@ export const nav: NavLink[] = [
   { label: "Vendors", href: "/vendors" },
   { label: "Journal", href: "/journal" },
   { label: "Refer a Friend", href: "/refer" },
-  { label: "Investment", href: "/pricing" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Our Story", href: "/about" },
 ];
 
@@ -50,7 +50,7 @@ export const navPrimary: NavLink[] = [
   { label: "Gallery", href: "/gallery" },
   { label: "Design My Day", href: "/design-my-day" },
   { label: "Vendors", href: "/vendors" },
-  { label: "Investment", href: "/pricing" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 /* --- Trust / at-a-glance stats --- */

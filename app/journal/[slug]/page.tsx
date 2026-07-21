@@ -14,9 +14,39 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const p = getPost(slug);
-  return p
-    ? { title: p.title, description: p.excerpt, openGraph: { title: p.title, description: p.excerpt, images: [p.cover] } }
-    : { title: "Journal" };
+  if (!p) return { title: "Journal" };
+  return {
+    title: p.metaTitle,
+    description: p.metaDescription,
+    keywords: p.keywords,
+    alternates: { canonical: `/journal/${p.slug}` },
+    openGraph: {
+      title: p.metaTitle,
+      description: p.metaDescription,
+      type: "article",
+      publishedTime: p.date,
+      modifiedTime: p.updated ?? p.date,
+      images: [p.cover],
+    },
+  };
+}
+
+/** Render inline [label](/path) links inside article text. */
+function renderText(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  const re = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    parts.push(
+      <Link key={`l${key++}`} href={m[2]} className="font-medium text-brass underline underline-offset-2 hover:text-brass-soft">{m[1]}</Link>
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -25,8 +55,24 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   if (!post) notFound();
   const more = posts.filter((p) => p.slug !== slug).slice(0, 2);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.metaDescription,
+    image: post.cover,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+    author: { "@type": "Organization", name: post.author },
+    publisher: { "@type": "Organization", name: "The Farm 1893" },
+    keywords: post.keywords.join(", "),
+    articleSection: post.category,
+    mainEntityOfPage: `/journal/${post.slug}`,
+  };
+
   return (
     <SiteShell>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Hero */}
       <article>
         <div className="relative flex min-h-[58vh] items-end overflow-hidden pt-24">
@@ -35,7 +81,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="container-x relative z-10 pb-12 text-parchment">
             <p className="eyebrow !text-brass-soft">{post.category} · {post.readMins} min read</p>
             <h1 className="mt-3 max-w-3xl font-display text-4xl leading-tight md:text-6xl">{post.title}</h1>
-            <p className="mt-4 text-sm text-parchment/70">{formatDate(post.date)}</p>
+            <p className="mt-4 text-sm text-parchment/70">By {post.author} · {formatDate(post.date)}{post.updated ? ` · Updated ${formatDate(post.updated)}` : ""}</p>
           </div>
         </div>
 
@@ -45,9 +91,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <Link href="/journal" className="inline-flex items-center gap-2 text-sm text-stone hover:text-ink"><ArrowLeft size={15} /> All stories</Link>
             <div className="mt-8 space-y-6">
               <p className="font-display text-2xl leading-relaxed text-ink">{post.excerpt}</p>
-              {post.body.map((para, i) => (
-                <p key={i} className="text-lg leading-relaxed text-ink-soft">{para}</p>
-              ))}
+              {post.content.map((b, i) => {
+                if (b.type === "h2") return <h2 key={i} className="pt-4 font-display text-3xl text-ink">{b.text}</h2>;
+                if (b.type === "list") return (
+                  <ul key={i} className="list-disc space-y-2 pl-5 text-lg leading-relaxed text-ink-soft marker:text-brass">
+                    {b.items.map((it, j) => <li key={j}>{renderText(it)}</li>)}
+                  </ul>
+                );
+                return <p key={i} className="text-lg leading-relaxed text-ink-soft">{renderText(b.text)}</p>;
+              })}
             </div>
 
             <div className="mt-12 rounded-2xl bg-[color:var(--color-ink)] p-8 text-center text-parchment">
