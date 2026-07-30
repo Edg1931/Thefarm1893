@@ -342,6 +342,70 @@ export async function getPortalData(leadId: string, weddingSlug?: string): Promi
   }
 }
 
+/* --- Contracts & invoices (Phase 3) --------------------------------------- */
+
+export type ContractRow = {
+  id: string; leadId: string | null; client: string; event: string; date: string;
+  value: number; status: "draft" | "sent" | "signed" | "paid"; deposit: number;
+  depositPaid: boolean; signedAt: string | null;
+};
+
+export async function getContracts(): Promise<{ live: boolean; contracts: ContractRow[] }> {
+  const sb = getServiceClient();
+  if (!sb) {
+    const { contracts } = await import("./growth");
+    return { live: false, contracts: contracts.map((c) => ({ id: c.id, leadId: null, client: c.client, event: c.event, date: c.date, value: c.value, status: c.status, deposit: c.deposit, depositPaid: c.depositPaid, signedAt: c.status === "signed" || c.status === "paid" ? "2026-06-20" : null })) };
+  }
+  try {
+    const { data, error } = await sb.from("contracts").select("*").order("created_at", { ascending: false }).limit(500);
+    if (error) throw error;
+    const contracts: ContractRow[] = (data ?? []).map((r: Row) => ({
+      id: str(r.id), leadId: r.lead_id ? str(r.lead_id) : null, client: str(r.client_name, "Client"),
+      event: str(r.event_type, "Event"), date: str(r.event_date), value: num(r.value),
+      status: (str(r.status, "draft") as ContractRow["status"]), deposit: num(r.deposit),
+      depositPaid: Boolean(r.deposit_paid), signedAt: r.signed_at ? str(r.signed_at) : null,
+    }));
+    return { live: true, contracts };
+  } catch (e) {
+    console.error("[data] getContracts", e);
+    return { live: true, contracts: [] };
+  }
+}
+
+export type InvoiceRow = {
+  id: string; leadId: string | null; label: string; amount: number; dueDate: string;
+  status: "draft" | "sent" | "paid" | "overdue" | "void"; paidAt: string | null;
+};
+
+const sampleInvoices: InvoiceRow[] = [
+  { id: "INV-1042-1", leadId: "L-1042", label: "Deposit", amount: 2800, dueDate: "2026-06-20", status: "paid", paidAt: "2026-06-20" },
+  { id: "INV-1042-2", leadId: "L-1042", label: "Installment 1 of 2", amount: 6600, dueDate: "2026-08-05", status: "sent", paidAt: null },
+  { id: "INV-1042-3", leadId: "L-1042", label: "Final balance", amount: 4225, dueDate: "2026-09-05", status: "draft", paidAt: null },
+  { id: "INV-1041-1", leadId: "L-1041", label: "Deposit", amount: 7750, dueDate: "2026-07-28", status: "overdue", paidAt: null },
+];
+
+export async function getInvoices(): Promise<{ live: boolean; invoices: InvoiceRow[]; outstanding: number; collected: number }> {
+  const sb = getServiceClient();
+  const tally = (rows: InvoiceRow[]) => ({
+    outstanding: rows.filter((i) => i.status === "sent" || i.status === "overdue").reduce((s, i) => s + i.amount, 0),
+    collected: rows.filter((i) => i.status === "paid").reduce((s, i) => s + i.amount, 0),
+  });
+  if (!sb) return { live: false, invoices: sampleInvoices, ...tally(sampleInvoices) };
+  try {
+    const { data, error } = await sb.from("invoices").select("*").order("due_date", { ascending: true }).limit(500);
+    if (error) throw error;
+    const invoices: InvoiceRow[] = (data ?? []).map((r: Row) => ({
+      id: str(r.id), leadId: r.lead_id ? str(r.lead_id) : null, label: str(r.label, "Invoice"),
+      amount: num(r.amount), dueDate: str(r.due_date), status: (str(r.status, "draft") as InvoiceRow["status"]),
+      paidAt: r.paid_at ? str(r.paid_at) : null,
+    }));
+    return { live: true, invoices, ...tally(invoices) };
+  } catch (e) {
+    console.error("[data] getInvoices", e);
+    return { live: true, invoices: [], outstanding: 0, collected: 0 };
+  }
+}
+
 /** Dashboard KPIs — computed from live leads when configured, else the demo numbers. */
 export async function getDashboardData() {
   const { live, leads } = await getLeads();

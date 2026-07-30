@@ -43,15 +43,26 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const s = event.data?.object ?? {};
+    const meta = (s.metadata ?? {}) as Record<string, string>;
     const sb = getServiceClient();
     if (sb) {
       try {
+        const paidAt = new Date().toISOString();
+        // Log the settled transaction (the receipt ledger).
         await sb.from("payments").insert({
           amount: (Number(s.amount_total) || 0) / 100,
           status: "paid",
           stripe_id: (s.id as string) ?? null,
-          created_at: new Date().toISOString(),
+          created_at: paidAt,
         });
+        // Reconcile the invoice this payment settles, if any.
+        if (meta.invoiceId) {
+          await sb.from("invoices").update({ status: "paid", paid_at: paidAt, stripe_id: (s.id as string) ?? null }).eq("id", meta.invoiceId);
+        }
+        // Mark a contract's deposit paid when the deposit clears.
+        if (meta.contractId && meta.kind === "deposit") {
+          await sb.from("contracts").update({ deposit_paid: true, status: "paid" }).eq("id", meta.contractId);
+        }
       } catch (e) {
         console.error("stripe webhook log error", e);
       }

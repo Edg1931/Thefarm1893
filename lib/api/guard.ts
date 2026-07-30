@@ -57,3 +57,29 @@ export function rateLimit(key: string, limit = 20, windowMs = 60_000): boolean {
 export function tooMany(): Response {
   return NextResponse.json({ error: "Too many requests. Please slow down and try again." }, { status: 429 });
 }
+
+/**
+ * Durable rate limiter — persists counters to the `rate_limits` table so limits
+ * survive serverless cold starts (the in-memory version resets per instance).
+ * Falls back to the in-memory limiter when Supabase isn't configured, so demo
+ * mode keeps working. Best-effort: never blocks a request on a DB hiccup.
+ */
+export async function rateLimitDurable(key: string, limit = 20, windowMs = 60_000): Promise<boolean> {
+  const { getServiceClient } = await import("@/lib/supabase/server");
+  const sb = getServiceClient();
+  if (!sb) return rateLimit(key, limit, windowMs);
+  try {
+    const now = Date.now();
+    const { data } = await sb.from("rate_limits").select("count,reset_at").eq("key", key).maybeSingle();
+    const resetAt = data ? new Date(String(data.reset_at)).getTime() : 0;
+    if (!data || now > resetAt) {
+      await sb.from("rate_limits").upsert({ key, count: 1, reset_at: new Date(now + windowMs).toISOString(), updated_at: new Date(now).toISOString() });
+      return true;
+    }
+    if (Number(data.count) >= limit) return false;
+    await sb.from("rate_limits").update({ count: Number(data.count) + 1, updated_at: new Date(now).toISOString() }).eq("key", key);
+    return true;
+  } catch {
+    return rateLimit(key, limit, windowMs); // never fail closed on infra errors
+  }
+}

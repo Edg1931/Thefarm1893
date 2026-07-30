@@ -188,7 +188,53 @@ create table if not exists contracts (
   status text default 'draft',
   deposit numeric default 0,
   deposit_paid boolean default false,
+  signed_at timestamptz,
+  signer_ip text,
+  signer_name text,
+  pdf_path text,
+  signature_data text,
   created_at timestamptz not null default now()
+);
+-- add signing columns if the table pre-dates this migration
+alter table contracts add column if not exists signed_at timestamptz;
+alter table contracts add column if not exists signer_ip text;
+alter table contracts add column if not exists signer_name text;
+alter table contracts add column if not exists pdf_path text;
+alter table contracts add column if not exists signature_data text;
+
+-- ---- invoices (installments, ACH/card, reminders) -------------------------
+create table if not exists invoices (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references leads(id) on delete set null,
+  event_id uuid references events(id) on delete set null,
+  contract_id uuid references contracts(id) on delete set null,
+  label text not null,
+  amount numeric not null,
+  due_date date,
+  status text not null default 'draft',   -- draft | sent | paid | overdue | void
+  stripe_id text,
+  paid_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists invoices_lead_idx on invoices (lead_id);
+create index if not exists invoices_status_idx on invoices (status);
+
+-- ---- payment reminders (dunning schedule) ----------------------------------
+create table if not exists payment_reminders (
+  id uuid primary key default gen_random_uuid(),
+  invoice_id uuid references invoices(id) on delete cascade,
+  send_at timestamptz not null,
+  sent_at timestamptz,
+  channel text default 'email',
+  created_at timestamptz not null default now()
+);
+
+-- ---- durable rate limiting (survives serverless cold starts) ---------------
+create table if not exists rate_limits (
+  key text primary key,
+  count int not null default 0,
+  reset_at timestamptz not null,
+  updated_at timestamptz not null default now()
 );
 
 -- ---- dossiers (per-client vendor team / payments / checklist as JSONB) -----
@@ -348,7 +394,8 @@ begin
     'room_assignments','registry_contributions','contracts',
     'dossiers','silo_listings','resources','availability_blocks',
     'portal_members','access_tokens','portal_messages','documents',
-    'seating_tables','seating_assignments','rsvps'
+    'seating_tables','seating_assignments','rsvps',
+    'invoices','payment_reminders','rate_limits'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);
