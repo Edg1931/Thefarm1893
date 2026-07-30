@@ -1,14 +1,16 @@
 import { Sidebar } from "@/components/crm/Sidebar";
 import { AccountMenu } from "@/components/crm/AccountMenu";
 import { SyncErrorToast } from "@/components/crm/SyncErrorToast";
+import { getProperties } from "@/lib/crm/data";
 import { Bell, Search } from "lucide-react";
 
 export const metadata = { title: "Venue OS — Dashboard" };
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { properties } = await getProperties();
   return (
     <div className="flex min-h-screen bg-[color:var(--color-linen)]">
-      <Sidebar />
+      <Sidebar properties={properties} />
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Topbar */}
         <header className="sticky top-0 z-40 hidden items-center justify-between border-b border-ink/10 bg-parchment/90 px-8 py-4 backdrop-blur lg:flex">

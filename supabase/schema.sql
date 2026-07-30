@@ -514,6 +514,26 @@ create table if not exists calendar_connections (
   created_at timestamptz not null default now()
 );
 
+-- ============================================================================
+-- PHASE 6 — Multi-property support
+-- A property entity plus NULLABLE property_id columns on the resources that can
+-- belong to more than one location. Additive & nullable = non-breaking; a
+-- single-venue install simply leaves them null (defaults to The Farm 1893).
+-- ============================================================================
+create table if not exists properties (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  address text,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+alter table resources           add column if not exists property_id uuid references properties(id) on delete set null;
+alter table events              add column if not exists property_id uuid references properties(id) on delete set null;
+alter table op_tasks            add column if not exists property_id uuid references properties(id) on delete set null;
+alter table inventory_items     add column if not exists property_id uuid references properties(id) on delete set null;
+alter table maintenance_assets  add column if not exists property_id uuid references properties(id) on delete set null;
+alter table staff               add column if not exists property_id uuid references properties(id) on delete set null;
+
 -- ---- updated_at trigger ----------------------------------------------------
 create or replace function touch_updated_at() returns trigger as $$
 begin
@@ -545,7 +565,7 @@ begin
     'staff','time_entries','op_tasks','inventory_items',
     'maintenance_assets','maintenance_logs',
     'conversations','reviews','review_requests','coupons',
-    'automations','calendar_connections'
+    'automations','calendar_connections','properties'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);

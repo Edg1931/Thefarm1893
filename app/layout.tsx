@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter, Great_Vibes } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { business } from "@/lib/content";
+import { ServiceWorkerRegister } from "@/components/site/ServiceWorkerRegister";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -43,7 +44,13 @@ export const metadata: Metadata = {
     description: business.heroSub,
     type: "website",
   },
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.svg", apple: "/icon-192.png" },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: business.name },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2b2320",
 };
 
 export default function RootLayout({
@@ -86,6 +93,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {children}
+        <ServiceWorkerRegister />
         <Analytics />
       </body>
     </html>

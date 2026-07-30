@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Panel, StatCard, InsightCard } from "@/components/crm/widgets";
-import { funnel, trafficSources, dashboardStats, financials } from "@/lib/crm/sample-data";
+import { funnel, trafficSources, dashboardStats } from "@/lib/crm/sample-data";
+import { getFinancials } from "@/lib/crm/data";
 import { analyticsInsights } from "@/lib/crm/growth";
 import { formatCurrency } from "@/lib/utils";
 import { Eye, Users, Route, Percent, Wallet, TrendingUp, PiggyBank, Landmark, ArrowUpRight, CircleDollarSign } from "lucide-react";
@@ -14,7 +15,8 @@ const accentBar: Record<string, string> = {
   sage: "bg-sage-deep", terracotta: "bg-terracotta", brass: "bg-brass", ink: "bg-ink",
 };
 
-export default function AnalyticsPage() {
+export default async function AnalyticsPage() {
+  const { financials } = await getFinancials();
   const visitors = funnel[0].value;
   const leads = funnel[2].value;
   const leadRate = Math.round((leads / visitors) * 100);

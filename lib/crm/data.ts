@@ -543,6 +543,50 @@ export async function getAutomations() {
   } catch (e) { console.error("[data] getAutomations", e); return { live: true, automations: [] }; }
 }
 
+/* --- Financials / P&L (Phase 6): live-aware overlay on the sample shape ---- */
+
+export async function getFinancials() {
+  const { financials } = await import("./sample-data");
+  const sb = getServiceClient();
+  if (!sb) return { live: false, financials };
+  try {
+    // Compute the top-line numbers from live rows; keep sample structure for
+    // streams / ROI / billing until those live sources are wired.
+    const [{ collected }, { outstanding }, { stats }] = await Promise.all([getPayments(), getInvoices(), getDashboardData()]);
+    return {
+      live: true,
+      financials: {
+        ...financials,
+        bookedRevenueYTD: stats.bookedRevenueYTD ?? financials.bookedRevenueYTD,
+        collectedYTD: collected || financials.collectedYTD,
+        outstandingBalances: outstanding || financials.outstandingBalances,
+        pipelineValue: stats.pipelineValue ?? financials.pipelineValue,
+      },
+    };
+  } catch (e) {
+    console.error("[data] getFinancials", e);
+    return { live: true, financials };
+  }
+}
+
+/* --- Properties (Phase 6 multi-property) ---------------------------------- */
+
+export type Property = { id: string; name: string; address: string; active: boolean };
+const sampleProperties: Property[] = [
+  { id: "prop-farm1893", name: "The Farm 1893", address: "Berlin Heights, OH", active: true },
+];
+
+export async function getProperties(): Promise<{ live: boolean; properties: Property[] }> {
+  const sb = getServiceClient();
+  if (!sb) return { live: false, properties: sampleProperties };
+  try {
+    const { data, error } = await sb.from("properties").select("*").order("created_at", { ascending: true });
+    if (error) throw error;
+    const properties = (data ?? []).map((r: Row) => ({ id: str(r.id), name: str(r.name), address: str(r.address), active: Boolean(r.active) }));
+    return { live: true, properties: properties.length ? properties : sampleProperties };
+  } catch (e) { console.error("[data] getProperties", e); return { live: true, properties: sampleProperties }; }
+}
+
 /** Dashboard KPIs — computed from live leads when configured, else the demo numbers. */
 export async function getDashboardData() {
   const { live, leads } = await getLeads();

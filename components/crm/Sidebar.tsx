@@ -11,6 +11,8 @@ import {
   ClipboardList, Package, Wrench, UsersRound, Inbox, Star,
 } from "lucide-react";
 import { business } from "@/lib/content";
+import { PropertySwitcher } from "@/components/crm/PropertySwitcher";
+import type { Property } from "@/lib/crm/data";
 
 type NavLink = { href: string; label: string; icon: typeof LayoutDashboard };
 type NavSection = { heading?: string; links: NavLink[] };
@@ -68,7 +70,7 @@ const sections: NavSection[] = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ properties = [] }: { properties?: Property[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -116,7 +118,8 @@ export function Sidebar() {
       {/* Desktop sidebar */}
       <aside className="hidden w-72 shrink-0 flex-col bg-[color:var(--color-ink)] p-5 lg:flex">
         <SidebarHeader />
-        <div className="mt-8 flex-1 overflow-y-auto pr-1">{Nav}</div>
+        <div className="mt-6"><PropertySwitcher properties={properties} /></div>
+        <div className="mt-2 flex-1 overflow-y-auto pr-1">{Nav}</div>
         <UpgradeCard />
       </aside>
 
@@ -129,7 +132,8 @@ export function Sidebar() {
               <SidebarHeader />
               <button onClick={() => setOpen(false)} aria-label="Close"><X className="text-parchment" /></button>
             </div>
-            <div className="mt-8 flex-1 overflow-y-auto pr-1">{Nav}</div>
+            <div className="mt-6"><PropertySwitcher properties={properties} /></div>
+            <div className="mt-2 flex-1 overflow-y-auto pr-1">{Nav}</div>
           </aside>
         </div>
       )}
