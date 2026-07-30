@@ -2,13 +2,14 @@ import Link from "next/link";
 import { DollarSign, Users, Zap, TrendingUp, CalendarDays } from "lucide-react";
 import { StatCard, InsightCard, RevenueChart, ScoreRing, Panel } from "@/components/crm/widgets";
 import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
+import { TodayPanel } from "@/components/crm/TodayPanel";
 import { revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sample-data";
-import { getDashboardData, getEvents, getSiloGuests } from "@/lib/crm/data";
+import { getDashboardData, getEvents, getSiloGuests, getToday } from "@/lib/crm/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default async function DashboardOverview() {
-  const [{ leads, stats: dashboardStats, live }, { events }, { guests }] = await Promise.all([
-    getDashboardData(), getEvents(), getSiloGuests(),
+  const [{ leads, stats: dashboardStats, live }, { events }, { guests }, { items: todayItems }] = await Promise.all([
+    getDashboardData(), getEvents(), getSiloGuests(), getToday(),
   ]);
   const hot = leads.filter((l) => l.priority === "hot" && l.stage !== "booked").slice(0, 4);
 
@@ -37,6 +38,9 @@ export default async function DashboardOverview() {
         <StatCard label="New leads this month" value={String(dashboardStats.leadsThisMonth)} delta="+9" icon={Users} accent="ink" />
         <StatCard label="Avg. response time" value={`${dashboardStats.avgResponseMins} min`} delta="Fast" icon={Zap} accent="terracotta" />
       </div>
+
+      {/* Owner "Today" — events, arrivals/turnovers, and balances coming due */}
+      <TodayPanel items={todayItems} />
 
       {/* Availability calendar — weddings + silos + AI open-date suggestions */}
       <div>

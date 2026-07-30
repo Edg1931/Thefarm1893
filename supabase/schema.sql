@@ -205,6 +205,41 @@ create table if not exists silo_listings (
   updated_at timestamptz not null default now()
 );
 
+-- ============================================================================
+-- PHASE 1 — Availability & calendar spine
+-- One list of bookable resources (the venue + each silo + farmhouse rooms) and
+-- the date ranges each is blocked, so one engine can prevent double-booking
+-- across weddings and short-term stays.
+-- ============================================================================
+
+-- ---- resources (bookable units) --------------------------------------------
+create table if not exists resources (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug text,
+  kind text not null default 'venue',   -- venue | silo | room
+  property_id uuid,                      -- multi-property (Phase 6); null = the Farm
+  capacity int,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create index if not exists resources_kind_idx on resources (kind);
+
+-- ---- availability blocks (manual holds, iCal/OTA imports, maintenance) ------
+create table if not exists availability_blocks (
+  id uuid primary key default gen_random_uuid(),
+  resource_id uuid references resources(id) on delete cascade,
+  resource_slug text,                    -- convenience key when resource_id unknown
+  start_date date not null,
+  end_date date not null,                -- inclusive
+  reason text,
+  source text not null default 'manual', -- manual | ical | ota
+  external_id text,                      -- de-dupe key for imported blocks
+  created_at timestamptz not null default now()
+);
+create index if not exists availability_blocks_range_idx on availability_blocks (start_date, end_date);
+create index if not exists availability_blocks_resource_idx on availability_blocks (resource_slug);
+
 -- ---- updated_at trigger ----------------------------------------------------
 create or replace function touch_updated_at() returns trigger as $$
 begin
@@ -229,7 +264,7 @@ begin
     'contacts','leads','events','tasks','messages','payments',
     'marketing_content','ai_insights','vendors','silo_guests',
     'room_assignments','registry_contributions','contracts',
-    'dossiers','silo_listings'
+    'dossiers','silo_listings','resources','availability_blocks'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);

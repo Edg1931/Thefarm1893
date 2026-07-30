@@ -18,6 +18,8 @@ import {
   type VendorRecord,
 } from "./sample-data";
 import { siloGuests as sampleSiloGuests, type SiloGuest } from "@/lib/silos";
+import { getBlocks } from "@/lib/services/availability";
+import { buildCalendar } from "./calendar";
 
 export const liveConfigured = (): boolean => Boolean(getServiceClient());
 
@@ -215,6 +217,66 @@ export async function getStoredDossier(leadId: string): Promise<Record<string, u
     console.error("[data] getStoredDossier", e);
     return null;
   }
+}
+
+/* --- Unified calendar + Owner "Today" ------------------------------------- */
+
+export type TodayItem = { kind: "event" | "arrival" | "departure" | "balance" | "task"; title: string; detail: string; date: string; amount?: number };
+
+/**
+ * The owner's at-a-glance "today + the days just ahead": upcoming events, silo
+ * arrivals/departures, balances coming due, and near-term tasks. Computed from
+ * live rows when configured, else from the sample data.
+ */
+export async function getToday(): Promise<{ live: boolean; items: TodayItem[] }> {
+  const [{ live, events }, { guests }] = await Promise.all([getEvents(), getSiloGuests()]);
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const horizon = new Date(now); horizon.setDate(horizon.getDate() + 14);
+  const horizonIso = horizon.toISOString().slice(0, 10);
+  const within = (d: string) => d >= todayIso && d <= horizonIso;
+
+  const items: TodayItem[] = [];
+
+  for (const e of events) {
+    if (within(e.date)) items.push({ kind: "event", title: e.title, detail: `${e.type} · ${e.status}`, date: e.date });
+  }
+  for (const g of guests) {
+    if (within(g.checkIn)) items.push({ kind: "arrival", title: `${g.name} arrives`, detail: `${g.silo} · ${g.nights} night${g.nights > 1 ? "s" : ""}`, date: g.checkIn });
+    const out = new Date(g.checkIn + "T00:00:00"); out.setDate(out.getDate() + g.nights);
+    const outIso = out.toISOString().slice(0, 10);
+    if (within(outIso)) items.push({ kind: "departure", title: `${g.name} checks out`, detail: `${g.silo} · turnover needed`, date: outIso });
+  }
+
+  // Balances due — live from events (contracted minus deposit), else sample billing.
+  if (!live) {
+    const { financials } = await import("./sample-data");
+    for (const b of financials.upcomingBilling) {
+      items.push({ kind: "balance", title: `${b.client} · ${b.label}`, detail: b.status, date: b.due, amount: b.amount });
+    }
+  } else {
+    const sb = getServiceClient();
+    if (sb) {
+      try {
+        const { data } = await sb.from("events").select("title,event_date,total_value,deposit_paid,status").in("status", ["confirmed", "tentative"]);
+        for (const r of (data ?? []) as Row[]) {
+          const bal = num(r.total_value) - num(r.deposit_paid);
+          if (bal > 0) items.push({ kind: "balance", title: `${str(r.title, "Event")} · balance`, detail: str(r.status), date: str(r.event_date), amount: bal });
+        }
+      } catch (e) { console.error("[data] getToday balances", e); }
+    }
+  }
+
+  items.sort((a, b) => a.date.localeCompare(b.date));
+  return { live, items };
+}
+
+/** The unified calendar feed (events + silo stays + blocks). */
+export async function getCalendar() {
+  const [{ live, events }, { guests }, { blocks }] = await Promise.all([
+    getEvents(), getSiloGuests(), getBlocks(),
+  ]);
+  return { live, items: buildCalendar(events, guests, blocks), blocks };
 }
 
 /** Dashboard KPIs — computed from live leads when configured, else the demo numbers. */

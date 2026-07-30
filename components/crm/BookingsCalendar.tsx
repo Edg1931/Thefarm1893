@@ -6,9 +6,11 @@ import { ChevronLeft, ChevronRight, CalendarDays, Sparkles, X, Home as HomeIcon,
 import { Panel } from "@/components/crm/widgets";
 import { upcomingEvents, bookedDates, type BookingEvent } from "@/lib/crm/sample-data";
 import { siloGuests, type SiloGuest } from "@/lib/silos";
+import { sampleBlocks, blockDays, type AvailabilityBlock } from "@/lib/crm/calendar";
 import { formatDate } from "@/lib/utils";
+import { Wrench } from "lucide-react";
 
-type EvType = "wedding" | "tentative" | "tour" | "silo";
+type EvType = "wedding" | "tentative" | "tour" | "silo" | "block";
 type CalEvent = { title: string; type: EvType; subtitle?: string };
 
 const typeStyle: Record<string, string> = {
@@ -16,9 +18,10 @@ const typeStyle: Record<string, string> = {
   tentative: "bg-brass text-ink",
   tour: "bg-ink/50 text-parchment",
   silo: "bg-terracotta text-parchment",
+  block: "bg-stone/70 text-parchment",
 };
-const typeLabel: Record<EvType, string> = { wedding: "Wedding", tentative: "Tentative hold", tour: "Tour", silo: "Silo stay" };
-const typeIcon: Record<EvType, typeof Heart> = { wedding: Heart, tentative: CalendarDays, tour: MapPin, silo: HomeIcon };
+const typeLabel: Record<EvType, string> = { wedding: "Wedding", tentative: "Tentative hold", tour: "Tour", silo: "Silo stay", block: "Blocked" };
+const typeIcon: Record<EvType, typeof Heart> = { wedding: Heart, tentative: CalendarDays, tour: MapPin, silo: HomeIcon, block: Wrench };
 
 function iso(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -30,7 +33,7 @@ function addDays(isoStr: string, n: number) {
 }
 
 /** All events expanded to the individual ISO days they occupy. */
-function buildEventMap(evts: BookingEvent[], guests: SiloGuest[]): Map<string, CalEvent[]> {
+function buildEventMap(evts: BookingEvent[], guests: SiloGuest[], blocks: AvailabilityBlock[]): Map<string, CalEvent[]> {
   const map = new Map<string, CalEvent[]>();
   const push = (day: string, ev: CalEvent) => map.set(day, [...(map.get(day) ?? []), ev]);
 
@@ -48,16 +51,22 @@ function buildEventMap(evts: BookingEvent[], guests: SiloGuest[]): Map<string, C
       });
     }
   }
+  for (const b of blocks) {
+    const where = b.resourceSlug === "venue" ? "Venue" : b.resourceSlug.replace(/-/g, " ").replace(/\bsilo\b/i, "Silo");
+    for (const day of blockDays(b)) {
+      push(day, { title: b.reason || "Blocked", type: "block", subtitle: `${where} · ${b.source}` });
+    }
+  }
   return map;
 }
 
 export function BookingsCalendar({
-  events: evts = upcomingEvents, guests = siloGuests, live = false,
-}: { events?: BookingEvent[]; guests?: SiloGuest[]; live?: boolean } = {}) {
+  events: evts = upcomingEvents, guests = siloGuests, blocks = sampleBlocks, live = false,
+}: { events?: BookingEvent[]; guests?: SiloGuest[]; blocks?: AvailabilityBlock[]; live?: boolean } = {}) {
   const now = new Date();
   const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [selected, setSelected] = useState<string | null>(null);
-  const events = useMemo(() => buildEventMap(evts, guests), [evts, guests]);
+  const events = useMemo(() => buildEventMap(evts, guests, blocks), [evts, guests, blocks]);
   const upcoming = evts;
   const bookedSet = useMemo(
     () => (live ? new Set(evts.filter((e) => e.status === "confirmed").map((e) => e.date)) : new Set(bookedDates)),
@@ -115,6 +124,7 @@ export function BookingsCalendar({
           <Legend color="bg-brass" label="Tentative" />
           <Legend color="bg-ink/50" label="Tour" />
           <Legend color="bg-terracotta" label="Silo Stay" />
+          <Legend color="bg-stone/70" label="Blocked" />
         </div>
         <div className="grid grid-cols-7 gap-1.5 text-center text-[0.7rem] uppercase tracking-wider text-stone">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => <div key={d} className="pb-1">{d}</div>)}
