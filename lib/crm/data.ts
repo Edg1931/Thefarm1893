@@ -490,6 +490,59 @@ export async function getStaff(): Promise<{ live: boolean; staff: StaffMember[] 
   } catch (e) { console.error("[data] getStaff", e); return { live: true, staff: [] }; }
 }
 
+/* --- Communications & growth (Phase 5) ------------------------------------ */
+
+export async function getConversations() {
+  const { sampleConversations } = await import("./comms");
+  const sb = getServiceClient();
+  if (!sb) return { live: false, conversations: sampleConversations };
+  try {
+    const { data, error } = await sb.from("conversations").select("*").order("last_at", { ascending: false }).limit(200);
+    if (error) throw error;
+    // Threads are summarized here; message bodies load per-thread in the inbox.
+    const conversations = (data ?? []).map((r: Row) => ({
+      id: str(r.id), name: str(r.name, "Guest"), channel: (str(r.channel, "email") as import("./comms").Channel),
+      preview: "", lastAt: str(r.last_at), unread: Boolean(r.unread), messages: [],
+    }));
+    return { live: true, conversations };
+  } catch (e) { console.error("[data] getConversations", e); return { live: true, conversations: [] }; }
+}
+
+export async function getReviews() {
+  const { aggregateReviews, ratingSummary } = await import("@/lib/services/reviews");
+  const { live, reviews } = await aggregateReviews();
+  return { live, reviews, summary: ratingSummary(reviews) };
+}
+
+export async function getCoupons() {
+  const { sampleCoupons } = await import("./comms");
+  const sb = getServiceClient();
+  if (!sb) return { live: false, coupons: sampleCoupons };
+  try {
+    const { data, error } = await sb.from("coupons").select("*").order("created_at", { ascending: false }).limit(200);
+    if (error) throw error;
+    const coupons = (data ?? []).map((r: Row) => ({
+      id: str(r.id), code: str(r.code), kind: (str(r.kind, "percent") as "percent" | "amount"),
+      amount: num(r.amount), expiresAt: str(r.expires_at), uses: num(r.uses), maxUses: num(r.max_uses), active: Boolean(r.active),
+    }));
+    return { live: true, coupons };
+  } catch (e) { console.error("[data] getCoupons", e); return { live: true, coupons: [] }; }
+}
+
+export async function getAutomations() {
+  const { sampleAutomations } = await import("./comms");
+  const sb = getServiceClient();
+  if (!sb) return { live: false, automations: sampleAutomations };
+  try {
+    const { data, error } = await sb.from("automations").select("*").order("created_at", { ascending: true }).limit(200);
+    if (error) throw error;
+    const automations = (data ?? []).map((r: Row) => ({
+      id: str(r.id), name: str(r.name), trigger: str(r.trigger), action: str(r.action), active: Boolean(r.active), runs: num(r.runs),
+    }));
+    return { live: true, automations };
+  } catch (e) { console.error("[data] getAutomations", e); return { live: true, automations: [] }; }
+}
+
 /** Dashboard KPIs — computed from live leads when configured, else the demo numbers. */
 export async function getDashboardData() {
   const { live, leads } = await getLeads();

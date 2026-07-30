@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { AdStudio } from "@/components/crm/AdStudio";
+import { CouponManager } from "@/components/crm/CouponManager";
 import { StatCard } from "@/components/crm/widgets";
+import { getCoupons } from "@/lib/crm/data";
 import { Eye, MousePointerClick, Users, Share2, BookOpen } from "lucide-react";
 
-export default function MarketingPage() {
+export default async function MarketingPage() {
+  const { coupons } = await getCoupons();
   return (
     <div className="space-y-6">
       <div>
@@ -27,6 +30,8 @@ export default function MarketingPage() {
       </div>
 
       <AdStudio />
+
+      <CouponManager initial={coupons} />
     </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, KanbanSquare, CalendarDays, Megaphone,
   Bot, Settings, Menu, X, Sparkles, Handshake, FileText,
   BarChart3, Zap, FileSignature, Share2, Home, LogOut, Layers, CreditCard, DoorOpen,
-  ClipboardList, Package, Wrench, UsersRound,
+  ClipboardList, Package, Wrench, UsersRound, Inbox, Star,
 } from "lucide-react";
 import { business } from "@/lib/content";
 
@@ -37,6 +37,7 @@ const sections: NavSection[] = [
   {
     heading: "AI Center",
     links: [
+      { href: "/dashboard/inbox", label: "Unified Inbox", icon: Inbox },
       { href: "/dashboard/ai", label: "AI Center", icon: Sparkles },
       { href: "/dashboard/proposals", label: "AI Proposals", icon: FileText },
       { href: "/dashboard/marketing", label: "Marketing Studio", icon: Megaphone },
@@ -59,6 +60,7 @@ const sections: NavSection[] = [
     links: [
       { href: "/dashboard/vendors", label: "Vendor Network", icon: Handshake },
       { href: "/dashboard/referrals", label: "Referrals", icon: Share2 },
+      { href: "/dashboard/reviews", label: "Reviews", icon: Star },
     ],
   },
   {

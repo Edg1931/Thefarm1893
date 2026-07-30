@@ -436,6 +436,84 @@ create table if not exists maintenance_logs (
   serviced_at timestamptz not null default now()
 );
 
+-- ============================================================================
+-- PHASE 5 — Communications, integrations & growth
+-- ============================================================================
+
+-- extend the message-channel enum for OTA inboxes (guarded)
+do $$ begin alter type message_channel add value if not exists 'airbnb'; exception when others then null; end $$;
+do $$ begin alter type message_channel add value if not exists 'vrbo'; exception when others then null; end $$;
+
+-- ---- unified inbox conversations -------------------------------------------
+create table if not exists conversations (
+  id uuid primary key default gen_random_uuid(),
+  contact_id uuid references contacts(id) on delete set null,
+  lead_id uuid references leads(id) on delete set null,
+  name text,
+  channel text not null default 'email',   -- email | sms | web_chat | airbnb | vrbo | facebook
+  external_id text,
+  last_at timestamptz not null default now(),
+  unread boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create index if not exists conversations_channel_idx on conversations (channel);
+
+-- ---- reviews (aggregated) + requests ---------------------------------------
+create table if not exists reviews (
+  id uuid primary key default gen_random_uuid(),
+  source text not null,                    -- google | airbnb | vrbo | facebook | the-knot
+  author text,
+  rating int,
+  body text,
+  event_id uuid references events(id) on delete set null,
+  review_date date,
+  created_at timestamptz not null default now()
+);
+create table if not exists review_requests (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references leads(id) on delete set null,
+  channel text default 'email',
+  sent_at timestamptz,
+  responded boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- ---- coupons / promo codes -------------------------------------------------
+create table if not exists coupons (
+  id uuid primary key default gen_random_uuid(),
+  code text unique not null,
+  kind text not null default 'percent',    -- percent | amount
+  amount numeric not null default 0,
+  expires_at date,
+  uses int not null default 0,
+  max_uses int not null default 0,          -- 0 = unlimited
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+-- ---- automations (trigger -> action) ---------------------------------------
+create table if not exists automations (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  trigger text not null,
+  condition jsonb default '{}',
+  action text not null,
+  active boolean not null default true,
+  runs int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+-- ---- external calendar connections (OAuth tokens / iCal feeds) -------------
+create table if not exists calendar_connections (
+  id uuid primary key default gen_random_uuid(),
+  provider text not null,                  -- google | outlook | apple | airbnb | vrbo
+  account text,
+  tokens jsonb default '{}',
+  ical_url text,
+  resource_id uuid references resources(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
 -- ---- updated_at trigger ----------------------------------------------------
 create or replace function touch_updated_at() returns trigger as $$
 begin
@@ -465,7 +543,9 @@ begin
     'seating_tables','seating_assignments','rsvps',
     'invoices','payment_reminders','rate_limits',
     'staff','time_entries','op_tasks','inventory_items',
-    'maintenance_assets','maintenance_logs'
+    'maintenance_assets','maintenance_logs',
+    'conversations','reviews','review_requests','coupons',
+    'automations','calendar_connections'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);

@@ -1,5 +1,6 @@
 import { Panel } from "@/components/crm/widgets";
 import { DemoButton } from "@/components/crm/DemoButton";
+import { CalendarConnect } from "@/components/crm/CalendarConnect";
 import { Database, Brain, Phone, CreditCard, Share2, Mail, Check, Plug } from "lucide-react";
 
 /** Server component — checks which integrations are wired via env. */
@@ -93,6 +94,8 @@ export default function SettingsPage() {
           ))}
         </div>
       </Panel>
+
+      <CalendarConnect />
     </div>
   );
 }

@@ -1,23 +1,22 @@
 import { Panel, StatCard } from "@/components/crm/widgets";
-import { DemoButton } from "@/components/crm/DemoButton";
+import { AutomationBuilder } from "@/components/crm/AutomationBuilder";
 import { sequences } from "@/lib/crm/growth";
-import { Zap, Mail, MessageSquare, Users, CheckCircle2, Plus } from "lucide-react";
+import { getAutomations } from "@/lib/crm/data";
+import { Zap, Mail, MessageSquare, Users, CheckCircle2 } from "lucide-react";
 
 export const metadata = { title: "AI Automations" };
 
-export default function AutomationsPage() {
+export default async function AutomationsPage() {
   const totalEnrolled = sequences.reduce((s, q) => s + q.enrolled, 0);
   const totalBooked = sequences.reduce((s, q) => s + q.booked, 0);
   const active = sequences.filter((s) => s.status === "active").length;
+  const { automations, live } = await getAutomations();
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h1 className="font-display text-4xl text-ink">AI Automations</h1>
-          <p className="mt-1 text-stone">Every lead nurtured automatically — email &amp; text, drafted by AI, sent at the perfect time.</p>
-        </div>
-        <DemoButton className="btn btn-primary !py-2.5 !text-xs" toast="New automation sequence created."><Plus size={15} /> New Sequence</DemoButton>
+      <div>
+        <h1 className="font-display text-4xl text-ink">AI Automations</h1>
+        <p className="mt-1 text-stone">Every lead nurtured automatically — email &amp; text, drafted by AI, sent at the perfect time.</p>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
@@ -25,6 +24,9 @@ export default function AutomationsPage() {
         <StatCard label="Contacts enrolled" value={totalEnrolled.toLocaleString()} icon={Users} accent="ink" />
         <StatCard label="Booked from nurture" value={String(totalBooked)} delta="+7 this mo" icon={CheckCircle2} accent="sage" />
       </div>
+
+      {/* Live rule engine: trigger → action, toggle on/off, add your own */}
+      <AutomationBuilder initial={automations} live={live} />
 
       <div className="rounded-2xl border border-brass/25 bg-brass/8 p-5 text-sm text-ink-soft">
         <span className="font-medium text-ink">AI Copilot:</span> Leads contacted within 5 minutes convert 3× more often — your
