@@ -24,6 +24,10 @@ import {
   sampleIdentities, sampleMessages, sampleDocuments, sampleSeating, sampleRsvps,
   type PortalIdentity, type PortalMessage, type PortalDocument, type SeatingTable, type Rsvp,
 } from "./portal";
+import {
+  sampleTasks, sampleInventory, sampleMaintenance, sampleStaff, isLowStock, maintenanceDueSoon,
+  type OpTask, type InventoryItem, type MaintenanceAsset, type StaffMember,
+} from "./operations";
 
 export const liveConfigured = (): boolean => Boolean(getServiceClient());
 
@@ -271,6 +275,20 @@ export async function getToday(): Promise<{ live: boolean; items: TodayItem[] }>
     }
   }
 
+  // Operational tasks due within the window + low-stock / maintenance alerts.
+  const { tasks } = await getOpsTasks();
+  for (const t of tasks) {
+    if (t.status !== "done" && within(t.dueAt)) items.push({ kind: "task", title: t.title, detail: `${t.category} · ${t.assignee}`, date: t.dueAt });
+  }
+  const { items: inv } = await getInventory();
+  for (const i of inv) {
+    if (i.quantity < i.parLevel) items.push({ kind: "task", title: `Low stock: ${i.name}`, detail: `${i.quantity}/${i.parLevel} ${i.unit} — reorder`, date: todayIso });
+  }
+  const { assets } = await getMaintenance();
+  for (const a of assets) {
+    if (a.nextService && a.nextService <= horizonIso) items.push({ kind: "task", title: `Maintenance due: ${a.name}`, detail: `${a.kind} service`, date: a.nextService < todayIso ? todayIso : a.nextService });
+  }
+
   items.sort((a, b) => a.date.localeCompare(b.date));
   return { live, items };
 }
@@ -404,6 +422,72 @@ export async function getInvoices(): Promise<{ live: boolean; invoices: InvoiceR
     console.error("[data] getInvoices", e);
     return { live: true, invoices: [], outstanding: 0, collected: 0 };
   }
+}
+
+/* --- Operations (Phase 4) ------------------------------------------------- */
+
+export async function getOpsTasks(): Promise<{ live: boolean; tasks: OpTask[] }> {
+  const sb = getServiceClient();
+  if (!sb) return { live: false, tasks: sampleTasks };
+  try {
+    const { data, error } = await sb.from("op_tasks").select("*").order("due_at", { ascending: true }).limit(500);
+    if (error) throw error;
+    const tasks: OpTask[] = (data ?? []).map((r: Row) => ({
+      id: str(r.id), title: str(r.title), category: (str(r.category, "other") as OpTask["category"]),
+      assignee: str(r.assignee_name, "Unassigned"), dueAt: str(r.due_at), status: (str(r.status, "todo") as OpTask["status"]),
+      recurring: r.recurring ? str(r.recurring) : undefined,
+    }));
+    return { live: true, tasks };
+  } catch (e) { console.error("[data] getOpsTasks", e); return { live: true, tasks: [] }; }
+}
+
+export async function getInventory(): Promise<{ live: boolean; items: InventoryItem[]; lowCount: number }> {
+  const sb = getServiceClient();
+  const count = (rows: InventoryItem[]) => rows.filter(isLowStock).length;
+  if (!sb) return { live: false, items: sampleInventory, lowCount: count(sampleInventory) };
+  try {
+    const { data, error } = await sb.from("inventory_items").select("*").order("name").limit(500);
+    if (error) throw error;
+    const items: InventoryItem[] = (data ?? []).map((r: Row) => ({
+      id: str(r.id), name: str(r.name), category: str(r.category, "Other"),
+      quantity: num(r.quantity), parLevel: num(r.par_level), unit: str(r.unit, "units"),
+    }));
+    return { live: true, items, lowCount: count(items) };
+  } catch (e) { console.error("[data] getInventory", e); return { live: true, items: [], lowCount: 0 }; }
+}
+
+export async function getMaintenance(): Promise<{ live: boolean; assets: MaintenanceAsset[]; dueCount: number }> {
+  const sb = getServiceClient();
+  const count = (rows: MaintenanceAsset[]) => rows.filter((a) => maintenanceDueSoon(a)).length;
+  if (!sb) return { live: false, assets: sampleMaintenance, dueCount: count(sampleMaintenance) };
+  try {
+    const { data, error } = await sb.from("maintenance_assets").select("*").order("next_service").limit(500);
+    if (error) throw error;
+    const assets: MaintenanceAsset[] = (data ?? []).map((r: Row) => ({
+      id: str(r.id), name: str(r.name), kind: (str(r.kind, "other") as MaintenanceAsset["kind"]),
+      lastService: str(r.last_service), nextService: str(r.next_service), intervalDays: num(r.interval_days, 90),
+    }));
+    return { live: true, assets, dueCount: count(assets) };
+  } catch (e) { console.error("[data] getMaintenance", e); return { live: true, assets: [], dueCount: 0 }; }
+}
+
+export async function getStaff(): Promise<{ live: boolean; staff: StaffMember[] }> {
+  const sb = getServiceClient();
+  if (!sb) return { live: false, staff: sampleStaff };
+  try {
+    const { data, error } = await sb.from("staff").select("*, time_entries(clock_in,clock_out)").order("name").limit(200);
+    if (error) throw error;
+    const staff: StaffMember[] = (data ?? []).map((r: Row) => {
+      const open = ((r.time_entries as Row[]) ?? []).find((t) => !t.clock_out);
+      return {
+        id: str(r.id), name: str(r.name), role: str(r.role, "Staff"),
+        permissions: Array.isArray(r.permissions) ? (r.permissions as string[]) : [],
+        hourlyRate: num(r.hourly_rate), active: Boolean(r.active),
+        clockedInAt: open ? str(open.clock_in) : null,
+      };
+    });
+    return { live: true, staff };
+  } catch (e) { console.error("[data] getStaff", e); return { live: true, staff: [] }; }
 }
 
 /** Dashboard KPIs — computed from live leads when configured, else the demo numbers. */

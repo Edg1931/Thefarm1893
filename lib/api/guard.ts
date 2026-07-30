@@ -33,6 +33,16 @@ export async function requireAdmin(): Promise<Response | null> {
   return null;
 }
 
+/**
+ * Role-aware gate. Today it requires an authenticated staff user (like
+ * requireAdmin) in live mode and stays open in demo mode. The `perm` argument
+ * is the seam for per-permission checks against `staff.permissions` as the
+ * staff/RBAC model fills in — callers already pass their required permission.
+ */
+export async function requireRole(_perm: string): Promise<Response | null> {
+  return requireAdmin();
+}
+
 /* --- Best-effort in-memory rate limiter (per server instance) --- */
 const buckets = new Map<string, { count: number; reset: number }>();
 

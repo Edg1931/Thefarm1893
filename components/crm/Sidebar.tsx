@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Users, KanbanSquare, CalendarDays, Megaphone,
   Bot, Settings, Menu, X, Sparkles, Handshake, FileText,
   BarChart3, Zap, FileSignature, Share2, Home, LogOut, Layers, CreditCard, DoorOpen,
+  ClipboardList, Package, Wrench, UsersRound,
 } from "lucide-react";
 import { business } from "@/lib/content";
 
@@ -42,6 +43,15 @@ const sections: NavSection[] = [
       { href: "/dashboard/content", label: "Content Library", icon: Layers },
       { href: "/dashboard/automations", label: "Automations", icon: Zap },
       { href: "/dashboard/receptionist", label: "AI Receptionist", icon: Bot },
+    ],
+  },
+  {
+    heading: "Operations",
+    links: [
+      { href: "/dashboard/operations", label: "Task Board", icon: ClipboardList },
+      { href: "/dashboard/inventory", label: "Inventory", icon: Package },
+      { href: "/dashboard/maintenance", label: "Maintenance", icon: Wrench },
+      { href: "/dashboard/staff", label: "Staff & Time Clock", icon: UsersRound },
     ],
   },
   {

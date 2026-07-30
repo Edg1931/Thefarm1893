@@ -368,6 +368,74 @@ create table if not exists rsvps (
 );
 create index if not exists rsvps_slug_idx on rsvps (wedding_slug);
 
+-- ============================================================================
+-- PHASE 4 — Back-of-house operations (tasks, inventory, maintenance, staff)
+-- ============================================================================
+
+-- ---- staff & time-clock ----------------------------------------------------
+create table if not exists staff (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid,
+  name text not null,
+  role text,
+  permissions text[] not null default '{}',
+  hourly_rate numeric default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create table if not exists time_entries (
+  id uuid primary key default gen_random_uuid(),
+  staff_id uuid references staff(id) on delete cascade,
+  clock_in timestamptz not null default now(),
+  clock_out timestamptz,
+  event_id uuid references events(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+-- ---- operational tasks (distinct from lead-linked `tasks`) ------------------
+create table if not exists op_tasks (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  category text not null default 'other',   -- cleaning | setup | lawn | turnover | other
+  assignee_staff_id uuid references staff(id) on delete set null,
+  assignee_name text,
+  event_id uuid references events(id) on delete set null,
+  due_at date,
+  status text not null default 'todo',       -- todo | in_progress | done
+  recurring text,
+  created_at timestamptz not null default now()
+);
+create index if not exists op_tasks_status_idx on op_tasks (status);
+
+-- ---- inventory (low-stock = quantity < par_level) --------------------------
+create table if not exists inventory_items (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  category text,
+  quantity int not null default 0,
+  par_level int not null default 0,
+  unit text default 'units',
+  created_at timestamptz not null default now()
+);
+
+-- ---- maintenance assets + logs ---------------------------------------------
+create table if not exists maintenance_assets (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  kind text default 'other',                 -- hvac | pool | septic | grounds | other
+  last_service date,
+  next_service date,
+  interval_days int default 90,
+  created_at timestamptz not null default now()
+);
+create table if not exists maintenance_logs (
+  id uuid primary key default gen_random_uuid(),
+  asset_id uuid references maintenance_assets(id) on delete cascade,
+  note text,
+  cost numeric default 0,
+  serviced_at timestamptz not null default now()
+);
+
 -- ---- updated_at trigger ----------------------------------------------------
 create or replace function touch_updated_at() returns trigger as $$
 begin
@@ -395,7 +463,9 @@ begin
     'dossiers','silo_listings','resources','availability_blocks',
     'portal_members','access_tokens','portal_messages','documents',
     'seating_tables','seating_assignments','rsvps',
-    'invoices','payment_reminders','rate_limits'
+    'invoices','payment_reminders','rate_limits',
+    'staff','time_entries','op_tasks','inventory_items',
+    'maintenance_assets','maintenance_logs'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);
