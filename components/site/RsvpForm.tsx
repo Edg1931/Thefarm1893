@@ -8,7 +8,7 @@ import { Check, Loader2 } from "lucide-react";
  * audience), and the subtle "planning your own?" opt-in tags them as a
  * future-couple lead for a gentle down-the-road nurture — the guest→couple loop.
  */
-export function RsvpForm({ coupleName }: { coupleName: string }) {
+export function RsvpForm({ coupleName, slug }: { coupleName: string; slug?: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -16,18 +16,21 @@ export function RsvpForm({ coupleName }: { coupleName: string }) {
     setStatus("loading");
     const fd = new FormData(e.currentTarget);
     const futureCouple = fd.get("futureCouple") === "on";
+    const declined = String(fd.get("response") || "").toLowerCase().includes("decline");
     try {
-      const res = await fetch("/api/leads", {
+      // Capture the RSVP into the CRM (feeds the guest list + seating chart) and,
+      // when the guest opts in, seed a future-couple lead — the guest→couple loop.
+      const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: String(fd.get("name") || "Guest"),
+          weddingSlug: slug || coupleName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+          guestName: String(fd.get("name") || "Guest"),
           email: String(fd.get("email") || ""),
-          guestCount: Number(fd.get("attending")) || 1,
-          eventType: futureCouple ? "Future Wedding" : "Wedding Guest",
-          segment: futureCouple ? "future-couple" : "guest",
-          source: futureCouple ? "guest-future-couple" : "wedding-guest",
-          message: `RSVP for ${coupleName}'s wedding · ${fd.get("response")}`,
+          partySize: Number(fd.get("attending")) || 1,
+          meal: String(fd.get("meal") || ""),
+          status: declined ? "declined" : "attending",
+          futureCouple,
         }),
       });
       if (!res.ok) throw new Error("bad status");
@@ -58,6 +61,14 @@ export function RsvpForm({ coupleName }: { coupleName: string }) {
           <option className="text-ink">Regretfully declines</option>
         </select>
       </div>
+      <select name="meal" className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none focus:border-brass" defaultValue="">
+        <option value="" className="text-ink" disabled>Meal preference (optional)</option>
+        <option className="text-ink">Chicken</option>
+        <option className="text-ink">Beef</option>
+        <option className="text-ink">Vegetarian</option>
+        <option className="text-ink">Vegan</option>
+        <option className="text-ink">Kids</option>
+      </select>
       <label className="flex items-start gap-2.5 rounded-xl bg-white/5 p-3 text-sm text-parchment/80">
         <input type="checkbox" name="futureCouple" className="mt-0.5" />
         <span>💍 We&apos;re dreaming of our own someday — keep us in mind for a tour of the farm.</span>

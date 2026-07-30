@@ -20,6 +20,10 @@ import {
 import { siloGuests as sampleSiloGuests, type SiloGuest } from "@/lib/silos";
 import { getBlocks } from "@/lib/services/availability";
 import { buildCalendar } from "./calendar";
+import {
+  sampleIdentities, sampleMessages, sampleDocuments, sampleSeating, sampleRsvps,
+  type PortalIdentity, type PortalMessage, type PortalDocument, type SeatingTable, type Rsvp,
+} from "./portal";
 
 export const liveConfigured = (): boolean => Boolean(getServiceClient());
 
@@ -277,6 +281,65 @@ export async function getCalendar() {
     getEvents(), getSiloGuests(), getBlocks(),
   ]);
   return { live, items: buildCalendar(events, guests, blocks), blocks };
+}
+
+/* --- Portals (client / guest / vendor) ------------------------------------ */
+
+export type PortalBundle = {
+  live: boolean;
+  identity: PortalIdentity | null;
+  messages: PortalMessage[];
+  documents: PortalDocument[];
+  seating: SeatingTable[];
+  rsvps: Rsvp[];
+};
+
+/** Everything the couple's planning portal needs for one booking. */
+export async function getPortalData(leadId: string, weddingSlug?: string): Promise<PortalBundle> {
+  const sb = getServiceClient();
+  if (!sb) {
+    const slug = weddingSlug ?? "hannah-and-wes";
+    return {
+      live: false,
+      identity: sampleIdentities[leadId] ?? sampleIdentities[Object.keys(sampleIdentities)[0]] ?? null,
+      messages: sampleMessages[leadId] ?? [],
+      documents: sampleDocuments[leadId] ?? [],
+      seating: sampleSeating[leadId] ?? [],
+      rsvps: sampleRsvps[slug] ?? [],
+    };
+  }
+  try {
+    const [lead, msgs, docs, tables, rsvpRows] = await Promise.all([
+      sb.from("leads").select("*").eq("id", leadId).maybeSingle(),
+      sb.from("portal_messages").select("*").eq("lead_id", leadId).order("created_at", { ascending: true }),
+      sb.from("documents").select("*").eq("lead_id", leadId).order("created_at", { ascending: false }),
+      sb.from("seating_tables").select("*, seating_assignments(guest_name)").eq("lead_id", leadId),
+      weddingSlug ? sb.from("rsvps").select("*").eq("wedding_slug", weddingSlug) : Promise.resolve({ data: [] }),
+    ]);
+    const l = lead.data as Row | null;
+    const identity: PortalIdentity | null = l
+      ? {
+          leadId,
+          coupleName: str(l.name, "Your Celebration"),
+          eventDate: str(l.event_date),
+          package: str(l.event_type, "Wedding"),
+          totalValue: num(l.budget),
+          balanceDue: 0,
+          coordinator: "The Farm 1893",
+        }
+      : null;
+    return {
+      live: true,
+      identity,
+      messages: (msgs.data ?? []).map((r: Row) => ({ id: str(r.id), leadId, sender: str(r.sender, "staff") as PortalMessage["sender"], body: str(r.body), createdAt: str(r.created_at) })),
+      documents: (docs.data ?? []).map((r: Row) => ({ id: str(r.id), leadId, name: str(r.name), kind: str(r.kind, "other"), url: str(r.path, "#"), uploadedBy: str(r.uploaded_by, "staff") as PortalDocument["uploadedBy"], createdAt: str(r.created_at) })),
+      seating: (tables.data ?? []).map((r: Row) => ({ id: str(r.id), label: str(r.label), capacity: num(r.capacity, 8), guests: ((r.seating_assignments as Row[]) ?? []).map((a) => str(a.guest_name)) })),
+      rsvps: ((rsvpRows.data ?? []) as Row[]).map((r) => ({ id: str(r.id), weddingSlug: str(r.wedding_slug), guestName: str(r.guest_name), email: str(r.email), partySize: num(r.party_size, 1), meal: str(r.meal), status: str(r.status, "attending") as Rsvp["status"] })),
+    };
+  } catch (e) {
+    console.error("[data] getPortalData", e);
+    return { live: true, identity: null, messages: [], documents: [], seating: [], rsvps: [] };
+  }
 }
 
 /** Dashboard KPIs — computed from live leads when configured, else the demo numbers. */

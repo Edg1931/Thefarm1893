@@ -240,6 +240,88 @@ create table if not exists availability_blocks (
 create index if not exists availability_blocks_range_idx on availability_blocks (start_date, end_date);
 create index if not exists availability_blocks_resource_idx on availability_blocks (resource_slug);
 
+-- ============================================================================
+-- PHASE 2 — Portals (client / guest / vendor) + auth
+-- Membership maps a Supabase auth user to a booking; access_tokens back the
+-- zero-account signed links (guest check-in, one-off signing). Messages,
+-- documents, seating, and RSVPs power the authenticated planning portal.
+-- ============================================================================
+
+-- ---- portal membership (auth user -> booking) ------------------------------
+create table if not exists portal_members (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  lead_id uuid references leads(id) on delete cascade,
+  vendor_id uuid references vendors(id) on delete cascade,
+  role text not null default 'couple',   -- couple | vendor
+  created_at timestamptz not null default now()
+);
+create index if not exists portal_members_user_idx on portal_members (user_id);
+
+-- ---- access tokens (revocation / audit for signed links) -------------------
+create table if not exists access_tokens (
+  token text primary key,
+  subject_type text not null,
+  subject_id text not null,
+  scope text not null,
+  expires_at timestamptz,
+  used_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+-- ---- portal messages (couple <-> staff <-> vendor) -------------------------
+create table if not exists portal_messages (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references leads(id) on delete cascade,
+  sender text not null default 'couple',  -- couple | staff | vendor | guest
+  body text not null,
+  channel text default 'portal',
+  created_at timestamptz not null default now()
+);
+create index if not exists portal_messages_lead_idx on portal_messages (lead_id);
+
+-- ---- documents (private file vault per client) -----------------------------
+create table if not exists documents (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references leads(id) on delete cascade,
+  name text not null,
+  path text,
+  kind text default 'other',               -- contract | invoice | insurance | inspiration | other
+  uploaded_by text default 'staff',
+  created_at timestamptz not null default now()
+);
+create index if not exists documents_lead_idx on documents (lead_id);
+
+-- ---- seating chart ---------------------------------------------------------
+create table if not exists seating_tables (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references leads(id) on delete cascade,
+  label text not null,
+  capacity int not null default 8,
+  created_at timestamptz not null default now()
+);
+create table if not exists seating_assignments (
+  id uuid primary key default gen_random_uuid(),
+  table_id uuid references seating_tables(id) on delete cascade,
+  guest_name text not null,
+  rsvp_id uuid,
+  created_at timestamptz not null default now()
+);
+
+-- ---- RSVPs (guest responses -> CRM audience) -------------------------------
+create table if not exists rsvps (
+  id uuid primary key default gen_random_uuid(),
+  wedding_slug text not null,
+  guest_name text not null,
+  email text,
+  party_size int default 1,
+  meal text,
+  status text default 'attending',        -- attending | declined | pending
+  future_couple boolean default false,     -- opted in as a future-wedding lead
+  created_at timestamptz not null default now()
+);
+create index if not exists rsvps_slug_idx on rsvps (wedding_slug);
+
 -- ---- updated_at trigger ----------------------------------------------------
 create or replace function touch_updated_at() returns trigger as $$
 begin
@@ -264,7 +346,9 @@ begin
     'contacts','leads','events','tasks','messages','payments',
     'marketing_content','ai_insights','vendors','silo_guests',
     'room_assignments','registry_contributions','contracts',
-    'dossiers','silo_listings','resources','availability_blocks'
+    'dossiers','silo_listings','resources','availability_blocks',
+    'portal_members','access_tokens','portal_messages','documents',
+    'seating_tables','seating_assignments','rsvps'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);

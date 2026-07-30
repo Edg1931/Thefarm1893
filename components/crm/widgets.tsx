@@ -118,7 +118,7 @@ export function RevenueChart({ data }: { data: { month: string; value: number }[
 export function Panel({
   title, action, children, className,
 }: {
-  title?: string; action?: React.ReactNode; children: React.ReactNode; className?: string;
+  title?: React.ReactNode; action?: React.ReactNode; children: React.ReactNode; className?: string;
 }) {
   return (
     <section className={cn("rounded-2xl bg-parchment p-6 shadow-[var(--shadow-soft)]", className)}>

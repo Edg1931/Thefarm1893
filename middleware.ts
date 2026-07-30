@@ -25,15 +25,21 @@ export async function middleware(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  const path = request.nextUrl.pathname;
+  const staffGated = path.startsWith("/dashboard");
+  const portalGated = path.startsWith("/portal") || path.startsWith("/vendor-portal");
+  // Guest check-in (/checkin/[token]) is intentionally NOT gated here — it's
+  // authorized by its signed token, not a session.
+  if (!user && (staffGated || portalGated)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    loginUrl.searchParams.set("next", path);
+    if (portalGated) loginUrl.searchParams.set("portal", "1");
     return NextResponse.redirect(loginUrl);
   }
   return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/portal/:path*", "/vendor-portal/:path*"],
 };

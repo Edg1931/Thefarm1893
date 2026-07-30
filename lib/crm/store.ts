@@ -105,6 +105,24 @@ export function setDossierOverride(leadId: string, patch: DossierPatch) {
   write(K.dossierOverrides, all);
 }
 
+/* --- Portal: messages & seating (demo persistence in the browser) --------- */
+export type LocalPortalMessage = { id: string; sender: string; body: string; createdAt: string };
+const portalMsgKey = (leadId: string) => `farm1893:portalMsgs:${leadId}`;
+export const getLocalPortalMessages = (leadId: string): LocalPortalMessage[] => read(portalMsgKey(leadId), []);
+export function addLocalPortalMessage(leadId: string, msg: LocalPortalMessage) {
+  write(portalMsgKey(leadId), [...getLocalPortalMessages(leadId), msg]);
+}
+
+export type LocalSeating = { id: string; label: string; capacity: number; guests: string[] };
+const seatingKey = (leadId: string) => `farm1893:seating:${leadId}`;
+export const getLocalSeating = (leadId: string): LocalSeating[] | null => {
+  const v = read<LocalSeating[] | null>(seatingKey(leadId), null);
+  return v;
+};
+export function setLocalSeating(leadId: string, tables: LocalSeating[]) {
+  write(seatingKey(leadId), tables);
+}
+
 function notifySyncError() {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("farm:sync-error"));
 }

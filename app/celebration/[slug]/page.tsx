@@ -148,7 +148,7 @@ export default async function CelebrationPage({ params }: { params: Promise<{ sl
             <Gift className="mx-auto text-brass-soft" />
             <h2 className="mt-4 font-display text-4xl md:text-5xl">Will you join us?</h2>
             <p className="mt-3 text-parchment/75">Kindly reply by August 1, 2026.</p>
-            <RsvpForm coupleName={c.couple} />
+            <RsvpForm coupleName={c.couple} slug={slug} />
             {registry && (
               <a href="#registry" className="mt-6 inline-flex items-center gap-2 rounded-full bg-parchment/10 px-5 py-2.5 text-sm text-brass-soft ring-1 ring-brass/30 transition hover:bg-parchment/20">
                 <Gift size={15} /> Browse our registry &amp; gift funds →
