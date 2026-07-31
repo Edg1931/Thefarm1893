@@ -19,6 +19,16 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Lock body scroll + close on Escape while the mobile drawer is open.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [open]);
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
@@ -67,32 +77,35 @@ export function Header() {
         </button>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — scrollable so the nav + primary CTA never clip */}
       <div
-        className={`fixed inset-0 z-[60] bg-[color:var(--color-ink)] text-parchment transition-opacity duration-300 lg:hidden ${
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!open}
+        className={`fixed inset-0 z-[60] flex flex-col overflow-y-auto overscroll-contain bg-[color:var(--color-ink)] text-parchment transition-opacity duration-300 lg:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
-        <div className="flex items-center justify-between px-6 py-6">
+        <div className="sticky top-0 flex items-center justify-between bg-[color:var(--color-ink)] px-6 py-6">
           <Logo light />
           <button onClick={() => setOpen(false)} aria-label="Close menu" className="p-2">
             <X size={28} className="text-parchment" />
           </button>
         </div>
-        <nav className="mt-8 flex flex-col gap-1 px-8">
+        <nav className="mt-2 flex flex-col gap-1 px-8">
           {nav.map((l, i) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="border-b border-white/10 py-4 font-display text-3xl text-parchment/90"
+              className="border-b border-white/10 py-3.5 font-display text-2xl text-parchment/90"
               style={{ animation: open ? `riseIn 0.5s ${i * 0.05}s both` : undefined }}
             >
               {l.label}
             </Link>
           ))}
         </nav>
-        <div className="mt-10 flex flex-col gap-3 px-8">
+        <div className="mb-8 mt-8 flex flex-col gap-3 px-8">
           <a href={business.phoneHref} className="btn btn-light">
             <Phone size={16} /> {business.phone}
           </a>

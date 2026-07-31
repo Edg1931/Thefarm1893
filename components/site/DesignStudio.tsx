@@ -127,7 +127,7 @@ export function DesignStudio() {
               {result.moodboard.map((src, i) => (
                 <div key={i} className={`group relative overflow-hidden rounded-xl ${i === 0 ? "col-span-2 row-span-2 aspect-square sm:aspect-auto" : "aspect-square"}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt="Wedding mood board" className="h-full w-full object-cover" />
+                  <img src={src} alt="Wedding mood board" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   {/* Palette wash — makes every board read in the chosen colors */}
                   <span
                     className="pointer-events-none absolute inset-0 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-40"

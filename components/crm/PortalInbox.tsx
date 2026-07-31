@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { Send, AlertCircle } from "lucide-react";
 import type { PortalMessage, PortalSender } from "@/lib/crm/portal";
-import { getLocalPortalMessages, addLocalPortalMessage, syncToApi, newId } from "@/lib/crm/store";
+import { getLocalPortalMessages, addLocalPortalMessage, newId } from "@/lib/crm/store";
 
 /**
  * Threaded messaging between the couple and the venue (and vendors). Optimistic:
@@ -17,18 +17,29 @@ export function PortalInbox({ leadId, initial, as = "couple", live = false }: { 
     return [...initial, ...local];
   });
   const [draft, setDraft] = useState("");
+  const [failed, setFailed] = useState<Set<string>>(new Set());
+  const [sending, setSending] = useState(false);
 
-  function send() {
+  async function send() {
     const body = draft.trim();
-    if (!body) return;
+    if (!body || sending) return;
     const msg: PortalMessage = { id: newId("MSG"), leadId, sender: as, body, createdAt: new Date().toISOString() };
     setMessages((m) => [...m, msg]);
     setDraft("");
+    setSending(true);
     if (!live) addLocalPortalMessage(leadId, { id: msg.id, sender: as, body, createdAt: msg.createdAt });
-    syncToApi("/api/portal/messages", "POST", { leadId, sender: as, body });
+    try {
+      const res = await fetch("/api/portal/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ leadId, sender: as, body }) });
+      if (!res.ok) throw new Error("failed");
+    } catch {
+      setFailed((f) => new Set(f).add(msg.id)); // flag, don't pretend it sent
+    } finally {
+      setSending(false);
+    }
   }
 
   const mine = as;
+  const time = (iso: string) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? "" : d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }); };
   return (
     <div className="flex h-full flex-col">
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
@@ -36,11 +47,14 @@ export function PortalInbox({ leadId, initial, as = "couple", live = false }: { 
         {messages.map((m) => {
           const own = m.sender === mine;
           return (
-            <div key={m.id} className={`flex ${own ? "justify-end" : "justify-start"}`}>
+            <div key={m.id} className={`flex flex-col ${own ? "items-end" : "items-start"}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${own ? "bg-brass text-ink" : "bg-bone text-ink-soft"}`}>
                 <p className="mb-0.5 text-[0.62rem] font-semibold uppercase tracking-wider opacity-60">{m.sender}</p>
                 <p className="leading-relaxed">{m.body}</p>
               </div>
+              <p className={`mt-0.5 px-1 text-[0.6rem] ${failed.has(m.id) ? "text-terracotta" : "text-stone"}`}>
+                {failed.has(m.id) ? <span className="inline-flex items-center gap-1"><AlertCircle size={10} /> Not delivered — try again</span> : time(m.createdAt)}
+              </p>
             </div>
           );
         })}
@@ -51,9 +65,10 @@ export function PortalInbox({ leadId, initial, as = "couple", live = false }: { 
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") send(); }}
           placeholder="Write a message…"
+          aria-label="Write a message"
           className="flex-1 rounded-xl border border-ink/10 bg-bone px-4 py-2.5 text-sm text-ink outline-none focus:border-brass"
         />
-        <button onClick={send} aria-label="Send" className="grid h-10 w-10 place-items-center rounded-xl bg-ink text-parchment transition hover:bg-ink/90"><Send size={16} /></button>
+        <button onClick={send} disabled={sending || !draft.trim()} aria-label="Send" className="grid h-10 w-10 place-items-center rounded-xl bg-ink text-parchment transition hover:bg-ink/90 disabled:opacity-40"><Send size={16} /></button>
       </div>
     </div>
   );

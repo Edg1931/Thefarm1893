@@ -52,11 +52,11 @@ export function RsvpForm({ coupleName, slug }: { coupleName: string; slug?: stri
 
   return (
     <form onSubmit={submit} className="mt-8 space-y-3 text-left">
-      <input name="name" required placeholder="Your name" className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
-      <input name="email" type="email" required placeholder="Your email" className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
+      <input name="name" required placeholder="Your name" aria-label="Your name" className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
+      <input name="email" type="email" required placeholder="Your email" aria-label="Your email" className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
       <div className="grid grid-cols-2 gap-3">
-        <input name="attending" type="number" min={1} placeholder="# attending" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
-        <select name="response" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none focus:border-brass">
+        <input name="attending" type="number" min={1} placeholder="# attending" aria-label="Number attending" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none placeholder:text-parchment/40 focus:border-brass" />
+        <select name="response" aria-label="Will you attend?" className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-parchment outline-none focus:border-brass">
           <option className="text-ink">Joyfully accepts</option>
           <option className="text-ink">Regretfully declines</option>
         </select>

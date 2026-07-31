@@ -25,10 +25,20 @@ export function ReceptionistWidget() {
   const [busy, setBusy] = useState(false);
   const [pulse, setPulse] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
+
+  // Move focus into the chat on open; close on Escape.
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => inputRef.current?.focus(), 60);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => { clearTimeout(t); document.removeEventListener("keydown", onKey); };
+  }, [open]);
 
   async function send(text: string) {
     const content = text.trim();
@@ -80,6 +90,11 @@ export function ReceptionistWidget() {
 
       {/* Panel */}
       <div
+        role="dialog"
+        aria-modal="false"
+        aria-label="Rosie — AI concierge chat"
+        aria-hidden={!open}
+        inert={!open || undefined}
         className={`fixed bottom-24 right-5 z-[70] flex w-[calc(100vw-2.5rem)] max-w-[380px] flex-col overflow-hidden rounded-2xl bg-parchment shadow-[0_40px_90px_-30px_rgba(28,26,23,0.6)] transition-all duration-300 ${
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
         }`}
@@ -151,9 +166,11 @@ export function ReceptionistWidget() {
           className="flex items-center gap-2 border-t border-ink/10 bg-parchment px-3 py-3"
         >
           <input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about dates, pricing, tours…"
+            aria-label="Ask Rosie a question"
             className="flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-stone"
           />
           <button

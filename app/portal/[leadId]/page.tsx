@@ -5,6 +5,7 @@ import { PortalInbox } from "@/components/crm/PortalInbox";
 import { SeatingChart } from "@/components/crm/SeatingChart";
 import { DocumentUpload } from "@/components/site/DocumentUpload";
 import { PayButton } from "@/components/site/PayButton";
+import { PlanningTimeline } from "@/components/site/PlanningTimeline";
 import { getPortalData } from "@/lib/crm/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ export default async function PortalPage({ params, searchParams }: {
   const { w } = await searchParams;
   const { live, identity, messages, documents, seating, rsvps } = await getPortalData(leadId, w ?? "hannah-and-wes");
   if (!identity) notFound();
+  const attendingCount = rsvps.filter((r) => r.status !== "declined").length;
 
   return (
     <PortalShell title={identity.coupleName} subtitle={`${identity.package} · ${formatDate(identity.eventDate)}`}>
@@ -62,13 +64,18 @@ export default async function PortalPage({ params, searchParams }: {
         </section>
       </div>
 
+      {/* AI planning timeline — date-aware next-best-actions */}
+      <div className="mt-6">
+        <PlanningTimeline eventDate={identity.eventDate} balanceDue={identity.balanceDue} coupleName={identity.coupleName} />
+      </div>
+
       {/* Seating chart */}
       <section className="mt-6 rounded-2xl border border-ink/8 bg-parchment p-6">
         <div className="mb-2 flex items-center gap-2">
           <Armchair size={18} className="text-brass" />
           <h2 className="font-display text-2xl text-ink">Seating chart</h2>
         </div>
-        <p className="mb-5 text-sm text-stone">Drawn from your RSVP list — {rsvps.filter((r) => r.status !== "declined").length} guest{rsvps.length === 1 ? "" : "s"} responding yes.</p>
+        <p className="mb-5 text-sm text-stone">Drawn from your RSVP list — {attendingCount} guest{attendingCount === 1 ? "" : "s"} responding yes.</p>
         <SeatingChart leadId={leadId} initial={seating} rsvps={rsvps} live={live} />
       </section>
 

@@ -1,12 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 export function GalleryGrid({ images }: { images: string[] }) {
   const [active, setActive] = useState<number | null>(null);
   const wall = images;
+
+  // Lightbox: close on Escape and lock body scroll while open.
+  useEffect(() => {
+    if (active === null) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setActive(null); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [active]);
 
   return (
     <>
@@ -31,15 +41,18 @@ export function GalleryGrid({ images }: { images: string[] }) {
 
       {active !== null && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo ${active + 1} of ${wall.length}`}
           className="fixed inset-0 z-[90] flex items-center justify-center bg-ink/90 p-6 backdrop-blur-sm"
           onClick={() => setActive(null)}
         >
-          <button className="absolute right-6 top-6 text-parchment/80 hover:text-parchment" aria-label="Close">
+          <button autoFocus className="absolute right-6 top-6 text-parchment/80 hover:text-parchment" aria-label="Close photo">
             <X size={32} />
           </button>
           <Image
             src={wall[active]}
-            alt=""
+            alt={`The Farm 1893 — enlarged photo ${active + 1}`}
             width={1400}
             height={1000}
             className="max-h-[85vh] w-auto rounded-lg object-contain shadow-2xl"

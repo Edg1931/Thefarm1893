@@ -36,14 +36,16 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
     );
   }
 
+  const isDemo = token === "demo";
   return (
     <PortalShell title="Welcome to the Farm" subtitle="Everything you need for a smooth arrival.">
-      {token === "demo" && (
-        <div className="mb-6 rounded-xl bg-brass/12 px-4 py-2.5 text-sm text-ink ring-1 ring-brass/25">Demo guidebook — real links are unique per booking.</div>
+      {isDemo && (
+        <div className="mb-6 rounded-xl bg-brass/12 px-4 py-2.5 text-sm text-ink ring-1 ring-brass/25">Demo guidebook — real links carry your booking&apos;s own unique door code &amp; Wi-Fi.</div>
       )}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card icon={KeyRound} title="Door code" value={guidebook.doorCode} note="Same code all weekend. The keypad is to the right of the door." />
-        <Card icon={Wifi} title="Wi-Fi" value={guidebook.wifi.network} note={`Password: ${guidebook.wifi.password}`} />
+        {/* Real bookings get their unique credentials by text; only the demo link shows sample codes. */}
+        <Card icon={KeyRound} title="Door code" value={isDemo ? guidebook.doorCode : "Texted on arrival day"} note={isDemo ? "Same code all weekend. The keypad is to the right of the door." : "We'll send your private keypad code the morning you arrive."} />
+        <Card icon={Wifi} title="Wi-Fi" value={isDemo ? guidebook.wifi.network : "In your welcome text"} note={isDemo ? `Password: ${guidebook.wifi.password}` : "Your network name & password arrive with your door code."} />
         <Card icon={Clock} title="Check-in / out" value={`${guidebook.checkIn} → ${guidebook.checkOut}`} note="Early arrival? Message us and we'll try to accommodate." />
         <Card icon={MapPin} title="Parking" value="Guest lot by the silos" note={guidebook.parking} />
       </div>

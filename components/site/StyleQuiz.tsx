@@ -97,7 +97,7 @@ export function StyleQuiz() {
               {design.moodboard.map((src, i) => (
                 <div key={i} className={`relative overflow-hidden rounded-xl ${i === 0 ? "col-span-2 row-span-2" : ""}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt="Your wedding mood board" className="h-full w-full object-cover" style={{ aspectRatio: i === 0 ? "1" : "1" }} />
+                  <img src={src} alt="Your wedding mood board" loading="lazy" decoding="async" className="h-full w-full object-cover" style={{ aspectRatio: i === 0 ? "1" : "1" }} />
                   <span className="pointer-events-none absolute inset-0 mix-blend-multiply" style={{ background: `linear-gradient(140deg, ${design.palette[0].hex}dd, ${design.palette[3].hex}bb)`, opacity: 0.6 }} />
                 </div>
               ))}

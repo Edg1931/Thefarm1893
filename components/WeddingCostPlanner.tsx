@@ -51,9 +51,11 @@ export function WeddingCostPlanner({
   function setGuestName(id: string, name: string) {
     setRooms((rs) => { const next = rs.map((r) => (r.id === id ? { ...r, guestName: name } : r)); persist(next); return next; });
   }
-  function copyLink(id: string) {
-    navigator.clipboard?.writeText(`https://thefarm1893.vercel.app/pay/room/${id}`).catch(() => {});
-    setCopied(id);
+  function copyLink(room: Room) {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const url = `${origin}/pay?item=${encodeURIComponent(room.name)}&amount=${Math.round(room.price)}&kind=room`;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    setCopied(room.id);
     setTimeout(() => setCopied(null), 1600);
   }
 
@@ -123,7 +125,7 @@ export function WeddingCostPlanner({
 function LodgingGroup({ title, icon: Icon, rooms, note, setMode, setGuestName, copyLink, copied }: {
   title: string; icon: typeof Home; rooms: Room[]; note?: string;
   setMode: (id: string, m: CoveredBy) => void; setGuestName: (id: string, n: string) => void;
-  copyLink: (id: string) => void; copied: string | null;
+  copyLink: (room: Room) => void; copied: string | null;
 }) {
   if (!rooms.length) return null;
   return (
@@ -166,7 +168,7 @@ function LodgingGroup({ title, icon: Icon, rooms, note, setMode, setGuestName, c
                   {r.paid ? (
                     <span className="flex items-center gap-1 rounded-full bg-sage/15 px-3 py-1.5 text-xs font-medium text-sage-deep"><Check size={12} /> Paid</span>
                   ) : (
-                    <button onClick={() => copyLink(r.id)} className="flex items-center gap-1 rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink-soft hover:border-ink/40">
+                    <button onClick={() => copyLink(r)} className="flex items-center gap-1 rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink-soft hover:border-ink/40">
                       {copied === r.id ? <><Check size={12} className="text-sage" /> Copied!</> : <><Link2 size={12} /> Copy pay link</>}
                     </button>
                   )}
