@@ -1,12 +1,21 @@
 import { CalendarClock, ShieldCheck, ShieldAlert, Clock } from "lucide-react";
 import { PortalShell } from "@/components/site/PortalShell";
 import { DocumentUpload } from "@/components/site/DocumentUpload";
+import { PortalAccessNotice } from "@/components/site/PortalAccessNotice";
+import { resolveVendorAccess } from "@/lib/services/portal-access";
 import { sampleVendorSchedule } from "@/lib/crm/portal";
 import { formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Vendor Portal", robots: { index: false } };
 
-export default function VendorPortalPage() {
+// Access depends on the visitor's session — never serve a prerendered copy.
+export const dynamic = "force-dynamic";
+
+export default async function VendorPortalPage() {
+  // Vendors must be signed in and linked as a vendor member (open in demo mode).
+  const access = await resolveVendorAccess();
+  if (!access.ok) return <PortalAccessNotice reason={access.reason} />;
+
   const schedule = sampleVendorSchedule;
   const needsInsurance = schedule.some((s) => !s.insuranceOnFile);
 

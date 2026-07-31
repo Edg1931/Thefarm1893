@@ -26,20 +26,22 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
-  const staffGated = path.startsWith("/dashboard");
-  const portalGated = path.startsWith("/portal") || path.startsWith("/vendor-portal");
-  // Guest check-in (/checkin/[token]) is intentionally NOT gated here — it's
-  // authorized by its signed token, not a session.
-  if (!user && (staffGated || portalGated)) {
+
+  // Staff area: hard redirect to the staff login.
+  if (!user && path.startsWith("/dashboard")) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", path);
-    if (portalGated) loginUrl.searchParams.set("portal", "1");
     return NextResponse.redirect(loginUrl);
   }
+
+  // Guest/client surfaces (/portal, /vendor-portal, /checkin, /sign) are NOT
+  // gated here: they can also be authorized by a signed per-booking token with
+  // no session at all. Each page resolves access itself (see
+  // lib/services/portal-access.ts) and renders a friendly sign-in notice.
   return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/portal/:path*", "/vendor-portal/:path*"],
+  matcher: ["/dashboard/:path*"],
 };

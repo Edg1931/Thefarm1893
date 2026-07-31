@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, MessageCircle, FileText, Users } from "lucide-react";
 import { Panel } from "@/components/crm/widgets";
 import { PortalInbox } from "@/components/crm/PortalInbox";
+import { PortalLinkButton } from "@/components/crm/PortalLinkButton";
 import { getPortalData } from "@/lib/crm/data";
 import { DEMO_LEAD_ID } from "@/lib/crm/portal";
 import { formatDate } from "@/lib/utils";
@@ -21,9 +22,12 @@ export default async function DashboardPortalPage() {
           <p className="mt-1 text-stone">What your couples see — and where you reply to them.</p>
         </div>
         {identity && (
-          <Link href={`/portal/${leadId}`} target="_blank" className="btn btn-ghost !py-2 !text-xs">
-            Open {identity.coupleName}&apos;s portal <ExternalLink size={13} />
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <PortalLinkButton leadId={leadId} />
+            <Link href={`/portal/${leadId}`} target="_blank" className="btn btn-ghost !py-2 !text-xs">
+              Open {identity.coupleName}&apos;s portal <ExternalLink size={13} />
+            </Link>
+          </div>
         )}
       </div>
 
@@ -35,7 +39,12 @@ export default async function DashboardPortalPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel title={<span className="flex items-center gap-2"><MessageCircle size={16} className="text-brass" /> Reply to {identity?.coupleName ?? "client"}</span>}>
-          <div className="h-[360px]"><PortalInbox leadId={leadId} initial={messages} as="staff" live={live} /></div>
+          <div className="h-[360px]">
+            <PortalInbox
+              leadId={leadId} initial={messages} as="staff" live={live}
+              context={identity ? { clientName: identity.coupleName, eventDate: identity.eventDate, packageName: identity.package, balanceDue: identity.balanceDue } : undefined}
+            />
+          </div>
         </Panel>
 
         <div className="space-y-6">

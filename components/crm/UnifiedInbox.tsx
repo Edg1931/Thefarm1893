@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MessageSquare, Bot, Home, Building2, Send } from "lucide-react";
+import { Mail, MessageSquare, Bot, Home, Building2, Send, Sparkles, Loader2 } from "lucide-react";
 import { Panel } from "@/components/crm/widgets";
 import type { Conversation, Channel } from "@/lib/crm/comms";
 
@@ -18,7 +18,33 @@ export function UnifiedInbox({ initial }: { initial: Conversation[] }) {
   const [threads, setThreads] = useState(initial);
   const [activeId, setActiveId] = useState(initial[0]?.id ?? "");
   const [draft, setDraft] = useState("");
+  const [drafting, setDrafting] = useState(false);
+  const [aiNote, setAiNote] = useState<string | null>(null);
   const active = threads.find((t) => t.id === activeId) ?? null;
+
+  /** Ask AI for a reply grounded in this thread's last inbound message. */
+  async function suggestReply() {
+    if (!active || drafting) return;
+    const lastInbound = [...active.messages].reverse().find((m) => m.role === "inbound");
+    if (!lastInbound) { setAiNote("Nothing to reply to yet."); setTimeout(() => setAiNote(null), 3000); return; }
+    setDrafting(true); setAiNote(null);
+    try {
+      const res = await fetch("/api/inbox/draft", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: lastInbound.body, clientName: active.name, channel: active.channel }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.draft) throw new Error(data.error ?? "No draft returned.");
+      setDraft(data.draft);
+      setAiNote(data.mocked ? "Drafted offline — add ANTHROPIC_API_KEY for live AI." : "Drafted by AI — edit before sending.");
+      setTimeout(() => setAiNote(null), 6000);
+    } catch {
+      setAiNote("Couldn't draft a reply. Try again.");
+      setTimeout(() => setAiNote(null), 4000);
+    } finally {
+      setDrafting(false);
+    }
+  }
 
   function send() {
     if (!active || !draft.trim()) return;
@@ -73,9 +99,17 @@ export function UnifiedInbox({ initial }: { initial: Conversation[] }) {
                 );
               })}
             </div>
-            <div className="mt-4 flex items-center gap-2 border-t border-ink/8 pt-4">
-              <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") send(); }} placeholder={`Reply on ${channelMeta[active.channel].label}…`} className="flex-1 rounded-xl border border-ink/10 bg-bone px-4 py-2.5 text-sm outline-none focus:border-brass" />
-              <button onClick={send} aria-label="Send" className="grid h-10 w-10 place-items-center rounded-xl bg-ink text-parchment hover:bg-ink/90"><Send size={16} /></button>
+            <div className="mt-4 border-t border-ink/8 pt-4">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <button onClick={suggestReply} disabled={drafting} className="inline-flex items-center gap-1.5 rounded-full bg-brass/12 px-3 py-1.5 text-xs font-medium text-brass ring-1 ring-brass/25 transition hover:bg-brass/20 disabled:opacity-60">
+                  {drafting ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />} {drafting ? "Drafting…" : "AI suggest reply"}
+                </button>
+                {aiNote && <span className="truncate text-[0.68rem] text-stone">{aiNote}</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") send(); }} placeholder={`Reply on ${channelMeta[active.channel].label}…`} aria-label="Reply message" className="flex-1 rounded-xl border border-ink/10 bg-bone px-4 py-2.5 text-sm outline-none focus:border-brass" />
+                <button onClick={send} disabled={!draft.trim()} aria-label="Send" className="grid h-10 w-10 place-items-center rounded-xl bg-ink text-parchment hover:bg-ink/90 disabled:opacity-40"><Send size={16} /></button>
+              </div>
             </div>
           </div>
         ) : <p className="py-12 text-center text-sm text-stone">Pick a thread to reply.</p>}

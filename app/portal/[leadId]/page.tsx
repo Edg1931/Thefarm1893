@@ -6,6 +6,8 @@ import { SeatingChart } from "@/components/crm/SeatingChart";
 import { DocumentUpload } from "@/components/site/DocumentUpload";
 import { PayButton } from "@/components/site/PayButton";
 import { PlanningTimeline } from "@/components/site/PlanningTimeline";
+import { PortalAccessNotice } from "@/components/site/PortalAccessNotice";
+import { resolvePortalAccess } from "@/lib/services/portal-access";
 import { getPortalData } from "@/lib/crm/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -13,10 +15,16 @@ export const metadata = { title: "Your Planning Portal", robots: { index: false 
 
 export default async function PortalPage({ params, searchParams }: {
   params: Promise<{ leadId: string }>;
-  searchParams: Promise<{ w?: string }>;
+  searchParams: Promise<{ w?: string; t?: string }>;
 }) {
   const { leadId } = await params;
-  const { w } = await searchParams;
+  const { w, t } = await searchParams;
+
+  // Private data — the visitor must hold a signed link for this booking, or be
+  // signed in and bound to it. Open only in demo mode.
+  const access = await resolvePortalAccess(leadId, t);
+  if (!access.ok) return <PortalAccessNotice reason={access.reason} />;
+
   const { live, identity, messages, documents, seating, rsvps } = await getPortalData(leadId, w ?? "hannah-and-wes");
   if (!identity) notFound();
   const attendingCount = rsvps.filter((r) => r.status !== "declined").length;
