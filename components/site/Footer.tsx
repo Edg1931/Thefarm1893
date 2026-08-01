@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Instagram, Facebook, Phone, Mail, MapPin } from "lucide-react";
 import { Logo } from "./Logo";
 import { business, nav } from "@/lib/content";
+import { PhoneLink } from "./PhoneLink";
 
 export function Footer() {
   return (
@@ -46,10 +47,10 @@ export function Footer() {
                 <span>{business.address}</span>
               </li>
               <li>
-                <a href={business.phoneHref} className="flex gap-3 hover:text-parchment">
+                <PhoneLink className="flex gap-3 hover:text-parchment">
                   <Phone size={17} className="mt-0.5 shrink-0 text-brass" />
                   {business.phone}
-                </a>
+                </PhoneLink>
               </li>
               <li>
                 <a href={`mailto:${business.email}`} className="flex gap-3 hover:text-parchment">

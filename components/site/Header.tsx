@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { nav, navPrimary, business } from "@/lib/content";
+import { PhoneLink } from "./PhoneLink";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -59,10 +60,10 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <a href={business.phoneHref} className="flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink">
+          <PhoneLink className="flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink">
             <Phone size={15} className="text-brass" />
             {business.phone}
-          </a>
+          </PhoneLink>
           <Link href="/contact" className="btn btn-primary !py-2.5 !px-6 !text-[0.72rem]">
             Book a Tour
           </Link>
@@ -106,9 +107,9 @@ export function Header() {
           ))}
         </nav>
         <div className="mb-8 mt-8 flex flex-col gap-3 px-8">
-          <a href={business.phoneHref} className="btn btn-light">
+          <PhoneLink className="btn btn-light">
             <Phone size={16} /> {business.phone}
-          </a>
+          </PhoneLink>
           <Link href="/contact" onClick={() => setOpen(false)} className="btn bg-parchment text-ink">
             Book a Tour
           </Link>

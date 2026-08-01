@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Loader2, Phone } from "lucide-react";
 import { business } from "@/lib/content";
+import { PhoneLink } from "./PhoneLink";
 
 /** Guest taps "I've arrived" — records the check-in against the booking token. */
 export function CheckinComplete({ token }: { token: string }) {
@@ -34,7 +35,7 @@ export function CheckinComplete({ token }: { token: string }) {
       {state === "error" && (
         <p className="flex items-center gap-1.5 text-sm text-terracotta">
           That didn&apos;t go through — tap again, or call us at{" "}
-          <a href={business.phoneHref} className="inline-flex items-center gap-1 font-medium underline"><Phone size={13} /> {business.phone}</a>.
+          <PhoneLink className="inline-flex items-center gap-1 font-medium underline"><Phone size={13} /> {business.phone}</PhoneLink>.
         </p>
       )}
     </div>

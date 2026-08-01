@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Phone, Sparkles } from "lucide-react";
 import { business } from "@/lib/content";
+import { PhoneLink } from "./PhoneLink";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -112,9 +113,9 @@ export function ReceptionistWidget() {
                 <span className="inline-block h-2 w-2 rounded-full bg-sage" /> AI Concierge · online 24/7
               </p>
             </div>
-            <a href={business.phoneHref} className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label="Call us">
+            <PhoneLink className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label="Call us">
               <Phone size={16} />
-            </a>
+            </PhoneLink>
           </div>
         </div>
 

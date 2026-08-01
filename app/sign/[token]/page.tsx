@@ -3,6 +3,7 @@ import { PortalShell } from "@/components/site/PortalShell";
 import { SignaturePad } from "@/components/site/SignaturePad";
 import { verifyToken } from "@/lib/services/portal-auth";
 import { business } from "@/lib/content";
+import { PhoneLink } from "@/components/site/PhoneLink";
 
 export const metadata = { title: "Sign your contract", robots: { index: false } };
 
@@ -17,7 +18,7 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
         <div className="rounded-2xl border border-ink/8 bg-parchment p-8 text-center">
           <DoorOpen className="mx-auto text-brass" />
           <p className="mt-3 text-ink-soft">This signing link is invalid or has expired. Reach out and we&apos;ll resend it.</p>
-          <a href={business.phoneHref} className="btn btn-primary mt-5"><Phone size={16} /> Call the Farm</a>
+          <PhoneLink className="btn btn-primary mt-5"><Phone size={16} /> Call the Farm</PhoneLink>
         </div>
       </PortalShell>
     );

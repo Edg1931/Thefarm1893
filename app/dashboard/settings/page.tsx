@@ -1,6 +1,8 @@
 import { Panel } from "@/components/crm/widgets";
 import { DemoButton } from "@/components/crm/DemoButton";
 import { CalendarConnect } from "@/components/crm/CalendarConnect";
+import { GoLiveHealth } from "@/components/crm/GoLiveHealth";
+import { ContentToReplace } from "@/components/crm/ContentToReplace";
 import { Database, Brain, Phone, CreditCard, Share2, Mail, Check, Plug } from "lucide-react";
 
 /** Server component — checks which integrations are wired via env. */
@@ -65,6 +67,12 @@ export default function SettingsPage() {
           (see <code className="rounded bg-white px-1.5 py-0.5 text-xs">.env.example</code>). The app detects them automatically and
           flips the feature from demo mode to live — no code changes needed.
         </p>
+      </div>
+
+      {/* Live database truth + the last placeholder content */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <GoLiveHealth />
+        <ContentToReplace />
       </div>
 
       <Panel>

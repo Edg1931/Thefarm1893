@@ -10,7 +10,10 @@ export type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export const aiEnabled = () => Boolean(process.env.ANTHROPIC_API_KEY);
 
-const MODEL = process.env.AI_MODEL || "claude-opus-4-8";
+// Current, generally-available model. Sonnet is the right default here: Rosie
+// answers every public visitor, so it balances quality against per-call cost.
+// Override with AI_MODEL for a more capable model on the same code path.
+const MODEL = process.env.AI_MODEL || "claude-sonnet-5";
 
 export async function generateText(opts: {
   system: string;

@@ -3,6 +3,7 @@ import { PortalShell } from "@/components/site/PortalShell";
 import { CheckinComplete } from "@/components/site/CheckinComplete";
 import { verifyToken } from "@/lib/services/portal-auth";
 import { business } from "@/lib/content";
+import { PhoneLink } from "@/components/site/PhoneLink";
 
 export const metadata = { title: "Self Check-In", robots: { index: false } };
 
@@ -30,7 +31,7 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
         <div className="rounded-2xl border border-ink/8 bg-parchment p-8 text-center">
           <DoorOpen className="mx-auto text-brass" />
           <p className="mt-3 text-ink-soft">This self check-in link is invalid or has expired. Please reach out and we&apos;ll send a new one right away.</p>
-          <a href={business.phoneHref} className="btn btn-primary mt-5"><Phone size={16} /> Call the Farm</a>
+          <PhoneLink className="btn btn-primary mt-5"><Phone size={16} /> Call the Farm</PhoneLink>
         </div>
       </PortalShell>
     );

@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Inter, Great_Vibes } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { business } from "@/lib/content";
+import { isPlaceholder } from "@/lib/content-flags";
 import { ServiceWorkerRegister } from "@/components/site/ServiceWorkerRegister";
 
 const cormorant = Cormorant_Garamond({
@@ -75,11 +76,12 @@ export default function RootLayout({
     email: business.email,
     url: SITE_URL,
     sameAs: [business.instagram, business.facebook],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5",
-      reviewCount: "48",
-    },
+    // Only publish a rating once the testimonials are real — inventing review
+    // counts in structured data is a Google policy violation, and it would be
+    // reporting reviews that don't exist.
+    ...(isPlaceholder("testimonials")
+      ? {}
+      : { aggregateRating: { "@type": "AggregateRating", ratingValue: "5", reviewCount: "48" } }),
   };
 
   return (

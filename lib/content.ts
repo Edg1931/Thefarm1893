@@ -24,6 +24,24 @@ export const business = {
     "A historic 1893 orchard, reimagined as an intimate all-in-one wedding & gathering venue in the Ohio countryside — ceremony, celebration, and a weekend to stay, all in one unforgettable place.",
 };
 
+/* ---------------------------------------------------------------------------
+   CONTENT STATUS — which pieces are still placeholder.
+   Flip an entry to "real" once you've swapped in the client's genuine content.
+   While an item is "placeholder", the app protects guests from it: the fake
+   phone renders as plain text instead of a tap-to-call link that dials nowhere,
+   and invented review counts stay out of the structured data we publish.
+   The dashboard (Integrations → Content to replace) lists everything still flagged.
+   --------------------------------------------------------------------------- */
+export type ContentKey = "phone" | "pricing" | "testimonials" | "photos";
+export type ContentState = "placeholder" | "real";
+
+export const contentStatus: Record<ContentKey, ContentState> = {
+  phone: "placeholder",       // (419) 555-1893 is a reserved fake number
+  pricing: "placeholder",     // packages below are illustrative
+  testimonials: "placeholder",// sample quotes, not real couples
+  photos: "real",             // client's photos are loaded in the Photos bucket
+};
+
 export type NavLink = { label: string; href: string };
 export const nav: NavLink[] = [
   { label: "The Venue", href: "/venue" },

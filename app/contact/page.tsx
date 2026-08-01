@@ -3,6 +3,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { Reveal } from "@/components/site/Reveal";
 import { LeadForm } from "@/components/site/LeadForm";
 import { business } from "@/lib/content";
+import { PhoneLink } from "@/components/site/PhoneLink";
 
 export const metadata = { title: "Book a Tour" };
 
@@ -27,13 +28,13 @@ export default async function ContactPage({
             </p>
 
             <div className="mt-10 space-y-5">
-              <a href={business.phoneHref} className="flex items-center gap-4 group">
+              <PhoneLink className="flex items-center gap-4 group">
                 <span className="grid h-12 w-12 place-items-center rounded-full bg-white/10 group-hover:bg-white/20"><Phone size={20} className="text-brass-soft" /></span>
                 <span>
                   <span className="block text-xs uppercase tracking-widest text-parchment/50">Call or text</span>
                   <span className="text-lg">{business.phone}</span>
                 </span>
-              </a>
+              </PhoneLink>
               <a href={`mailto:${business.email}`} className="flex items-center gap-4 group">
                 <span className="grid h-12 w-12 place-items-center rounded-full bg-white/10 group-hover:bg-white/20"><Mail size={20} className="text-brass-soft" /></span>
                 <span>

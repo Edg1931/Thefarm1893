@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Lock, Mail, Phone } from "lucide-react";
 import { PortalShell } from "@/components/site/PortalShell";
 import { business } from "@/lib/content";
+import { PhoneLink } from "./PhoneLink";
 
 /**
  * Shown when a visitor isn't (yet) authorized for a portal. `signin` means "we
@@ -28,7 +29,7 @@ export function PortalAccessNotice({ reason }: { reason: "signin" | "denied" }) 
             </p>
             <div className="mt-6 flex flex-col items-center gap-2">
               <Link href="/portal/signin" className="btn btn-primary"><Mail size={16} /> Try a different email</Link>
-              <a href={business.phoneHref} className="btn btn-ghost !py-2 !text-xs"><Phone size={14} /> Call the Farm</a>
+              <PhoneLink className="btn btn-ghost !py-2 !text-xs"><Phone size={14} /> Call the Farm</PhoneLink>
             </div>
           </>
         )}
