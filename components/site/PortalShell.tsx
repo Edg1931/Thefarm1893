@@ -8,7 +8,9 @@ export function PortalShell({ title, subtitle, children }: { title: string; subt
     <div className="min-h-screen bg-bone">
       <header className="border-b border-ink/8 bg-parchment">
         <div className="container-x flex items-center justify-between py-4">
-          <Link href="/"><Logo /></Link>
+          {/* Logo renders its own <Link> — wrapping it produced nested <a> tags,
+              which browsers un-nest during parsing, breaking hydration. */}
+          <Logo />
           <span className="text-xs uppercase tracking-widest text-stone">Planning Portal</span>
         </div>
       </header>

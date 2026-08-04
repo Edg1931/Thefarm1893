@@ -101,6 +101,9 @@ export function ContractsManager({ initial, live }: { initial: ContractRow[]; li
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
+              {rows.length === 0 && (
+                <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-stone">No contracts yet — create one above and send a signing link in a click.</td></tr>
+              )}
               {rows.map((c) => (
                 <tr key={c.id} className="hover:bg-bone/60">
                   <td className="px-5 py-4"><p className="font-medium text-ink">{c.client}</p><p className="text-xs text-stone">{c.id}</p></td>

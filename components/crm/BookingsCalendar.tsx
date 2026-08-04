@@ -108,11 +108,11 @@ export function BookingsCalendar({
   const selectedEvents = selected ? events.get(selected) ?? [] : null;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+    <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr] [&>*]:min-w-0">
       <Panel
         title={monthName}
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <button onClick={() => shift(-1)} aria-label="Previous month" className="grid h-8 w-8 place-items-center rounded-lg bg-bone text-ink-soft hover:bg-linen"><ChevronLeft size={16} /></button>
             <button onClick={() => { setView({ y: now.getFullYear(), m: now.getMonth() }); setSelected(null); }} className="rounded-lg bg-bone px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-linen">Today</button>
             <button onClick={() => shift(1)} aria-label="Next month" className="grid h-8 w-8 place-items-center rounded-lg bg-bone text-ink-soft hover:bg-linen"><ChevronRight size={16} /></button>
@@ -127,11 +127,11 @@ export function BookingsCalendar({
           <Legend color="bg-stone/70" label="Blocked" />
         </div>
         <div className="grid grid-cols-7 gap-1.5 text-center text-[0.7rem] uppercase tracking-wider text-stone">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => <div key={d} className="pb-1">{d}</div>)}
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => <div key={d} className="min-w-0 truncate pb-1">{d}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-1.5">
           {cells.map((d, i) => {
-            if (!d) return <div key={i} className="min-h-[78px]" />;
+            if (!d) return <div key={i} className="min-h-[78px] min-w-0" />;
             const date = new Date(view.y, view.m, d);
             const dayIso = iso(date);
             const evs = events.get(dayIso);
@@ -143,7 +143,7 @@ export function BookingsCalendar({
               <button
                 key={i}
                 onClick={() => setSelected(isSelected ? null : dayIso)}
-                className={`min-h-[78px] rounded-lg border p-1.5 text-left transition hover:border-brass/50 ${
+                className={`min-h-[78px] min-w-0 overflow-hidden rounded-lg border p-1.5 text-left transition hover:border-brass/50 ${
                   isSelected ? "border-brass ring-2 ring-brass/40 bg-brass/5"
                   : isToday ? "border-brass ring-1 ring-brass/40 bg-brass/5"
                   : isBooked ? "border-sage/40 bg-sage/8"

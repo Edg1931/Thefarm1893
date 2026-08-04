@@ -8,8 +8,12 @@ export const metadata = { title: "Venue OS — Dashboard" };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { properties } = await getProperties();
+  // Column on mobile so the Sidebar's mobile top-bar stacks ABOVE the content;
+  // a flex row from lg up where the desktop sidebar sits alongside it. (As a
+  // row at every width, the mobile bar became a sibling column and squeezed the
+  // dashboard to ~220px on a phone.)
   return (
-    <div className="flex min-h-screen bg-[color:var(--color-linen)]">
+    <div className="min-h-screen bg-[color:var(--color-linen)] lg:flex">
       <Sidebar properties={properties} />
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Topbar */}

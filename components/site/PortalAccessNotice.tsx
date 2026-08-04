@@ -29,7 +29,8 @@ export function PortalAccessNotice({ reason }: { reason: "signin" | "denied" }) 
             </p>
             <div className="mt-6 flex flex-col items-center gap-2">
               <Link href="/portal/signin" className="btn btn-primary"><Mail size={16} /> Try a different email</Link>
-              <PhoneLink className="btn btn-ghost !py-2 !text-xs"><Phone size={14} /> Call the Farm</PhoneLink>
+              <PhoneLink className="btn btn-ghost !py-2.5 !text-xs" fallbackHref="/contact"
+                fallbackChildren={<><Phone size={14} /> Contact the Farm</>}><Phone size={14} /> Call the Farm</PhoneLink>
             </div>
           </>
         )}

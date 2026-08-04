@@ -103,6 +103,9 @@ export function VendorManager({ initial = seed, live = false }: { initial?: Vend
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
+              {vendors.length === 0 && (
+                <tr><td colSpan={8} className="px-5 py-12 text-center text-sm text-stone">No vendors yet — invite a partner or import one from their website above.</td></tr>
+              )}
               {vendors.map((v) => {
                 const conv = v.referralsSent ? Math.round((v.bookedFromReferrals / v.referralsSent) * 100) : 0;
                 const prof = profiles[v.id];

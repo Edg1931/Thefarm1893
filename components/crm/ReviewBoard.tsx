@@ -42,6 +42,12 @@ export function ReviewBoard({ reviews, summary }: { reviews: Review[]; summary: 
         )}
       </Panel>
 
+      {reviews.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-ink/15 bg-bone p-10 text-center">
+          <p className="font-display text-xl text-ink">No reviews yet</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-stone">Send your first request above — reviews are the strongest lever you have for both Google and AI search.</p>
+        </div>
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         {reviews.map((r) => (
           <div key={r.id} className="rounded-2xl border border-ink/8 bg-parchment p-5">

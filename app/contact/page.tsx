@@ -78,7 +78,7 @@ export default async function ContactPage({
             title="The Farm 1893 location"
             className="h-full w-full grayscale-[0.3]"
             loading="lazy"
-            src="https://www.google.com/maps?q=Berlin+Heights+Ohio&output=embed"
+            src="https://www.google.com/maps?q=12316+Berlin+Road,+Berlin+Heights,+OH+44814&output=embed"
           />
         </div>
       </section>

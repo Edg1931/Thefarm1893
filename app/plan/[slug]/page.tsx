@@ -11,7 +11,7 @@ import { formatDate } from "@/lib/utils";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const b = getBudget(slug);
-  return { title: b ? `${b.coupleName} · Cost Planner` : "Cost Planner" };
+  return { title: b ? `${b.coupleName} · Cost Planner` : "Cost Planner", robots: { index: false, follow: false } };
 }
 
 export default async function PlanPage({ params }: { params: Promise<{ slug: string }> }) {

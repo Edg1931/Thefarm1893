@@ -85,6 +85,9 @@ export function ContactsManager({ initial = seed, live = false, examples = [] }:
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
+              {contacts.length === 0 && (
+                <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-stone">No contacts yet — new inquiries from the website land here automatically.</td></tr>
+              )}
               {[...examples, ...contacts].map((l) => {
                 const isNew = addedIds.has(l.id);
                 const isExample = exampleIds.has(l.id);

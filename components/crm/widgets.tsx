@@ -123,7 +123,7 @@ export function Panel({
   return (
     <section className={cn("rounded-2xl bg-parchment p-6 shadow-[var(--shadow-soft)]", className)}>
       {title && (
-        <header className="mb-5 flex items-center justify-between">
+        <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <h3 className="font-display text-2xl text-ink">{title}</h3>
           {action}
         </header>

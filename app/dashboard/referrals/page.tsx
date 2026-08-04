@@ -44,6 +44,9 @@ export default function ReferralsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
+              {referrals.length === 0 && (
+                <tr><td colSpan={5} className="px-5 py-12 text-center text-sm text-stone">No referrals yet — share your ambassador link to start tracking them here.</td></tr>
+              )}
               {referrals.map((r, i) => (
                 <tr key={i} className="hover:bg-bone/60">
                   <td className="px-5 py-4 font-medium text-ink">{r.advocate}</td>

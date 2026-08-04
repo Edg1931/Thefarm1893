@@ -36,6 +36,9 @@ export function AutomationBuilder({ initial, live }: { initial: Automation[]; li
           <button type="submit" className="btn btn-primary !py-2 !text-xs">Add</button>
         </form>
       )}
+      {rules.length === 0 && (
+        <p className="rounded-xl bg-bone p-6 text-center text-sm text-stone">No rules yet — add one above to start nurturing leads automatically.</p>
+      )}
       <ul className="space-y-2">
         {rules.map((a) => (
           <li key={a.id} className="flex items-center justify-between rounded-xl bg-bone p-3">

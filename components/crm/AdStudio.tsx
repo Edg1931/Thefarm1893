@@ -40,7 +40,8 @@ const GOALS = [
 ];
 const TONES = ["Warm & rustic-luxe", "Fun & playful", "Elevated & luxurious", "Cozy & down-to-earth", "Urgent & scarcity"];
 
-const DEFAULT_CONNECTED = new Set(["instagram", "facebook", "email"]);
+// No channel is really connected until OAuth is wired — don't pretend otherwise.
+const DEFAULT_CONNECTED = new Set<string>();
 
 export function AdStudio() {
   const [connected, setConnected] = useState<Set<string>>(new Set(DEFAULT_CONNECTED));
@@ -91,10 +92,12 @@ export function AdStudio() {
       platform: current.label,
       text: edited.slice(0, 90),
       when: when ? new Date(when).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }) : "Queued",
-      status: launch ? (isPaid ? "Live ad" : "Published") : "Scheduled",
+      status: launch ? "Ready to publish" : "Scheduled",
       image: photo,
     }, ...q]);
-    setToast(launch ? (isPaid ? `Ad launched to ${current.label} 🚀` : `Published to ${current.label} ✓`) : `Scheduled to ${current.label} ✓`);
+    setToast(launch
+      ? `Saved to your ${current.label} queue — connect ${current.label} to publish.`
+      : `Scheduled in your ${current.label} queue ✓`);
     setTimeout(() => setToast(""), 2600);
   }
 
@@ -118,12 +121,12 @@ export function AdStudio() {
               <button key={c.key} onClick={() => toggleConnect(c.key)}
                 className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition ${on ? "border-sage/40 bg-sage/10 text-sage-deep" : "border-ink/15 bg-white text-stone hover:border-ink/40"}`}>
                 <c.icon size={14} /> {c.label}
-                {on ? <Check size={12} /> : <span className="text-[0.6rem] uppercase tracking-wide text-brass">Connect</span>}
+                {on ? <Check size={12} /> : <span className="text-[0.6rem] uppercase tracking-wide text-brass">Not connected</span>}
               </button>
             );
           })}
         </div>
-        <p className="mt-2 text-xs text-stone">Connect your accounts to publish and run ads directly. (OAuth activates with your Meta / Google / TikTok keys.)</p>
+        <p className="mt-2 text-xs text-stone">Drafts are saved to your queue. Publishing directly activates once you connect accounts in <a href="/dashboard/settings" className="text-brass hover:underline">Integrations</a> (Meta / Google / TikTok keys).</p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
@@ -204,7 +207,9 @@ export function AdStudio() {
             <div className="mt-4 flex flex-wrap gap-3">
               <button onClick={() => schedule(false)} disabled={!edited.trim()} className="btn btn-ghost !py-2.5 disabled:opacity-50"><CalendarPlus size={15} /> Schedule</button>
               <button onClick={() => schedule(true)} disabled={!edited.trim()} className="btn btn-primary !py-2.5 disabled:opacity-50">
-                {boost && isPaid ? <><Rocket size={15} /> Launch Ad{boost ? ` · $${budget}` : ""}</> : <><Check size={15} /> Publish Now</>}
+                {/* Nothing is posted or charged until channels are connected —
+                    label the action for what it actually does today. */}
+                {boost && isPaid ? <><Rocket size={15} /> Queue Ad{boost ? ` · $${budget} budget` : ""}</> : <><Check size={15} /> Add to Queue</>}
               </button>
             </div>
           </div>

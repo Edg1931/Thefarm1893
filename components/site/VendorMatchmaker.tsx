@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Sparkles, Loader2, Star, MapPin, Wand2 } from "lucide-react";
 import { vendorCategories, type Vendor } from "@/lib/content";
+import Link from "next/link";
 
 const STYLES = ["Timeless & elegant", "Rustic & cozy", "Modern & minimal", "Boho & whimsical", "Moody & dramatic"];
 const BUDGETS = [
@@ -17,6 +18,7 @@ export function VendorMatchmaker() {
   const [budget, setBudget] = useState<"$" | "$$" | "$$$">("$$");
   const [cats, setCats] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [picks, setPicks] = useState<Vendor[] | null>(null);
   const [rationale, setRationale] = useState("");
 
@@ -27,15 +29,21 @@ export function VendorMatchmaker() {
   async function build() {
     setLoading(true);
     setPicks(null);
+    setError(false);
     try {
       const res = await fetch("/api/vendor-match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ style, budget, categories: cats }),
       });
+      if (!res.ok) throw new Error("request failed");
       const data = await res.json();
       setPicks(data.picks ?? []);
       setRationale(data.rationale ?? "");
+    } catch {
+      // Previously this rejected unhandled and the UI just returned to idle
+      // with no explanation.
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -89,6 +97,12 @@ export function VendorMatchmaker() {
         Build My Dream Team
       </button>
 
+      {error && (
+        <p className="mt-3 rounded-xl bg-terracotta/10 px-4 py-3 text-sm text-terracotta ring-1 ring-terracotta/25">
+          We couldn&apos;t build your team just now — please try again, or <Link href="/contact" className="font-medium underline">tell us what you&apos;re looking for</Link> and we&apos;ll match you personally.
+        </p>
+      )}
+
       {picks && (
         <div className="animate-rise mt-7">
           {rationale && (
@@ -111,7 +125,7 @@ export function VendorMatchmaker() {
               </div>
             ))}
           </div>
-          <a href="/contact" className="btn btn-ghost mt-4 w-full !py-2.5 !text-xs">Request This Team →</a>
+          <Link href="/contact" className="btn btn-ghost mt-4 w-full !py-2.5 !text-xs">Request This Team →</Link>
         </div>
       )}
     </div>

@@ -34,6 +34,9 @@ export function CouponManager({ initial }: { initial: Coupon[] }) {
           <button type="submit" className="btn btn-primary !py-2 !text-xs">Create</button>
         </form>
       )}
+      {coupons.length === 0 && (
+        <p className="rounded-xl bg-bone p-6 text-center text-sm text-stone">No promo codes yet — create one to run a weekday or off-season offer.</p>
+      )}
       <ul className="space-y-2">
         {coupons.map((c) => {
           const ok = couponValid(c);

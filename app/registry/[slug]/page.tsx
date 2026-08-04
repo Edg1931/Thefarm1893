@@ -8,7 +8,7 @@ import { Logo } from "@/components/site/Logo";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const r = getRegistry(slug);
-  return { title: r ? `${r.coupleName} · Registry` : "Registry" };
+  return { title: r ? `${r.coupleName} · Registry` : "Registry", robots: { index: false, follow: false } };
 }
 
 export default async function RegistryPage({ params }: { params: Promise<{ slug: string }> }) {

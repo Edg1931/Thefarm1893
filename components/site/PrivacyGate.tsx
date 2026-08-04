@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Lock, LockOpen, X } from "lucide-react";
+import { useModalClose } from "@/lib/useModalClose";
 
 /**
  * Guest-facing privacy gate for the wedding microsite. Sections the couple marked
@@ -79,8 +80,7 @@ export function PrivacyGate({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm" onClick={() => setOpen(false)}>
-          <div className="relative w-full max-w-sm rounded-2xl bg-parchment p-7 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <UnlockDialog onClose={() => setOpen(false)}>
             <button onClick={() => setOpen(false)} aria-label="Close" className="absolute right-4 top-4 text-stone hover:text-ink"><X size={20} /></button>
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brass/15"><Lock className="text-brass" size={26} /></div>
             <h3 className="mt-4 font-display text-2xl text-ink">Just for our guests 💛</h3>
@@ -88,6 +88,7 @@ export function PrivacyGate({
             <form onSubmit={submit} className="mt-5">
               <input
                 autoFocus
+                aria-label="Invite code"
                 value={entry}
                 onChange={(e) => { setEntry(e.target.value); setError(false); }}
                 placeholder="Invite code"
@@ -96,9 +97,31 @@ export function PrivacyGate({
               {error && <p className="mt-2 text-xs text-terracotta">That code doesn&apos;t match — check your invitation.</p>}
               <button type="submit" className="btn btn-primary mt-4 w-full"><LockOpen size={16} /> Unlock</button>
             </form>
-          </div>
-        </div>
+        </UnlockDialog>
       )}
     </>
+  );
+}
+
+
+/** The unlock dialog itself — split out so it can use the shared modal hook
+ *  (Escape to close, focus trap, focus restore), which hooks can't do inside a
+ *  conditional render. */
+function UnlockDialog({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useModalClose(onClose, ref);
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Enter your invite code"
+        className="relative w-full max-w-sm rounded-2xl bg-parchment p-7 text-center shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
   );
 }

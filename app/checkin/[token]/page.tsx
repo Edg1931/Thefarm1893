@@ -31,7 +31,8 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
         <div className="rounded-2xl border border-ink/8 bg-parchment p-8 text-center">
           <DoorOpen className="mx-auto text-brass" />
           <p className="mt-3 text-ink-soft">This self check-in link is invalid or has expired. Please reach out and we&apos;ll send a new one right away.</p>
-          <PhoneLink className="btn btn-primary mt-5"><Phone size={16} /> Call the Farm</PhoneLink>
+          <PhoneLink className="btn btn-primary mt-5" fallbackHref="/contact"
+            fallbackChildren={<><Phone size={16} /> Get a new link</>}><Phone size={16} /> Call the Farm</PhoneLink>
         </div>
       </PortalShell>
     );

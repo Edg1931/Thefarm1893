@@ -55,6 +55,9 @@ export function StaffManager({ initial, live }: { initial: StaffMember[]; live: 
               <tr><th className="px-5 py-3.5 font-medium">Name</th><th className="px-5 py-3.5 font-medium">Role</th><th className="px-5 py-3.5 font-medium">Permissions</th><th className="px-5 py-3.5 font-medium">Rate</th><th className="px-5 py-3.5 font-medium">Time clock</th><th className="px-5 py-3.5 font-medium">Active</th></tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
+              {staff.length === 0 && (
+                <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-stone">No staff yet — add your team to enable permissions, the time clock, and payroll reporting.</td></tr>
+              )}
               {staff.map((m) => (
                 <tr key={m.id} className="hover:bg-bone/60">
                   <td className="px-5 py-3.5 font-medium text-ink">{m.name}</td>

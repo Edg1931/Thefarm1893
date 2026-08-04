@@ -49,6 +49,12 @@ export function MaintenanceSchedule({ initial, live }: { initial: MaintenanceAss
         </Panel>
       )}
 
+      {assets.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-ink/15 bg-bone p-10 text-center">
+          <p className="font-display text-xl text-ink">No assets tracked yet</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-stone">Add your HVAC, pool, septic, and grounds equipment to get ahead of every service date.</p>
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         {assets.map((a) => {
           const Icon = kindIcon[a.kind] ?? Wrench;

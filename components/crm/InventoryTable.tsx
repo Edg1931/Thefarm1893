@@ -56,6 +56,9 @@ export function InventoryTable({ initial, live }: { initial: InventoryItem[]; li
               <tr><th className="px-5 py-3.5 font-medium">Item</th><th className="px-5 py-3.5 font-medium">Category</th><th className="px-5 py-3.5 font-medium">On hand</th><th className="px-5 py-3.5 font-medium">Par</th><th className="px-5 py-3.5 font-medium">Adjust</th></tr>
             </thead>
             <tbody className="divide-y divide-ink/6">
+              {items.length === 0 && (
+                <tr><td colSpan={5} className="px-5 py-12 text-center text-sm text-stone">Nothing tracked yet — add tables, chairs, and linens to get low-stock alerts.</td></tr>
+              )}
               {items.map((i) => {
                 const lo = i.quantity < i.parLevel;
                 return (

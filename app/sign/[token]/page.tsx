@@ -18,7 +18,8 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
         <div className="rounded-2xl border border-ink/8 bg-parchment p-8 text-center">
           <DoorOpen className="mx-auto text-brass" />
           <p className="mt-3 text-ink-soft">This signing link is invalid or has expired. Reach out and we&apos;ll resend it.</p>
-          <PhoneLink className="btn btn-primary mt-5"><Phone size={16} /> Call the Farm</PhoneLink>
+          <PhoneLink className="btn btn-primary mt-5" fallbackHref="/contact"
+            fallbackChildren={<><Phone size={16} /> Get a new link</>}><Phone size={16} /> Call the Farm</PhoneLink>
         </div>
       </PortalShell>
     );

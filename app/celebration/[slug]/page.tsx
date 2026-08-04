@@ -19,7 +19,7 @@ import { formatDate } from "@/lib/utils";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const c = getCelebration(slug);
-  return { title: c ? `${c.couple} · ${formatDate(c.date)}` : "Celebration" };
+  return { title: c ? `${c.couple} · ${formatDate(c.date)}` : "Celebration", robots: { index: false, follow: false } };
 }
 
 export default async function CelebrationPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -82,7 +82,7 @@ export function SeatingChart({ leadId, initial, rsvps, live = false }: { leadId:
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-stone"><b className="text-ink">{seated}</b> seated · <b className="text-ink">{unassigned.length}</b> still to place</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={autoArrange} disabled={unassigned.length === 0} className="btn btn-primary !py-2 !text-xs disabled:opacity-50"><Sparkles size={14} /> Auto-arrange</button>
           <button onClick={addTable} className="btn btn-ghost !py-2 !text-xs"><Plus size={14} /> Add table</button>
         </div>

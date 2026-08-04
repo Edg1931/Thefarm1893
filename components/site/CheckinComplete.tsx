@@ -33,9 +33,17 @@ export function CheckinComplete({ token }: { token: string }) {
         {state === "busy" ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} I&apos;ve arrived — check me in
       </button>
       {state === "error" && (
-        <p className="flex items-center gap-1.5 text-sm text-terracotta">
-          That didn&apos;t go through — tap again, or call us at{" "}
-          <PhoneLink className="inline-flex items-center gap-1 font-medium underline"><Phone size={13} /> {business.phone}</PhoneLink>.
+        /* flex-wrap matters here: this is the one surface that's almost always
+           a phone, and the sentence + number must wrap rather than squeeze. */
+        <p className="flex flex-wrap items-center justify-center gap-1.5 text-center text-sm text-terracotta">
+          That didn&apos;t go through — tap again, or reach us at{" "}
+          <PhoneLink
+            className="inline-flex items-center gap-1 font-medium underline"
+            fallbackHref="/contact"
+            fallbackChildren={<><Phone size={13} /> contact us</>}
+          >
+            <Phone size={13} /> {business.phone}
+          </PhoneLink>.
         </p>
       )}
     </div>

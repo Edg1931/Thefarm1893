@@ -499,11 +499,36 @@ export async function getConversations() {
   try {
     const { data, error } = await sb.from("conversations").select("*").order("last_at", { ascending: false }).limit(200);
     if (error) throw error;
-    // Threads are summarized here; message bodies load per-thread in the inbox.
-    const conversations = (data ?? []).map((r: Row) => ({
-      id: str(r.id), name: str(r.name, "Guest"), channel: (str(r.channel, "email") as import("./comms").Channel),
-      preview: "", lastAt: str(r.last_at), unread: Boolean(r.unread), messages: [],
-    }));
+    const rows = (data ?? []) as Row[];
+
+    // Pull the messages for these threads in one query. Without this every live
+    // thread opened to a permanently empty pane (and AI reply drafts had
+    // nothing to work from), since nothing ever loaded the bodies.
+    const leadIds = [...new Set(rows.map((r) => str(r.lead_id)).filter(Boolean))];
+    const byLead = new Map<string, { role: "inbound" | "outbound" | "ai"; body: string; at: string }[]>();
+    if (leadIds.length) {
+      const { data: msgs } = await sb
+        .from("messages")
+        .select("lead_id, role, body, created_at")
+        .in("lead_id", leadIds)
+        .order("created_at", { ascending: true })
+        .limit(1000);
+      for (const m of (msgs ?? []) as Row[]) {
+        const k = str(m.lead_id);
+        const list = byLead.get(k) ?? [];
+        list.push({ role: (str(m.role, "inbound") as "inbound" | "outbound" | "ai"), body: str(m.body), at: str(m.created_at) });
+        byLead.set(k, list);
+      }
+    }
+
+    const conversations = rows.map((r: Row) => {
+      const messages = byLead.get(str(r.lead_id)) ?? [];
+      return {
+        id: str(r.id), name: str(r.name, "Guest"), channel: (str(r.channel, "email") as import("./comms").Channel),
+        preview: messages[messages.length - 1]?.body?.slice(0, 80) ?? "",
+        lastAt: str(r.last_at), unread: Boolean(r.unread), messages,
+      };
+    });
     return { live: true, conversations };
   } catch (e) { console.error("[data] getConversations", e); return { live: true, conversations: [] }; }
 }

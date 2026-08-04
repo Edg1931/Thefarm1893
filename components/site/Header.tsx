@@ -38,9 +38,12 @@ export function Header() {
           : "bg-transparent py-6"
       }`}
     >
+      {/* Over a hero photo (not scrolled) everything must render LIGHT — the dark
+          ink palette was invisible against the hero's dark scrim. Once the bar
+          picks up its bone background on scroll, revert to the ink palette. */}
       <div className="container-x flex items-center justify-between">
-        <div className={scrolled ? "" : "drop-shadow-sm"}>
-          <Logo />
+        <div className={scrolled ? "" : "drop-shadow-md"}>
+          <Logo light={!scrolled} />
         </div>
 
         <nav className="hidden items-center gap-6 lg:flex">
@@ -51,7 +54,11 @@ export function Header() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`link-underline text-[0.82rem] font-medium uppercase tracking-[0.14em] transition-colors hover:text-ink ${active ? "text-ink" : "text-ink-soft"}`}
+                className={`link-underline text-[0.82rem] font-medium uppercase tracking-[0.14em] transition-colors ${
+                  scrolled
+                    ? `hover:text-ink ${active ? "text-ink" : "text-ink-soft"}`
+                    : `drop-shadow-sm hover:text-white ${active ? "text-white" : "text-white/85"}`
+                }`}
               >
                 {l.label}
               </Link>
@@ -60,17 +67,22 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <PhoneLink className="flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink">
-            <Phone size={15} className="text-brass" />
+          <PhoneLink className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+            scrolled ? "text-ink-soft hover:text-ink" : "text-white/90 drop-shadow-sm hover:text-white"
+          }`}>
+            <Phone size={15} className={scrolled ? "text-brass" : "text-brass-soft"} />
             {business.phone}
           </PhoneLink>
-          <Link href="/contact" className="btn btn-primary !py-2.5 !px-6 !text-[0.72rem]">
+          <Link
+            href="/contact"
+            className={`btn !py-2.5 !px-6 !text-[0.72rem] ${scrolled ? "btn-primary" : "bg-parchment text-ink hover:bg-white"}`}
+          >
             Book a Tour
           </Link>
         </div>
 
         <button
-          className="lg:hidden p-2 text-ink"
+          className={`lg:hidden p-2 transition-colors ${scrolled ? "text-ink" : "text-white drop-shadow-md"}`}
           onClick={() => setOpen(true)}
           aria-label="Open menu"
         >

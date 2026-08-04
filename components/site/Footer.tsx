@@ -65,12 +65,13 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-parchment/40 md:flex-row">
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-parchment/70 md:flex-row">
           <p>© {new Date().getFullYear()} {business.name}. All rights reserved.</p>
           <p className="font-script text-lg text-brass-soft">Est. {business.established}</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-parchment/70">Privacy</Link>
-            <Link href="/dashboard" className="hover:text-parchment/70">Venue Login</Link>
+            <Link href="/login" className="hover:text-parchment/70">Venue Login</Link>
+            <Link href="/portal/signin" className="hover:text-parchment/70">Couples &amp; Vendors</Link>
           </div>
         </div>
       </div>

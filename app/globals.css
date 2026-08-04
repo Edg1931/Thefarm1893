@@ -18,7 +18,9 @@
   --color-terracotta: #b0563b; /* muted apple red accent */
   --color-brass: #b18f57;      /* aged gold / luxe accent */
   --color-brass-soft: #cbb488;
-  --color-stone: #8b8175;      /* muted taupe text */
+  --color-stone: #736a5e;      /* muted taupe text — darkened from #8b8175 to pass
+                                  WCAG AA (4.5:1) on bone/parchment/linen; it is the
+                                  default secondary-text token used ~350 times */
   --color-stone-soft: #b7ad9f;
 
   /* — Fonts (wired to next/font CSS vars) — */
