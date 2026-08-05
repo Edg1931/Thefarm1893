@@ -61,6 +61,22 @@ export async function GET() {
       checks.push({ key: "seed", ok: false, label: "Bookable resources seeded", detail: "Could not read the resources table — has schema.sql been run?" });
     }
 
+    // 2b. Fee schedule. The app falls back to the default rate card when this
+    // is empty, so nothing breaks — but edits made in the UI won't have a row
+    // to land on until seed.sql's fee_types block has run.
+    try {
+      const { count } = await sb.from("fee_types").select("code", { count: "exact", head: true });
+      const n = count ?? 0;
+      checks.push({
+        key: "fees", ok: n > 0, label: "Billable fee schedule",
+        detail: n > 0
+          ? `${n} fee type${n === 1 ? "" : "s"} configured (outside vendor, late checkout, walkthroughs).`
+          : "Run the fee_types block in supabase/seed.sql — the app is using built-in default rates.",
+      });
+    } catch {
+      checks.push({ key: "fees", ok: false, label: "Billable fee schedule", detail: "Could not read fee_types — has the latest schema.sql been run?" });
+    }
+
     // 3. Private documents bucket for portal/contract/insurance uploads.
     try {
       const { data } = await sb.storage.listBuckets();
