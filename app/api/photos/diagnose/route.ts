@@ -139,8 +139,10 @@ export async function GET() {
     problem = `There's no bucket named "${BUCKET}". Found: ${buckets.map((b) => b.name).join(", ") || "none"}.`;
     fix = `Storage → New bucket → name it exactly "${BUCKET}" → mark it PUBLIC.`;
   } else if (!bucket.public) {
-    problem = `The "${BUCKET}" bucket is PRIVATE, so every image URL is rejected by Supabase even though the files are there.`;
-    fix = `Storage → ${BUCKET} → Settings → make the bucket public.`;
+    // No longer fatal — the site signs URLs when the bucket is private — but
+    // public URLs are cacheable and cheaper, so it's still worth flagging.
+    problem = `The "${BUCKET}" bucket is PRIVATE. Photos still display (the site signs each URL), but public URLs are faster and cacheable.`;
+    fix = `Storage → ${BUCKET} → ⋯ → Make public.`;
   } else if (totalImages === 0 && rootEntries.length > 0) {
     const folders = rootEntries.filter((r) => r.kind === "folder").map((r) => r.name);
     const loose = rootEntries.filter((r) => r.kind === "file").length;

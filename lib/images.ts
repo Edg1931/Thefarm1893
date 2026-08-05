@@ -34,6 +34,56 @@ function publicUrl(path: string): string {
 }
 
 /**
+ * Is the bucket flagged public?
+ *
+ * This matters because the two halves of the job have different requirements.
+ * We LIST with the service-role key, which ignores the flag entirely — so a
+ * private bucket lists perfectly. But the `/object/public/…` URL we hand the
+ * browser is rejected unless the bucket is public. The result is a page that
+ * finds every photo and displays none of them, with no error on either side.
+ *
+ * Rather than depend on the flag being set correctly, sign the URLs when it
+ * isn't. Photos then work either way.
+ */
+let publicFlag: { at: number; value: boolean } | null = null;
+
+async function bucketIsPublic(sb: NonNullable<ReturnType<typeof storageClient>>): Promise<boolean> {
+  if (publicFlag && Date.now() - publicFlag.at < 300_000) return publicFlag.value;
+  try {
+    const { data, error } = await sb.storage.getBucket(BUCKET);
+    if (error) throw error;
+    const value = Boolean(data?.public);
+    publicFlag = { at: Date.now(), value };
+    if (!value) {
+      console.warn(
+        `[images] bucket "${BUCKET}" is PRIVATE — serving signed URLs instead. ` +
+        `Marking it public in Supabase → Storage is faster and cacheable.`,
+      );
+    }
+    return value;
+  } catch {
+    return true; // assume public; the plain URL is the cheaper path
+  }
+}
+
+/** Turn object paths into URLs the browser can actually load. */
+async function toUrls(sb: NonNullable<ReturnType<typeof storageClient>>, paths: string[]): Promise<string[]> {
+  if (!paths.length) return [];
+  if (await bucketIsPublic(sb)) return paths.map(publicUrl);
+  try {
+    // 24h TTL against a 60s page revalidate — a URL is never close to expiring
+    // by the time it reaches a visitor.
+    const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(paths, 86_400);
+    if (error) throw error;
+    const byPath = new Map((data ?? []).filter((r) => r.signedUrl).map((r) => [r.path, r.signedUrl]));
+    return paths.map((p) => byPath.get(p) ?? publicUrl(p));
+  } catch (e) {
+    console.error("[images] could not sign URLs", e);
+    return paths.map(publicUrl);
+  }
+}
+
+/**
  * Storage folder names are case sensitive, but there's no reason the website
  * should be. If `gallery` comes back empty we look for a folder that differs
  * only in case (`Gallery`, `GALLERY`) and use that instead — uploading into a
@@ -102,9 +152,8 @@ export async function listPhotos(folder: string): Promise<string[]> {
       sortBy: { column: "name", order: "asc" },
     });
     if (error) throw error;
-    return (data ?? [])
-      .filter((f) => f.name && IMG_EXT.test(f.name))
-      .map((f) => publicUrl(`${name}/${f.name}`));
+    const paths = (data ?? []).filter((f) => f.name && IMG_EXT.test(f.name)).map((f) => `${name}/${f.name}`);
+    return toUrls(sb, paths);
   };
   try {
     await reportBucketOnce(sb, folder);
@@ -142,16 +191,17 @@ export async function listPhotosDeep(folder: string): Promise<string[]> {
     const files: string[] = [];
     const subfolders: string[] = [];
     for (const f of data ?? []) {
-      if (f.name && IMG_EXT.test(f.name)) files.push(publicUrl(`${folder}/${f.name}`));
+      if (f.name && IMG_EXT.test(f.name)) files.push(`${folder}/${f.name}`);
       else if (f.id === null && f.name) subfolders.push(f.name); // folders have id === null
     }
     const nested = await Promise.all(
       subfolders.map(async (sf) => {
         const { data: sd } = await sb.storage.from(BUCKET).list(`${folder}/${sf}`, { limit: 100, sortBy: { column: "name", order: "asc" } });
-        return (sd ?? []).filter((x) => x.name && IMG_EXT.test(x.name)).map((x) => publicUrl(`${folder}/${sf}/${x.name}`));
+        return (sd ?? []).filter((x) => x.name && IMG_EXT.test(x.name)).map((x) => `${folder}/${sf}/${x.name}`);
       })
     );
-    return [...files, ...nested.flat()];
+    // One signing round-trip for the whole tree rather than one per folder.
+    return toUrls(sb, [...files, ...nested.flat()]);
   } catch (e) {
     console.error("[images] listDeep", folder, e);
     return [];
@@ -184,7 +234,7 @@ export async function heroFor(name: string, fallback: string): Promise<string> {
     const match = (data ?? []).find(
       (f) => f.name && IMG_EXT.test(f.name) && f.name.replace(/\.[^.]+$/, "").toLowerCase() === name.toLowerCase()
     );
-    return match ? publicUrl(`${dir}/${match.name}`) : null;
+    return match ? (await toUrls(sb, [`${dir}/${match.name}`]))[0] ?? null : null;
   };
   try {
     await reportBucketOnce(sb, "heroes");
