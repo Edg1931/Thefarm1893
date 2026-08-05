@@ -45,31 +45,34 @@ function publicUrl(path: string): string {
 let rootCache: { at: number; names: string[] } | null = null;
 
 /**
- * One-time report of what's ACTUALLY in the bucket, printed when a folder the
- * site reads comes back empty.
+ * One line, once per server process, saying what the bucket ACTUALLY contains.
  *
- * An empty folder is not an error — Storage returns `[]` for a folder that
- * doesn't exist — so a name mismatch fails completely silently. This makes it
- * visible in the deploy log. Names only, no URLs or credentials.
+ * This is deliberately unconditional rather than only-on-failure. Storage
+ * returns an empty array for a folder that doesn't exist, exactly as it does
+ * for a folder that exists and is empty — so a folder-name mismatch produces
+ * no error, no exception, and no log anywhere. Silence was indistinguishable
+ * from success, which is what made this hard to pin down.
+ *
+ * Names only: no URLs, no credentials.
  */
 let reported = false;
 
-async function reportBucketOnce(sb: NonNullable<ReturnType<typeof storageClient>>, missing: string) {
+async function reportBucketOnce(sb: NonNullable<ReturnType<typeof storageClient>>, context: string) {
   if (reported) return;
   reported = true;
   try {
     const { data, error } = await sb.storage.from(BUCKET).list("", { limit: 100, sortBy: { column: "name", order: "asc" } });
     if (error) {
-      console.error(`[images] "${missing}" empty; bucket "${BUCKET}" could not be listed: ${error.message}`);
+      console.error(`[images] bucket "${BUCKET}" could not be listed (asked for "${context}"): ${error.message}`);
       return;
     }
     const entries = (data ?? []).filter((f) => f.name && f.name !== ".emptyFolderPlaceholder");
     const folders = entries.filter((f) => f.id === null).map((f) => f.name);
     const files = entries.filter((f) => f.id !== null).map((f) => f.name);
     console.log(
-      `[images] "${missing}/" is empty. Bucket "${BUCKET}" contains ` +
-      `folders: [${folders.join(", ") || "none"}] · loose files: [${files.slice(0, 20).join(", ") || "none"}]` +
-      (files.length > 20 ? ` (+${files.length - 20} more)` : ""),
+      `[images] bucket "${BUCKET}" top level — folders: [${folders.join(", ") || "NONE"}] · ` +
+      `loose files: [${files.slice(0, 20).join(", ") || "none"}]${files.length > 20 ? ` (+${files.length - 20} more)` : ""} ` +
+      `· site reads: [hero, gallery, heroes, venue, bridal-prep, silos]`,
     );
   } catch (e) {
     console.error("[images] bucket report failed", e);
@@ -104,12 +107,11 @@ export async function listPhotos(folder: string): Promise<string[]> {
       .map((f) => publicUrl(`${name}/${f.name}`));
   };
   try {
+    await reportBucketOnce(sb, folder);
     const hit = await read(folder);
     if (hit.length) return hit;
     const alt = await realFolderName(sb, folder);
-    const rescued = alt ? await read(alt) : [];
-    if (!rescued.length) await reportBucketOnce(sb, folder);
-    return rescued;
+    return alt ? await read(alt) : [];
   } catch (e) {
     console.error("[images] list", folder, e);
     return [];
@@ -125,6 +127,7 @@ export async function listPhotosDeep(folder: string): Promise<string[]> {
   const sb = storageClient();
   if (!sb) return [];
   try {
+    await reportBucketOnce(sb, folder);
     const first = await sb.storage.from(BUCKET).list(folder, { limit: 100, sortBy: { column: "name", order: "asc" } });
     if (first.error) throw first.error;
     let data = first.data;
@@ -142,7 +145,6 @@ export async function listPhotosDeep(folder: string): Promise<string[]> {
       if (f.name && IMG_EXT.test(f.name)) files.push(publicUrl(`${folder}/${f.name}`));
       else if (f.id === null && f.name) subfolders.push(f.name); // folders have id === null
     }
-    if (!files.length && !subfolders.length) await reportBucketOnce(sb, folder);
     const nested = await Promise.all(
       subfolders.map(async (sf) => {
         const { data: sd } = await sb.storage.from(BUCKET).list(`${folder}/${sf}`, { limit: 100, sortBy: { column: "name", order: "asc" } });
@@ -185,6 +187,7 @@ export async function heroFor(name: string, fallback: string): Promise<string> {
     return match ? publicUrl(`${dir}/${match.name}`) : null;
   };
   try {
+    await reportBucketOnce(sb, "heroes");
     const hit = await read("heroes");
     if (hit) return hit;
     const alt = await realFolderName(sb, "heroes");
