@@ -9,6 +9,7 @@ import {
   getAddedContacts, addContactLocal, getContactOverrides, setContactOverride, syncToApi,
 } from "@/lib/crm/store";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { Toast } from "@/components/crm/Toast";
 
 const COLUMNS: { key: Stage; label: string; hint: string }[] = [
   { key: "new", label: "New Inquiry", hint: "Respond fast" },
@@ -131,9 +132,7 @@ export function PipelineBoard({ initial, live = false }: { initial: Lead[]; live
       {adding && <ContactModal isNew onClose={() => setAdding(false)} onSave={addLead} />}
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg">
-          <Check size={16} /> {toast}
-        </div>
+        <Toast message={toast} />
       )}
     </>
   );

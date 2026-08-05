@@ -2,6 +2,8 @@ import { ReceptionistTester, ReceptionistConfig } from "@/components/crm/Recepti
 import { StatCard, Panel } from "@/components/crm/widgets";
 import { PhoneCall, MessageSquare, CalendarCheck, Clock } from "lucide-react";
 
+export const metadata = { title: "AI Receptionist" };
+
 const callLog = [
   { name: "Jordan Blake", channel: "Web chat", intent: "Checked May 30 availability", outcome: "Lead captured", time: "9 min ago", hot: true },
   { name: "Unknown caller", channel: "Phone", intent: "Pricing for 120-guest wedding", outcome: "Brochure emailed", time: "1 hr ago", hot: false },

@@ -8,6 +8,7 @@ import { ContactModal } from "@/components/crm/ContactModal";
 import { leads as seed, type Lead } from "@/lib/crm/sample-data";
 import { getAddedContacts, addContactLocal, getContactOverrides, setContactOverride, syncToApi } from "@/lib/crm/store";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { Toast } from "@/components/crm/Toast";
 
 export function ContactsManager({ initial = seed, live = false, examples = [] }: { initial?: Lead[]; live?: boolean; examples?: Lead[] }) {
   const [contacts, setContacts] = useState<Lead[]>(initial);
@@ -134,7 +135,7 @@ export function ContactsManager({ initial = seed, live = false, examples = [] }:
       {adding && <ContactModal onClose={() => setAdding(false)} onSave={addContact} isNew />}
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg"><Check size={16} /> {toast}</div>
+        <Toast message={toast} />
       )}
     </div>
   );

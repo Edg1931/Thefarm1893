@@ -5,6 +5,7 @@ import { Pencil, Check, X, CalendarClock, Palette, UtensilsCrossed, Truck, Phone
 import { Panel } from "@/components/crm/widgets";
 import { type DossierDetails as Details } from "@/lib/crm/bookings";
 import { getDossierOverride, setDossierOverride, syncToApi } from "@/lib/crm/store";
+import { Toast } from "@/components/crm/Toast";
 
 const GROUPS: { title: string; icon: typeof CalendarClock; fields: [string, string][] }[] = [
   {
@@ -96,7 +97,7 @@ export function DossierDetails({ leadId, initial, live = false }: { leadId: stri
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg"><Check size={16} /> {toast}</div>
+        <Toast message={toast} />
       )}
     </Panel>
   );

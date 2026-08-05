@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Copy, Check, X, Printer, Sparkles, FileText, Image as ImageIcon, Mail, SignpostBig, Layers,
 } from "lucide-react";
@@ -104,7 +104,8 @@ function VisualPreview({ t, thumb, large }: { t: ContentTemplate; thumb?: boolea
 }
 
 function PreviewModal({ t, onClose }: { t: ContentTemplate; onClose: () => void }) {
-  useModalClose(onClose);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalClose(onClose, dialogRef);
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -138,7 +139,7 @@ function PreviewModal({ t, onClose }: { t: ContentTemplate; onClose: () => void 
 
   return (
     <div className="fixed inset-0 z-[85] flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-parchment p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-parchment p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="font-display text-2xl text-ink">{t.title}</h2>

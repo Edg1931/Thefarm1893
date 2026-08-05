@@ -5,6 +5,8 @@ import { GoLiveHealth } from "@/components/crm/GoLiveHealth";
 import { ContentToReplace } from "@/components/crm/ContentToReplace";
 import { Database, Brain, Phone, CreditCard, Share2, Mail, Check, Plug } from "lucide-react";
 
+export const metadata = { title: "Integrations" };
+
 /** Server component — checks which integrations are wired via env. */
 function status(...keys: string[]) {
   return keys.every((k) => Boolean(process.env[k]));

@@ -2,6 +2,8 @@ import { PipelineBoard } from "@/components/crm/PipelineBoard";
 import { getLeads } from "@/lib/crm/data";
 import { formatCurrency } from "@/lib/utils";
 
+export const metadata = { title: "Lead Pipeline" };
+
 export default async function LeadsPage() {
   const { leads, live } = await getLeads();
   const total = leads.reduce((s, l) => s + l.budget, 0);

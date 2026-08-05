@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Handshake, DollarSign, Send, Award, Star, Plus, X, Check, DownloadCloud, Eye, Images } from "lucide-react";
 import { Panel, StatCard } from "@/components/crm/widgets";
 import { vendorRecords as seed, type VendorRecord, type VendorProfile } from "@/lib/crm/sample-data";
@@ -8,6 +8,7 @@ import { getAddedVendors, addVendorLocal, syncToApi, newId, getVendorProfiles, s
 import { ImportVendorModal, VendorProfileModal } from "@/components/crm/VendorProfiles";
 import { useModalClose } from "@/lib/useModalClose";
 import { formatCurrency } from "@/lib/utils";
+import { Toast } from "@/components/crm/Toast";
 
 const tierCls: Record<string, string> = {
   preferred: "bg-brass/15 text-brass",
@@ -142,16 +143,15 @@ export function VendorManager({ initial = seed, live = false }: { initial?: Vend
       {viewing && <VendorProfileModal vendor={viewing} profile={profiles[viewing.id]} onClose={() => setViewing(null)} onRefresh={refreshProfile} />}
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg">
-          <Check size={16} /> {toast}
-        </div>
+        <Toast message={toast} />
       )}
     </div>
   );
 }
 
 function VendorModal({ onClose, onAdd }: { onClose: () => void; onAdd: (v: VendorRecord) => void }) {
-  useModalClose(onClose);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalClose(onClose, dialogRef);
   const [tier, setTier] = useState<"preferred" | "featured" | "listed">("listed");
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -175,7 +175,7 @@ function VendorModal({ onClose, onAdd }: { onClose: () => void; onAdd: (v: Vendo
 
   return (
     <div className="fixed inset-0 z-[85] flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-2xl bg-parchment p-7 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" className="w-full max-w-lg rounded-2xl bg-parchment p-7 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl text-ink">Invite a vendor</h2>
           <button onClick={onClose} aria-label="Close" className="text-stone hover:text-ink"><X size={22} /></button>

@@ -35,7 +35,7 @@ export function CalendarConnect() {
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {providers.map((p) => (
-          <a key={p.key} href={p.method === "OAuth" ? `/api/integrations/calendar/callback?provider=${p.key}` : "#ical-import"}
+          <a key={p.key} href={p.method === "OAuth" ? `/api/integrations/calendar/start?provider=${p.key}` : "#ical-import"}
             className="flex items-center justify-between rounded-xl border border-ink/8 bg-bone p-3 text-sm hover:border-brass/40">
             <span className="text-ink">{p.label}</span>
             <span className="flex items-center gap-1 text-xs text-stone"><Link2 size={12} /> {p.method}</span>
@@ -50,8 +50,8 @@ export function CalendarConnect() {
       <div id="ical-import" className="mt-5 rounded-xl bg-bone p-4">
         <p className="text-sm font-medium text-ink">Import an iCal feed (Airbnb / VRBO / Google)</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…/calendar.ics" className="min-w-[220px] flex-1 rounded-lg border border-ink/12 bg-parchment px-3 py-2 text-sm outline-none focus:border-brass" />
-          <select value={slug} onChange={(e) => setSlug(e.target.value)} className="rounded-lg border border-ink/12 bg-parchment px-3 py-2 text-sm outline-none focus:border-brass">
+          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…/calendar.ics" aria-label="iCal feed URL" className="min-w-[220px] flex-1 rounded-lg border border-ink/12 bg-parchment px-3 py-2 text-sm outline-none focus:border-brass" />
+          <select value={slug} onChange={(e) => setSlug(e.target.value)} aria-label="Which resource this feed blocks" className="rounded-lg border border-ink/12 bg-parchment px-3 py-2 text-sm outline-none focus:border-brass">
             <option value="venue">Main venue</option>
             <option value="the-orchard-silo">Orchard Silo</option>
             <option value="the-harvest-silo">Harvest Silo</option>

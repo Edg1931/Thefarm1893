@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { X, Loader2, ImageOff, Images } from "lucide-react";
 import { marketingPhotoSources, marketingPhotoGroups } from "@/lib/photo-categories";
 import { useModalClose } from "@/lib/useModalClose";
 
 /** Browse the venue's Storage photos by category and pick one for marketing content. */
 export function PhotoPicker({ onPick, onClose }: { onPick: (url: string) => void; onClose: () => void }) {
-  useModalClose(onClose);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useModalClose(onClose, dialogRef);
   const [srcIdx, setSrcIdx] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,7 @@ export function PhotoPicker({ onPick, onClose }: { onPick: (url: string) => void
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl bg-parchment p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl bg-parchment p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 font-display text-2xl text-ink"><Images size={20} className="text-brass" /> Insert a photo</h2>
           <button onClick={onClose} aria-label="Close" className="text-stone hover:text-ink"><X size={22} /></button>

@@ -7,6 +7,8 @@ import { revenueByMonth, aiInsights, funnel, trafficSources } from "@/lib/crm/sa
 import { getDashboardData, getEvents, getSiloGuests, getToday } from "@/lib/crm/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
+export const metadata = { title: "Overview" };
+
 export default async function DashboardOverview() {
   const [{ leads, stats: dashboardStats, live }, { events }, { guests }, { items: todayItems }] = await Promise.all([
     getDashboardData(), getEvents(), getSiloGuests(), getToday(),

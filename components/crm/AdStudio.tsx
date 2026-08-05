@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { RichTextEditor } from "@/components/crm/RichTextEditor";
 import { PhotoPicker } from "@/components/crm/PhotoPicker";
+import { Toast } from "@/components/crm/Toast";
 
 type Channel = { key: string; label: string; icon: LucideIcon; limit?: number; paid?: boolean };
 
@@ -247,7 +248,7 @@ export function AdStudio() {
       </div>
 
       {picker && <PhotoPicker onPick={(u) => { setPhoto(u); setPicker(false); }} onClose={() => setPicker(false)} />}
-      {toast && <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg"><Check size={16} /> {toast}</div>}
+      {toast && <Toast message={toast} />}
     </div>
   );
 }

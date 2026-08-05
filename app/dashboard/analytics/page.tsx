@@ -5,6 +5,7 @@ import { getFinancials } from "@/lib/crm/data";
 import { analyticsInsights } from "@/lib/crm/growth";
 import { formatCurrency } from "@/lib/utils";
 import { Eye, Users, Route, Percent, Wallet, TrendingUp, PiggyBank, Landmark, ArrowUpRight, CircleDollarSign } from "lucide-react";
+import { DemoBanner } from "@/components/crm/DemoBanner";
 
 export const metadata = { title: "Analytics & Financials" };
 
@@ -16,15 +17,15 @@ const accentBar: Record<string, string> = {
 };
 
 export default async function AnalyticsPage() {
-  const { financials } = await getFinancials();
+  const { financials, live } = await getFinancials();
   const visitors = funnel[0].value;
   const leads = funnel[2].value;
-  const leadRate = Math.round((leads / visitors) * 100);
+  const leadRate = visitors > 0 ? Math.round((leads / visitors) * 100) : 0;
 
   const totalStreams = financials.streams.reduce((s, r) => s + r.value, 0);
   const totalSpend = financials.marketingRoi.reduce((s, r) => s + r.spend, 0);
   const totalAttributed = financials.marketingRoi.reduce((s, r) => s + r.revenue, 0);
-  const blendedRoi = Math.round(totalAttributed / totalSpend);
+  const blendedRoi = totalSpend > 0 ? Math.round(totalAttributed / totalSpend) : 0;
 
   return (
     <div className="space-y-8">
@@ -32,6 +33,8 @@ export default async function AnalyticsPage() {
         <h1 className="font-display text-4xl text-ink">Analytics &amp; Financials</h1>
         <p className="mt-1 text-stone">The money, the marketing, and the funnel — with AI telling you what to do next.</p>
       </div>
+
+      <DemoBanner live={live} what="financials" />
 
       {/* ---- FINANCIALS ---- */}
       <section className="space-y-5">
@@ -93,7 +96,7 @@ export default async function AnalyticsPage() {
         </div>
 
         {/* Marketing ROI */}
-        <Panel title="Marketing ROI by channel" action={<span className="text-sm font-medium text-sage-deep">Blended {blendedRoi}× return</span>}>
+        <Panel title="Marketing ROI by channel" action={<span className="text-sm font-medium text-sage-deep">{totalSpend > 0 ? `Blended ${blendedRoi}× return` : "No spend recorded"}</span>}>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wider text-stone">
@@ -107,7 +110,7 @@ export default async function AnalyticsPage() {
               </thead>
               <tbody className="divide-y divide-ink/6">
                 {[...financials.marketingRoi].sort((a, b) => b.revenue / b.spend - a.revenue / a.spend).map((r) => {
-                  const roi = r.revenue / r.spend;
+                  const roi = r.spend > 0 ? r.revenue / r.spend : 0;
                   const width = Math.min(100, Math.round((roi / 32) * 100));
                   return (
                     <tr key={r.channel} className="hover:bg-bone/60">

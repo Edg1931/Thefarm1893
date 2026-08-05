@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check } from "lucide-react";
+import { Toast } from "@/components/crm/Toast";
 
 /**
  * A button for demo-only actions (send contract, new sequence, etc.) that gives
@@ -22,9 +23,7 @@ export function DemoButton({
     <>
       <button onClick={click} className={className}>{children}</button>
       {show && (
-        <div className="fixed bottom-6 right-6 z-[80] flex items-center gap-2 rounded-xl bg-sage-deep px-5 py-3 text-sm text-parchment shadow-lg">
-          <Check size={16} /> {toast}
-        </div>
+        <Toast message={toast} />
       )}
     </>
   );

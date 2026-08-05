@@ -4,9 +4,12 @@ import { CouponManager } from "@/components/crm/CouponManager";
 import { StatCard } from "@/components/crm/widgets";
 import { getCoupons } from "@/lib/crm/data";
 import { Eye, MousePointerClick, Users, Share2, BookOpen } from "lucide-react";
+import { DemoBanner } from "@/components/crm/DemoBanner";
+
+export const metadata = { title: "Marketing Studio" };
 
 export default async function MarketingPage() {
-  const { coupons } = await getCoupons();
+  const { coupons, live } = await getCoupons();
   return (
     <div className="space-y-6">
       <div>
@@ -31,6 +34,7 @@ export default async function MarketingPage() {
 
       <AdStudio />
 
+      <DemoBanner live={live} empty={coupons.length === 0} what="promo codes" />
       <CouponManager initial={coupons} />
     </div>
   );
