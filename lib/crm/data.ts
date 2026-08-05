@@ -28,6 +28,9 @@ import {
   sampleTasks, sampleInventory, sampleMaintenance, sampleStaff, isLowStock, maintenanceDueSoon,
   type OpTask, type InventoryItem, type MaintenanceAsset, type StaffMember,
 } from "./operations";
+import type { Turnover, TurnoverTask, TurnoverIssue, TurnoverPhoto } from "./turnover";
+import type { Expense } from "./expenses";
+import type { FeeType, FeeCharge } from "./fees";
 
 export const liveConfigured = (): boolean => Boolean(getServiceClient());
 
@@ -287,6 +290,21 @@ export async function getToday(): Promise<{ live: boolean; items: TodayItem[] }>
   const { assets } = await getMaintenance();
   for (const a of assets) {
     if (a.nextService && a.nextService <= horizonIso) items.push({ kind: "task", title: `Maintenance due: ${a.name}`, detail: `${a.kind} service`, date: a.nextService < todayIso ? todayIso : a.nextService });
+  }
+
+  // Cleans that still need doing. A turnover that slips is the one thing that
+  // can't be recovered later, so it belongs on the owner's daily list.
+  const { turnovers } = await getTurnovers();
+  const { BENCHMARKS } = await import("./turnover");
+  for (const t of turnovers) {
+    if (t.status === "done" || !within(t.scheduledFor)) continue;
+    const b = BENCHMARKS[t.unitKind];
+    items.push({
+      kind: "task",
+      title: `Turnover: ${t.resourceSlug.replace(/-/g, " ")}`,
+      detail: `${t.cleanerName} · ${b.min}–${b.max} min${t.status === "in_progress" ? " · in progress" : ""}`,
+      date: t.scheduledFor,
+    });
   }
 
   items.sort((a, b) => a.date.localeCompare(b.date));
@@ -577,15 +595,30 @@ export async function getFinancials() {
   try {
     // Compute the top-line numbers from live rows; keep sample structure for
     // streams / ROI / billing until those live sources are wired.
-    const [{ collected }, { outstanding }, { stats }] = await Promise.all([getPayments(), getInvoices(), getDashboardData()]);
+    const [{ collected }, { outstanding }, { stats }, { expenses }] = await Promise.all([
+      getPayments(), getInvoices(), getDashboardData(), getExpenses(),
+    ]);
+
+    // Operating expenses come straight from the ledger — including the turnover
+    // labour that books itself when a clean is finished — so profit is measured,
+    // not assumed. Only fall back to the demo figure when nothing is logged yet.
+    const year = new Date().getFullYear().toString();
+    const opex = expenses.filter((e) => e.incurredOn.startsWith(year)).reduce((s, e) => s + e.amount, 0);
+    const operatingExpensesYTD = opex || financials.operatingExpensesYTD;
+    const bookedRevenueYTD = stats.bookedRevenueYTD ?? financials.bookedRevenueYTD;
+    const netProfitYTD = bookedRevenueYTD - operatingExpensesYTD;
+
     return {
       live: true,
       financials: {
         ...financials,
-        bookedRevenueYTD: stats.bookedRevenueYTD ?? financials.bookedRevenueYTD,
+        bookedRevenueYTD,
         collectedYTD: collected || financials.collectedYTD,
         outstandingBalances: outstanding || financials.outstandingBalances,
         pipelineValue: stats.pipelineValue ?? financials.pipelineValue,
+        operatingExpensesYTD,
+        netProfitYTD,
+        grossMarginPct: bookedRevenueYTD ? Math.round((netProfitYTD / bookedRevenueYTD) * 100) : financials.grossMarginPct,
       },
     };
   } catch (e) {
@@ -610,6 +643,111 @@ export async function getProperties(): Promise<{ live: boolean; properties: Prop
     const properties = (data ?? []).map((r: Row) => ({ id: str(r.id), name: str(r.name), address: str(r.address), active: Boolean(r.active) }));
     return { live: true, properties: properties.length ? properties : sampleProperties };
   } catch (e) { console.error("[data] getProperties", e); return { live: true, properties: sampleProperties }; }
+}
+
+/* --- Turnover / housekeeping (Phase 7) ------------------------------------ */
+
+export async function getTurnovers(): Promise<{ live: boolean; turnovers: Turnover[] }> {
+  const { sampleTurnovers } = await import("./turnover");
+  const sb = getServiceClient();
+  if (!sb) return { live: false, turnovers: sampleTurnovers };
+  try {
+    const { data, error } = await sb.from("turnovers").select("*").order("scheduled_for", { ascending: false }).limit(300);
+    if (error) throw error;
+    const rows = data ?? [];
+    const ids = rows.map((r: Row) => str(r.id)).filter(Boolean);
+
+    // Children are batch-loaded in three queries rather than 3×N per turnover.
+    const [tasksRes, issuesRes, photosRes] = ids.length
+      ? await Promise.all([
+          sb.from("turnover_tasks").select("*").in("turnover_id", ids).order("sort_order"),
+          sb.from("turnover_issues").select("*").in("turnover_id", ids),
+          sb.from("turnover_photos").select("*").in("turnover_id", ids),
+        ])
+      : [{ data: [] }, { data: [] }, { data: [] }];
+
+    const by = <T,>(list: Row[], make: (r: Row) => T) => {
+      const m = new Map<string, T[]>();
+      for (const r of list) {
+        const k = str(r.turnover_id);
+        (m.get(k) ?? m.set(k, []).get(k)!).push(make(r));
+      }
+      return m;
+    };
+    const tasksBy = by<TurnoverTask>(tasksRes.data ?? [], (r) => ({
+      id: str(r.id), label: str(r.label), category: str(r.category, "cleaning") as TurnoverTask["category"], done: Boolean(r.done),
+    }));
+    const issuesBy = by<TurnoverIssue>(issuesRes.data ?? [], (r) => ({
+      id: str(r.id), kind: str(r.kind, "damage") as TurnoverIssue["kind"], description: str(r.description),
+      estCost: num(r.est_cost), resolved: Boolean(r.resolved),
+    }));
+    const photosBy = by<TurnoverPhoto>(photosRes.data ?? [], (r) => ({
+      id: str(r.id), phase: str(r.phase, "before") as TurnoverPhoto["phase"], path: str(r.path), caption: str(r.caption) || undefined,
+    }));
+
+    const turnovers: Turnover[] = rows.map((r: Row) => ({
+      id: str(r.id),
+      resourceSlug: str(r.resource_slug, "venue"),
+      unitKind: str(r.unit_kind, "silo") as Turnover["unitKind"],
+      eventTitle: str(r.notes) || undefined,
+      scheduledFor: str(r.scheduled_for),
+      status: str(r.status, "scheduled") as Turnover["status"],
+      cleanerName: str(r.cleaner_name, "Unassigned"),
+      hourlyRate: num(r.hourly_rate, 45),
+      expectedMinutes: num(r.expected_minutes, 75),
+      actualMinutes: r.actual_minutes == null ? null : num(r.actual_minutes),
+      cost: r.cost == null ? null : num(r.cost),
+      tasks: tasksBy.get(str(r.id)) ?? [],
+      issues: issuesBy.get(str(r.id)) ?? [],
+      photos: photosBy.get(str(r.id)) ?? [],
+      notes: str(r.notes) || undefined,
+    }));
+    return { live: true, turnovers };
+  } catch (e) { console.error("[data] getTurnovers", e); return { live: true, turnovers: [] }; }
+}
+
+/* --- Expenses (Phase 7) ---------------------------------------------------- */
+
+export async function getExpenses(): Promise<{ live: boolean; expenses: Expense[] }> {
+  const { sampleExpenses } = await import("./expenses");
+  const sb = getServiceClient();
+  if (!sb) return { live: false, expenses: sampleExpenses };
+  try {
+    const { data, error } = await sb.from("expenses").select("*").order("incurred_on", { ascending: false }).limit(1000);
+    if (error) throw error;
+    const expenses: Expense[] = (data ?? []).map((r: Row) => ({
+      id: str(r.id), incurredOn: str(r.incurred_on), category: str(r.category, "other") as Expense["category"],
+      vendor: str(r.vendor), description: str(r.description), amount: num(r.amount),
+      receiptPath: str(r.receipt_path) || undefined, taxDeductible: r.tax_deductible !== false,
+    }));
+    return { live: true, expenses };
+  } catch (e) { console.error("[data] getExpenses", e); return { live: true, expenses: [] }; }
+}
+
+/* --- Billable fees (Phase 7) ----------------------------------------------- */
+
+export async function getFees(): Promise<{ live: boolean; feeTypes: FeeType[]; charges: FeeCharge[] }> {
+  const { defaultFeeTypes, sampleCharges } = await import("./fees");
+  const sb = getServiceClient();
+  if (!sb) return { live: false, feeTypes: defaultFeeTypes, charges: sampleCharges };
+  try {
+    const [typesRes, chargesRes] = await Promise.all([
+      sb.from("fee_types").select("*").order("code"),
+      sb.from("fee_charges").select("*").order("created_at", { ascending: false }).limit(300),
+    ]);
+    const feeTypes: FeeType[] = (typesRes.data ?? []).map((r: Row) => ({
+      code: str(r.code), label: str(r.label), amount: num(r.amount), unit: str(r.unit, "flat") as FeeType["unit"],
+      graceMinutes: num(r.grace_minutes), active: r.active !== false, notes: str(r.notes) || undefined,
+    }));
+    const charges: FeeCharge[] = (chargesRes.data ?? []).map((r: Row) => ({
+      id: str(r.id), feeCode: str(r.fee_code), eventTitle: str(r.reason), quantity: num(r.quantity, 1),
+      amount: num(r.amount), reason: str(r.reason), waived: Boolean(r.waived), invoiced: Boolean(r.invoice_id),
+      createdAt: str(r.created_at),
+    }));
+    // A brand-new database has no fee schedule yet; fall back to the defaults so
+    // the owner sees the rates from the notes instead of an empty page.
+    return { live: true, feeTypes: feeTypes.length ? feeTypes : defaultFeeTypes, charges };
+  } catch (e) { console.error("[data] getFees", e); return { live: true, feeTypes: defaultFeeTypes, charges: [] }; }
 }
 
 /** Dashboard KPIs — computed from live leads when configured, else the demo numbers. */

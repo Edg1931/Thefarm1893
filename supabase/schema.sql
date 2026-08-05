@@ -534,6 +534,111 @@ alter table inventory_items     add column if not exists property_id uuid refere
 alter table maintenance_assets  add column if not exists property_id uuid references properties(id) on delete set null;
 alter table staff               add column if not exists property_id uuid references properties(id) on delete set null;
 
+
+-- ============================================================================
+-- PHASE 7 — Walt's operating plan: turnover, expenses, and billable fees
+-- Built to answer three specific questions from the owner's notes:
+--   "What does a clean actually cost me?"  "Can I cut accounting to 2 hrs/wk?"
+--   "Am I capturing the fees I'm entitled to?"
+-- ============================================================================
+
+-- ---- turnover / housekeeping -----------------------------------------------
+-- A single clean of one unit. `expected_minutes` carries the benchmark so
+-- actual-vs-expected (and therefore cost-per-clean) is a plain subtraction.
+create table if not exists turnovers (
+  id uuid primary key default gen_random_uuid(),
+  resource_slug text not null,               -- venue | the-orchard-silo | ...
+  unit_kind text not null default 'silo',    -- silo | bridal_barn | main_venue | farmhouse
+  event_id uuid references events(id) on delete set null,
+  scheduled_for date,
+  status text not null default 'scheduled',  -- scheduled | in_progress | done | flagged
+  cleaner_staff_id uuid references staff(id) on delete set null,
+  cleaner_name text,
+  hourly_rate numeric,                       -- rate used for THIS clean
+  expected_minutes int,                      -- benchmark for the unit kind
+  started_at timestamptz,
+  finished_at timestamptz,
+  actual_minutes int,                        -- computed on completion
+  cost numeric,                              -- actual_minutes/60 * hourly_rate
+  notes text,
+  created_at timestamptz not null default now()
+);
+create index if not exists turnovers_status_idx on turnovers (status);
+create index if not exists turnovers_date_idx on turnovers (scheduled_for);
+
+-- ---- per-turnover checklist (stocking / staging / cleaning) ----------------
+create table if not exists turnover_tasks (
+  id uuid primary key default gen_random_uuid(),
+  turnover_id uuid references turnovers(id) on delete cascade,
+  label text not null,
+  category text default 'cleaning',          -- cleaning | staging | stocking | inspect
+  done boolean not null default false,
+  sort_order int default 0
+);
+
+-- ---- before / after photos + damage & missing-item reports -----------------
+create table if not exists turnover_photos (
+  id uuid primary key default gen_random_uuid(),
+  turnover_id uuid references turnovers(id) on delete cascade,
+  phase text not null default 'before',      -- before | after | damage
+  path text not null,
+  caption text,
+  created_at timestamptz not null default now()
+);
+create table if not exists turnover_issues (
+  id uuid primary key default gen_random_uuid(),
+  turnover_id uuid references turnovers(id) on delete cascade,
+  kind text not null default 'damage',       -- damage | missing | maintenance
+  description text not null,
+  est_cost numeric default 0,
+  resolved boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- ---- expenses (the accounting-cost reduction) ------------------------------
+create table if not exists expenses (
+  id uuid primary key default gen_random_uuid(),
+  incurred_on date not null default current_date,
+  category text not null default 'other',    -- cleaning | maintenance | supplies | payroll | marketing | utilities | insurance | other
+  vendor text,
+  description text,
+  amount numeric not null,
+  event_id uuid references events(id) on delete set null,
+  turnover_id uuid references turnovers(id) on delete set null,
+  receipt_path text,                          -- private `documents` bucket
+  tax_deductible boolean not null default true,
+  property_id uuid references properties(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+create index if not exists expenses_date_idx on expenses (incurred_on);
+create index if not exists expenses_category_idx on expenses (category);
+
+-- ---- billable fee schedule + charges ---------------------------------------
+-- The rates live in the DB so the owner can change them without a deploy.
+create table if not exists fee_types (
+  id uuid primary key default gen_random_uuid(),
+  code text unique not null,                 -- outside_vendor | late_checkout | extra_walkthrough
+  label text not null,
+  amount numeric not null default 0,
+  unit text default 'flat',                  -- flat | hour
+  grace_minutes int default 0,
+  active boolean not null default true,
+  notes text
+);
+create table if not exists fee_charges (
+  id uuid primary key default gen_random_uuid(),
+  fee_code text not null,
+  lead_id uuid references leads(id) on delete set null,
+  event_id uuid references events(id) on delete set null,
+  quantity numeric not null default 1,
+  amount numeric not null,                   -- resolved at time of charge
+  reason text,
+  invoice_id uuid references invoices(id) on delete set null,
+  waived boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists fee_charges_event_idx on fee_charges (event_id);
+
 -- ---- updated_at trigger ----------------------------------------------------
 create or replace function touch_updated_at() returns trigger as $$
 begin
@@ -565,7 +670,9 @@ begin
     'staff','time_entries','op_tasks','inventory_items',
     'maintenance_assets','maintenance_logs',
     'conversations','reviews','review_requests','coupons',
-    'automations','calendar_connections','properties'
+    'automations','calendar_connections','properties',
+    'turnovers','turnover_tasks','turnover_photos','turnover_issues',
+    'expenses','fee_types','fee_charges'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);

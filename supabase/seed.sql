@@ -63,6 +63,23 @@ from (values
 ) as v(name, trigger, action, active)
 where not exists (select 1 from automations a where a.name = v.name);
 
+-- ---- billable fee schedule -------------------------------------------------
+-- The rates the venue is entitled to charge but most often forgets. They live
+-- in the database (not in code) so they can be changed from Dashboard → Money →
+-- Billable Fees without a redeploy. `grace_minutes` is the slack given before a
+-- late checkout starts billing.
+insert into fee_types (code, label, amount, unit, grace_minutes, active, notes)
+select v.code, v.label, v.amount, v.unit, v.grace_minutes, v.active, v.notes
+from (values
+  ('outside_vendor',    'Outside vendor fee',      350, 'flat',  0,  true,
+   'Charged when a couple books a caterer or bar service off the preferred list ($200-500 depending on scope).'),
+  ('late_checkout',     'Late checkout / overtime',120, 'hour',  15, true,
+   'Applies after a 15-minute grace window, then bills by the hour.'),
+  ('extra_walkthrough', 'Additional walkthrough',  120, 'hour',  0,  true,
+   'Package includes one planning walkthrough; additional site visits bill hourly.')
+) as v(code, label, amount, unit, grace_minutes, active, notes)
+where not exists (select 1 from fee_types f where f.code = v.code);
+
 
 -- ============================================================================
 -- AFTER RUNNING THIS — three manual steps
@@ -96,5 +113,6 @@ where not exists (select 1 from automations a where a.name = v.name);
 -- VERIFY IT WORKED
 --   select slug, kind from resources order by kind, slug;   -- expect 5 rows
 --   select name, active from automations;                   -- expect 4 rows
+--   select code, amount, unit from fee_types order by code; -- expect 3 rows
 -- Then open Dashboard → Integrations: the health panel should turn green.
 -- ============================================================================

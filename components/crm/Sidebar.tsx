@@ -9,6 +9,7 @@ import {
   Bot, Settings, Menu, X, Sparkles, Handshake, FileText,
   BarChart3, Zap, FileSignature, Share2, Home, LogOut, Layers, CreditCard, DoorOpen,
   ClipboardList, Package, Wrench, UsersRound, Inbox, Star,
+  Sparkle, Receipt, BadgeDollarSign,
 } from "lucide-react";
 import { business } from "@/lib/content";
 import { PropertySwitcher } from "@/components/crm/PropertySwitcher";
@@ -52,9 +53,17 @@ const sections: NavSection[] = [
     heading: "Operations",
     links: [
       { href: "/dashboard/operations", label: "Task Board", icon: ClipboardList },
+      { href: "/dashboard/turnover", label: "Turnover & Cleaning", icon: Sparkle },
       { href: "/dashboard/inventory", label: "Inventory", icon: Package },
       { href: "/dashboard/maintenance", label: "Maintenance", icon: Wrench },
       { href: "/dashboard/staff", label: "Staff & Time Clock", icon: UsersRound },
+    ],
+  },
+  {
+    heading: "Money",
+    links: [
+      { href: "/dashboard/expenses", label: "Expenses", icon: Receipt },
+      { href: "/dashboard/fees", label: "Billable Fees", icon: BadgeDollarSign },
     ],
   },
   {
