@@ -53,11 +53,16 @@ async function bucketIsPublic(sb: NonNullable<ReturnType<typeof storageClient>>)
     const { data, error } = await sb.storage.getBucket(BUCKET);
     if (error) throw error;
     const value = Boolean(data?.public);
+    const changed = publicFlag?.value !== value;
     publicFlag = { at: Date.now(), value };
-    if (!value) {
-      console.warn(
-        `[images] bucket "${BUCKET}" is PRIVATE — serving signed URLs instead. ` +
-        `Marking it public in Supabase → Storage is faster and cacheable.`,
+    // State the mode either way. Logging only the failure meant a fix produced
+    // silence, which is the same thing a broken deploy produces.
+    if (changed || !value) {
+      console.log(
+        value
+          ? `[images] bucket "${BUCKET}" is PUBLIC — serving plain public URLs (cacheable).`
+          : `[images] bucket "${BUCKET}" is PRIVATE — serving signed URLs instead. ` +
+            `Marking it public in Supabase → Storage is faster and cacheable.`,
       );
     }
     return value;
