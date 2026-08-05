@@ -26,22 +26,56 @@ function storageClient() {
 
 function publicUrl(path: string): string {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  return `${base}/storage/v1/object/public/${BUCKET}/${encodeURI(path)}`;
+  // encodeURIComponent per segment, not encodeURI on the whole path: encodeURI
+  // leaves #, ?, and & alone, and a filename like "barn #2.jpg" would otherwise
+  // truncate the URL at the hash and 404.
+  const encoded = path.split("/").map(encodeURIComponent).join("/");
+  return `${base}/storage/v1/object/public/${BUCKET}/${encoded}`;
+}
+
+/**
+ * Storage folder names are case sensitive, but there's no reason the website
+ * should be. If `gallery` comes back empty we look for a folder that differs
+ * only in case (`Gallery`, `GALLERY`) and use that instead — uploading into a
+ * capitalised folder is an easy mistake and shouldn't blank the page.
+ *
+ * Only runs on the empty path, so the normal case costs no extra request.
+ * Memoised briefly because a single page render calls this several times.
+ */
+let rootCache: { at: number; names: string[] } | null = null;
+
+async function realFolderName(sb: NonNullable<ReturnType<typeof storageClient>>, folder: string): Promise<string | null> {
+  try {
+    if (!rootCache || Date.now() - rootCache.at > 60_000) {
+      const { data } = await sb.storage.from(BUCKET).list("", { limit: 100 });
+      rootCache = { at: Date.now(), names: (data ?? []).filter((f) => f.id === null && f.name).map((f) => f.name) };
+    }
+    const want = folder.toLowerCase();
+    return rootCache.names.find((n) => n.toLowerCase() === want && n !== folder) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** Public URLs of the images in a folder of the `photos` bucket (empty on any failure). */
 export async function listPhotos(folder: string): Promise<string[]> {
   const sb = storageClient();
   if (!sb) return [];
-  try {
-    const { data, error } = await sb.storage.from(BUCKET).list(folder, {
+  const read = async (name: string) => {
+    const { data, error } = await sb.storage.from(BUCKET).list(name, {
       limit: 100,
       sortBy: { column: "name", order: "asc" },
     });
     if (error) throw error;
     return (data ?? [])
       .filter((f) => f.name && IMG_EXT.test(f.name))
-      .map((f) => publicUrl(`${folder}/${f.name}`));
+      .map((f) => publicUrl(`${name}/${f.name}`));
+  };
+  try {
+    const hit = await read(folder);
+    if (hit.length) return hit;
+    const alt = await realFolderName(sb, folder);
+    return alt ? await read(alt) : [];
   } catch (e) {
     console.error("[images] list", folder, e);
     return [];
@@ -57,8 +91,17 @@ export async function listPhotosDeep(folder: string): Promise<string[]> {
   const sb = storageClient();
   if (!sb) return [];
   try {
-    const { data, error } = await sb.storage.from(BUCKET).list(folder, { limit: 100, sortBy: { column: "name", order: "asc" } });
-    if (error) throw error;
+    const first = await sb.storage.from(BUCKET).list(folder, { limit: 100, sortBy: { column: "name", order: "asc" } });
+    if (first.error) throw first.error;
+    let data = first.data;
+    // Same case-insensitive rescue as listPhotos.
+    if (!(data ?? []).length) {
+      const alt = await realFolderName(sb, folder);
+      if (alt) {
+        const retry = await sb.storage.from(BUCKET).list(alt, { limit: 100, sortBy: { column: "name", order: "asc" } });
+        if (!retry.error) { data = retry.data; folder = alt; }
+      }
+    }
     const files: string[] = [];
     const subfolders: string[] = [];
     for (const f of data ?? []) {
@@ -98,13 +141,19 @@ export async function heroOr(folder: string, fallback: string): Promise<string> 
 export async function heroFor(name: string, fallback: string): Promise<string> {
   const sb = storageClient();
   if (!sb) return fallback;
-  try {
-    const { data, error } = await sb.storage.from(BUCKET).list("heroes", { limit: 100 });
+  const read = async (dir: string) => {
+    const { data, error } = await sb.storage.from(BUCKET).list(dir, { limit: 100 });
     if (error) throw error;
     const match = (data ?? []).find(
       (f) => f.name && IMG_EXT.test(f.name) && f.name.replace(/\.[^.]+$/, "").toLowerCase() === name.toLowerCase()
     );
-    return match ? publicUrl(`heroes/${match.name}`) : fallback;
+    return match ? publicUrl(`${dir}/${match.name}`) : null;
+  };
+  try {
+    const hit = await read("heroes");
+    if (hit) return hit;
+    const alt = await realFolderName(sb, "heroes");
+    return (alt ? await read(alt) : null) ?? fallback;
   } catch (e) {
     console.error("[images] heroFor", name, e);
     return fallback;

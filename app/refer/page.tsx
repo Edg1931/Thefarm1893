@@ -4,6 +4,11 @@ import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
 import { ReferForm } from "@/components/site/ReferForm";
 
+// Hero images come from Supabase Storage (heroes/<page>.jpg). Without this
+// the hero is baked at build time, so a newly uploaded photo would never
+// appear until the next deploy.
+export const revalidate = 60;
+
 export const metadata = {
   title: "Refer a Friend",
   description: "Loved your day at The Farm 1893? Refer a couple and enjoy a free anniversary night on us.",

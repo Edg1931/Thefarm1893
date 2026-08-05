@@ -3,6 +3,7 @@ import { DemoButton } from "@/components/crm/DemoButton";
 import { CalendarConnect } from "@/components/crm/CalendarConnect";
 import { GoLiveHealth } from "@/components/crm/GoLiveHealth";
 import { ContentToReplace } from "@/components/crm/ContentToReplace";
+import { PhotoHealth } from "@/components/crm/PhotoHealth";
 import { Database, Brain, Phone, CreditCard, Share2, Mail, Check, Plug } from "lucide-react";
 
 export const metadata = { title: "Integrations" };
@@ -76,6 +77,9 @@ export default function SettingsPage() {
         <GoLiveHealth />
         <ContentToReplace />
       </div>
+
+      {/* Why uploaded photos are (or aren't) reaching the website */}
+      <PhotoHealth />
 
       <Panel>
         <div className="grid gap-4 md:grid-cols-2">

@@ -7,6 +7,11 @@ import { DateChecker } from "@/components/site/DateChecker";
 import { ScarcityBadge } from "@/components/site/ScarcityBadge";
 import { packages, faqs } from "@/lib/content";
 
+// Hero images come from Supabase Storage (heroes/<page>.jpg). Without this
+// the hero is baked at build time, so a newly uploaded photo would never
+// appear until the next deploy.
+export const revalidate = 60;
+
 export const metadata = { title: "Investment" };
 
 export default function PricingPage() {

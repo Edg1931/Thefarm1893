@@ -7,6 +7,11 @@ import { Reveal } from "@/components/site/Reveal";
 import { SiloCrossPromo } from "@/components/site/CrossPromo";
 import { gallery } from "@/lib/content";
 
+// Hero images come from Supabase Storage (heroes/<page>.jpg). Without this
+// the hero is baked at build time, so a newly uploaded photo would never
+// appear until the next deploy.
+export const revalidate = 60;
+
 export const metadata = { title: "The Stay" };
 
 const highlights = [
