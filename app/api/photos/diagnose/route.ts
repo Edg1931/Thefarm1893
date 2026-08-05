@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { requireAdmin } from "@/lib/api/guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,10 +35,17 @@ const EXPECTED = [
   { folder: "silos", used: "Homepage 'Explore' — plus silos/<slug>/ per silo page" },
 ];
 
+/**
+ * Deliberately NOT behind the staff login. Once Supabase is live, /dashboard
+ * requires an account — and "I can't sign in" and "my photos are missing" are
+ * exactly the two problems that tend to arrive together, which would make a
+ * gated diagnostic useless at the one moment it's needed.
+ *
+ * It only ever reports metadata about a bucket that is public by design:
+ * folder names, file counts, and an HTTP status. No key, secret, or env value
+ * is returned — only whether one is present.
+ */
 export async function GET() {
-  const denied = await requireAdmin();
-  if (denied) return denied;
-
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

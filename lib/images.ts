@@ -44,6 +44,38 @@ function publicUrl(path: string): string {
  */
 let rootCache: { at: number; names: string[] } | null = null;
 
+/**
+ * One-time report of what's ACTUALLY in the bucket, printed when a folder the
+ * site reads comes back empty.
+ *
+ * An empty folder is not an error — Storage returns `[]` for a folder that
+ * doesn't exist — so a name mismatch fails completely silently. This makes it
+ * visible in the deploy log. Names only, no URLs or credentials.
+ */
+let reported = false;
+
+async function reportBucketOnce(sb: NonNullable<ReturnType<typeof storageClient>>, missing: string) {
+  if (reported) return;
+  reported = true;
+  try {
+    const { data, error } = await sb.storage.from(BUCKET).list("", { limit: 100, sortBy: { column: "name", order: "asc" } });
+    if (error) {
+      console.error(`[images] "${missing}" empty; bucket "${BUCKET}" could not be listed: ${error.message}`);
+      return;
+    }
+    const entries = (data ?? []).filter((f) => f.name && f.name !== ".emptyFolderPlaceholder");
+    const folders = entries.filter((f) => f.id === null).map((f) => f.name);
+    const files = entries.filter((f) => f.id !== null).map((f) => f.name);
+    console.log(
+      `[images] "${missing}/" is empty. Bucket "${BUCKET}" contains ` +
+      `folders: [${folders.join(", ") || "none"}] · loose files: [${files.slice(0, 20).join(", ") || "none"}]` +
+      (files.length > 20 ? ` (+${files.length - 20} more)` : ""),
+    );
+  } catch (e) {
+    console.error("[images] bucket report failed", e);
+  }
+}
+
 async function realFolderName(sb: NonNullable<ReturnType<typeof storageClient>>, folder: string): Promise<string | null> {
   try {
     if (!rootCache || Date.now() - rootCache.at > 60_000) {
@@ -75,7 +107,9 @@ export async function listPhotos(folder: string): Promise<string[]> {
     const hit = await read(folder);
     if (hit.length) return hit;
     const alt = await realFolderName(sb, folder);
-    return alt ? await read(alt) : [];
+    const rescued = alt ? await read(alt) : [];
+    if (!rescued.length) await reportBucketOnce(sb, folder);
+    return rescued;
   } catch (e) {
     console.error("[images] list", folder, e);
     return [];
@@ -108,6 +142,7 @@ export async function listPhotosDeep(folder: string): Promise<string[]> {
       if (f.name && IMG_EXT.test(f.name)) files.push(publicUrl(`${folder}/${f.name}`));
       else if (f.id === null && f.name) subfolders.push(f.name); // folders have id === null
     }
+    if (!files.length && !subfolders.length) await reportBucketOnce(sb, folder);
     const nested = await Promise.all(
       subfolders.map(async (sf) => {
         const { data: sd } = await sb.storage.from(BUCKET).list(`${folder}/${sf}`, { limit: 100, sortBy: { column: "name", order: "asc" } });
