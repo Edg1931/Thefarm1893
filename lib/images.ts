@@ -252,3 +252,66 @@ export async function heroFor(name: string, fallback: string): Promise<string> {
     return fallback;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   GROUPED PHOTOS — one group per subfolder, e.g. venue/inside, venue/outside.
+   Lets a page present real areas of the property instead of a flat wall of
+   images, and lets the owner reorganise the tour by moving files in Storage.
+   --------------------------------------------------------------------------- */
+
+export type PhotoGroup = { key: string; label: string; photos: string[] };
+
+/** "the-barn" -> "The Barn", "inside" -> "Inside", "cocktail_hour" -> "Cocktail Hour" */
+export function prettifyFolder(name: string): string {
+  return name
+    .replace(/[-_]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Photos in `folder`, split by subfolder. Loose files directly inside `folder`
+ * become a leading group keyed "" so nothing is ever hidden just because it
+ * wasn't filed into a subfolder.
+ */
+export async function listPhotoGroups(folder: string): Promise<PhotoGroup[]> {
+  const sb = storageClient();
+  if (!sb) return [];
+  try {
+    await reportBucketOnce(sb, folder);
+    let { data } = await sb.storage.from(BUCKET).list(folder, { limit: 100, sortBy: { column: "name", order: "asc" } });
+    if (!(data ?? []).length) {
+      const alt = await realFolderName(sb, folder);
+      if (alt) {
+        const retry = await sb.storage.from(BUCKET).list(alt, { limit: 100, sortBy: { column: "name", order: "asc" } });
+        data = retry.data;
+        folder = alt;
+      }
+    }
+    const loose = (data ?? []).filter((f) => f.name && IMG_EXT.test(f.name)).map((f) => `${folder}/${f.name}`);
+    const subs = (data ?? []).filter((f) => f.id === null && f.name && f.name !== ".emptyFolderPlaceholder").map((f) => f.name);
+
+    const subGroups = await Promise.all(
+      subs.map(async (sf) => {
+        const { data: sd } = await sb.storage.from(BUCKET).list(`${folder}/${sf}`, { limit: 100, sortBy: { column: "name", order: "asc" } });
+        const paths = (sd ?? []).filter((x) => x.name && IMG_EXT.test(x.name)).map((x) => `${folder}/${sf}/${x.name}`);
+        return { key: sf, label: prettifyFolder(sf), paths };
+      }),
+    );
+
+    // Sign/build every URL in one pass rather than once per group.
+    const all = [...loose, ...subGroups.flatMap((g) => g.paths)];
+    const urls = await toUrls(sb, all);
+    const byPath = new Map(all.map((p, i) => [p, urls[i]]));
+    const url = (p: string) => byPath.get(p) as string;
+
+    const groups: PhotoGroup[] = [];
+    if (loose.length) groups.push({ key: "", label: prettifyFolder(folder), photos: loose.map(url) });
+    for (const g of subGroups) if (g.paths.length) groups.push({ key: g.key, label: g.label, photos: g.paths.map(url) });
+    return groups;
+  } catch (e) {
+    console.error("[images] listPhotoGroups", folder, e);
+    return [];
+  }
+}

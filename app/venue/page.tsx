@@ -5,6 +5,8 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
 import { Reveal } from "@/components/site/Reveal";
 import { VirtualTour } from "@/components/site/VirtualTour";
+import { VenueAreas } from "@/components/site/VenueAreas";
+import { listPhotoGroups } from "@/lib/images";
 import { spaces, amenities } from "@/lib/content";
 
 // Hero images come from Supabase Storage (heroes/<page>.jpg). Without this
@@ -14,37 +16,45 @@ export const revalidate = 60;
 
 export const metadata = { title: "The Venue" };
 
-export default function VenuePage() {
+export default async function VenuePage() {
+  // Areas come from the subfolders of `venue/` in Storage. If none are there
+  // yet, fall back to the written spaces so the page is never empty.
+  const groups = await listPhotoGroups("venue");
+
   return (
     <SiteShell>
       <PageHero
         eyebrow="The Venue"
         script="every corner tells a story"
         title="A restored orchard, made for gathering"
-        subtitle="Explore the four spaces that carry your celebration from first look to last dance."
+        subtitle="Walk the property — the grounds, the ceremony sites, the barn, and the rooms where the morning starts."
         heroKey="venue"
         image="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2100&q=80"
       />
 
-      <section className="bg-bone py-20 md:py-28">
-        <div className="container-x space-y-24">
-          {spaces.map((sp, i) => (
-            <Reveal key={sp.slug}>
-              <div className={`grid items-center gap-12 lg:grid-cols-2 ${i % 2 ? "lg:[&>*:first-child]:order-2" : ""}`}>
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-[var(--shadow-lift)]">
-                  <Image src={sp.image} alt={sp.name} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+      {groups.length > 0 ? (
+        <VenueAreas groups={groups} spaces={spaces} />
+      ) : (
+        <section className="bg-bone py-20 md:py-28">
+          <div className="container-x space-y-24">
+            {spaces.map((sp, i) => (
+              <Reveal key={sp.slug}>
+                <div className={`grid items-center gap-12 lg:grid-cols-2 ${i % 2 ? "lg:[&>*:first-child]:order-2" : ""}`}>
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-[var(--shadow-lift)]">
+                    <Image src={sp.image} alt={sp.name} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+                  </div>
+                  <div>
+                    <p className="eyebrow">{sp.tag} · {sp.capacity}</p>
+                    <h2 className="mt-3 font-display text-4xl text-ink md:text-5xl">{sp.name}</h2>
+                    <p className="mt-5 text-lg leading-relaxed text-ink-soft">{sp.detail}</p>
+                    <p className="mt-3 italic text-stone">{sp.blurb}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="eyebrow">{sp.tag} · {sp.capacity}</p>
-                  <h2 className="mt-3 font-display text-4xl text-ink md:text-5xl">{sp.name}</h2>
-                  <p className="mt-5 text-lg leading-relaxed text-ink-soft">{sp.detail}</p>
-                  <p className="mt-3 italic text-stone">{sp.blurb}</p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      )}
 
       <VirtualTour />
 

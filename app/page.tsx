@@ -7,7 +7,7 @@ import { DateChecker } from "@/components/site/DateChecker";
 import { GuideCapture } from "@/components/site/GuideCapture";
 import { ScarcityBadge } from "@/components/site/ScarcityBadge";
 import {
-  business, stats, spaces, packages, testimonials, gallery as galleryFallback, amenities,
+  business, stats, packages, testimonials, gallery as galleryFallback, amenities,
 } from "@/lib/content";
 import { photosOr, listPhotosDeep } from "@/lib/images";
 import { showcaseCategories } from "@/lib/photo-categories";
@@ -132,35 +132,10 @@ export default async function Home() {
       {/* ============ EXPLORE SHOWCASE (venue · prep · silos) ============ */}
       <ExploreShowcase blocks={showcaseBlocks} />
 
-      {/* ============ SPACES ============ */}
-      <section className="bg-[color:var(--color-linen)] py-24 md:py-32">
-        <div className="container-x">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">The spaces</p>
-            <h2 className="mt-4 font-display text-4xl text-ink md:text-5xl">Four settings, one seamless day</h2>
-            <p className="mt-4 text-ink-soft">Every space flows into the next — no shuttles, no logistics, no rushing.</p>
-          </Reveal>
-          <div className="mt-14 grid gap-6 md:grid-cols-2">
-            {spaces.map((sp, i) => (
-              <Reveal key={sp.slug} delay={(i % 2) * 120}>
-                <article className="card-hover group h-full overflow-hidden rounded-2xl bg-parchment shadow-[var(--shadow-soft)]">
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <Image src={sp.image} alt={sp.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width:768px) 100vw, 50vw" />
-                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[0.68rem] font-medium uppercase tracking-widest text-ink">{sp.tag}</span>
-                  </div>
-                  <div className="p-7">
-                    <div className="flex items-baseline justify-between">
-                      <h3 className="font-display text-3xl text-ink">{sp.name}</h3>
-                      <span className="text-xs uppercase tracking-wider text-sage-deep">{sp.capacity}</span>
-                    </div>
-                    <p className="mt-3 leading-relaxed text-ink-soft">{sp.detail}</p>
-                  </div>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* The old "The spaces" block lived here. It restated ExploreShowcase
+          directly above it, but against hardcoded stock photos rather than the
+          venue's own — two takes on the same content, one of them not even of
+          this property. ExploreShowcase carries it now, from Storage. */}
 
       {/* ============ THE WEEKEND ============ */}
       <section className="relative overflow-hidden bg-[color:var(--color-ink)] py-24 text-parchment md:py-32">
