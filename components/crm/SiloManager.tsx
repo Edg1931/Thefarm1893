@@ -16,14 +16,18 @@ function seedReviews(silo: Silo): SiloReview[] {
   return siloReviews.filter((r) => r.stay === silo.name).map((r) => ({ name: r.name, text: r.text, rating: r.rating }));
 }
 
-export function SiloManager() {
-  const [silos, setSilos] = useState<Silo[]>(seed);
+export function SiloManager({ heroes = {} }: { heroes?: Record<string, string> }) {
+  // `heroes` maps slug -> the silo's own photo from Storage. Without it this
+  // panel showed stock imagery of somebody else's cabin while the public silo
+  // pages showed the real thing.
+  const withHero = (list: Silo[]) => list.map((s) => (heroes[s.slug] ? { ...s, hero: heroes[s.slug] } : s));
+  const [silos, setSilos] = useState<Silo[]>(() => withHero(seed));
   const [reviews, setReviews] = useState<Record<string, SiloReview[]>>({});
   const [editing, setEditing] = useState<Silo | null>(null);
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    setSilos(seed.map(applySiloOverride));
+    setSilos(withHero(seed.map(applySiloOverride)));
     const r: Record<string, SiloReview[]> = {};
     for (const s of seed) r[s.slug] = getStoredReviews(s) ?? seedReviews(s);
     setReviews(r);

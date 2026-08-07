@@ -34,7 +34,7 @@ export default async function AutomationsPage() {
         auto-market your 4 open dates in the next 60 days.
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2 [&>*]:min-w-0">
         {sequences.map((seq) => (
           <Panel key={seq.id}
             title={seq.name}

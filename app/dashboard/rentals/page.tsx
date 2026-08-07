@@ -4,6 +4,8 @@ import { BookingsCalendar } from "@/components/crm/BookingsCalendar";
 import { SiloManager } from "@/components/crm/SiloManager";
 import { siloStats } from "@/lib/silos";
 import { getSiloGuests, getEvents } from "@/lib/crm/data";
+import { silos as siloList } from "@/lib/silos";
+import { listPhotos } from "@/lib/images";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Home, TrendingUp, Repeat, Star, Mail, Zap, CalendarDays } from "lucide-react";
 
@@ -16,7 +18,12 @@ const statusCls: Record<string, string> = {
 };
 
 export default async function RentalsPage() {
-  const [{ guests, live }, { events }] = await Promise.all([getSiloGuests(), getEvents()]);
+  const [{ guests, live }, { events }, heroPairs] = await Promise.all([
+    getSiloGuests(),
+    getEvents(),
+    Promise.all(siloList.map(async (s) => [s.slug, (await listPhotos(`silos/${s.slug}`))[0]] as const)),
+  ]);
+  const heroes = Object.fromEntries(heroPairs.filter(([, url]) => url)) as Record<string, string>;
   return (
     <div className="space-y-6">
       <div>
@@ -46,7 +53,9 @@ export default async function RentalsPage() {
         <BookingsCalendar events={events} guests={guests} live={live} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
+      {/* [&>*]:min-w-0 — grid children default to min-width:auto, so a wide table
+          pushes the whole page sideways instead of scrolling inside its Panel. */}
+      <div className="grid gap-6 xl:grid-cols-3 [&>*]:min-w-0">
         <Panel title="Recent & upcoming guests" className="xl:col-span-2">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
@@ -82,7 +91,7 @@ export default async function RentalsPage() {
           </div>
         </Panel>
 
-        <SiloManager />
+        <SiloManager heroes={heroes} />
       </div>
     </div>
   );

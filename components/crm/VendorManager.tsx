@@ -75,7 +75,7 @@ export function VendorManager({ initial = seed, live = false }: { initial?: Vend
           <h1 className="font-display text-4xl text-ink">Vendor Network</h1>
           <p className="mt-1 text-stone">Your preferred-partner ecosystem — and a referral revenue stream.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => setImporting(true)} className="btn btn-primary !py-2.5 !text-xs"><DownloadCloud size={15} /> Import from website</button>
           <button onClick={() => setOpen(true)} className="btn btn-ghost !py-2.5 !text-xs"><Plus size={15} /> Invite manually</button>
         </div>
