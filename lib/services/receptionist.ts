@@ -91,12 +91,27 @@ function extract(messages: ChatMessage[]): Known {
     if (monthYear) { k.date = `${cap(monthYear[1])} ${monthYear[2]}`; break; }
   }
 
-  // Guest count: a number attached to people-words, either order.
+  // Guest count. Ranges are normal in real enquiries ("180 to 200"), so take
+  // the upper bound — it's the number that decides whether they fit.
   const lower = said.toLowerCase();
-  const g1 = lower.match(/\b(\d{2,4})\s*(?:people|guests?|pax|attendees|heads)\b/);
-  const g2 = lower.match(/\b(?:about|around|roughly|approx\.?|~)?\s*(\d{2,4})\s*(?:of us|in total|total)\b/);
-  const n = g1?.[1] ?? g2?.[1];
-  if (n) k.guests = parseInt(n, 10);
+  const range = (m: RegExpMatchArray | null) =>
+    m ? Math.max(parseInt(m[1], 10), m[2] ? parseInt(m[2], 10) : 0) : undefined;
+
+  const g1 = range(lower.match(/\b(\d{2,4})\s*(?:to|-|–|—)?\s*(\d{2,4})?\s*(?:people|guests?|pax|attendees|heads)\b/));
+  const g2 = range(lower.match(/\b(?:about|around|roughly|approx\.?|~)?\s*(\d{2,4})\s*(?:to|-|–|—)?\s*(\d{2,4})?\s*(?:of us|in total|total)\b/));
+
+  // A bare number is an answer when we just asked the question. Rosie asked
+  // "roughly how many guests", the visitor replied "180 to 200", and the old
+  // parser ignored it for lacking the word "guests" — so she asked again.
+  let g3: number | undefined;
+  const lastUser = userMsgs[userMsgs.length - 1] ?? "";
+  const lastAsk = [...messages].reverse().find((m) => m.role === "assistant")?.content.toLowerCase() ?? "";
+  if (/how many guests|how many people|guest count/.test(lastAsk)) {
+    g3 = range(lastUser.trim().match(/^\s*(?:about|around|roughly|approx\.?|~)?\s*(\d{2,4})\s*(?:to|-|–|—|or)?\s*(\d{2,4})?\s*$/i));
+  }
+
+  const guests = g1 ?? g2 ?? g3;
+  if (guests) k.guests = guests;
 
   const em = said.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
   if (em) k.email = em[0];

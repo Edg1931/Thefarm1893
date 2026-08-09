@@ -65,9 +65,24 @@ export async function generateText(opts: {
       return { text: opts.mock(), mocked: true };
     }
     const data = await res.json();
-    const text = data?.content?.[0]?.text?.trim();
+    // The response `content` is an ARRAY OF BLOCKS, and the first one is not
+    // guaranteed to be the text. Reading content[0].text assumed it always was,
+    // so a reply led by any other block type produced "no text" and silently
+    // fell back to the canned answers even though the call had succeeded.
+    // Collect every text block instead.
+    const blocks: { type?: string; text?: string }[] = Array.isArray(data?.content) ? data.content : [];
+    const text = blocks
+      .filter((b) => b?.type === "text" && typeof b.text === "string")
+      .map((b) => b.text as string)
+      .join("")
+      .trim();
     if (!text) {
-      console.error("[ai] Anthropic returned no text — falling back.");
+      // Name the shape so this is diagnosable rather than mysterious.
+      console.error(
+        `[ai] no text in a successful response — falling back. ` +
+        `blocks=[${blocks.map((b) => b?.type ?? "?").join(",") || "none"}] ` +
+        `stop_reason=${data?.stop_reason ?? "?"} model=${data?.model ?? MODEL}`,
+      );
       return { text: opts.mock(), mocked: true };
     }
     announce(`live — model "${MODEL}" answering.`);
