@@ -12,10 +12,10 @@ export const business = {
   city: "Berlin Heights",
   region: "Ohio",
   address: "12316 Berlin Road, Berlin Heights, OH 44814",
-  // Placeholder — swap real number to connect the AI receptionist line
-  phone: "(419) 555-1893",
-  phoneHref: "tel:+14195551893",
-  email: "hello@thefarm1893.com",
+  // ✓REAL — interim line until the venue's own number/domain is set up
+  phone: "(567) 623-5455",
+  phoneHref: "tel:+15676235455",
+  email: "thefarm1893@gmail.com",
   established: 1893,
   instagram: "https://instagram.com/thefarm1893",
   facebook: "https://facebook.com/thefarm1893",
@@ -36,7 +36,7 @@ export type ContentKey = "phone" | "pricing" | "testimonials" | "photos";
 export type ContentState = "placeholder" | "real";
 
 export const contentStatus: Record<ContentKey, ContentState> = {
-  phone: "placeholder",       // (419) 555-1893 is a reserved fake number
+  phone: "real",              // (567) 623-5455 — interim line, tap-to-call enabled
   pricing: "placeholder",     // packages below are illustrative
   testimonials: "placeholder",// sample quotes, not real couples
   photos: "real",             // client's photos are loaded in the Photos bucket

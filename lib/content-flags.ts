@@ -39,7 +39,7 @@ export function phoneDisplay(): { text: string; href: string | null; placeholder
 export const CONTENT_GUIDANCE: Record<ContentKey, { label: string; why: string; where: string }> = {
   phone: {
     label: "Real phone number",
-    why: "(419) 555-1893 is a reserved fake number — tap-to-call is disabled until this is real.",
+    why: "While this is a placeholder, tap-to-call is disabled and \"Call the Farm\" buttons route to the contact page instead.",
     where: "lib/content.ts → business.phone + business.phoneHref",
   },
   pricing: {

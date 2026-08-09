@@ -159,7 +159,7 @@ to live — no code changes.
 | **Stripe** | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | **Deliberately deferred.** Until added, checkout/invoices run in demo mode and no card is ever charged |
 
 `EMAIL_FROM` must be a domain you've verified in Resend, e.g.
-`The Farm 1893 <hello@thefarm1893.com>`.
+`The Farm 1893 <onboarding@resend.dev>` until the venue's own domain is verified with Resend, at which point set `EMAIL_FROM`. Replies go to `EMAIL_REPLY_TO` (defaults to the address in `lib/content.ts`).
 
 See **`.env.example`** for the full annotated list, including calendar OAuth and OTA sync.
 
