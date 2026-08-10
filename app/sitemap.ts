@@ -7,7 +7,7 @@ const base = process.env.NEXT_PUBLIC_SITE_URL || "https://thefarm1893.vercel.app
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
-    "", "/venue", "/weddings", "/gatherings", "/accommodations", "/stay",
+    "", "/venue", "/weddings", "/gatherings",
     "/silos", "/design-my-day", "/quiz", "/gallery", "/real-weddings", "/vendors",
     "/journal", "/refer", "/pricing", "/about", "/contact",
   ].map((path) => ({

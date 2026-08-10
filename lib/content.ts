@@ -47,9 +47,9 @@ export const nav: NavLink[] = [
   { label: "The Venue", href: "/venue" },
   { label: "Weddings", href: "/weddings" },
   { label: "Gatherings", href: "/gatherings" },
-  { label: "The Stay", href: "/accommodations" },
+  // "The Stay" (/accommodations) and "Retreats" (/stay) both described the same
+  // farmhouse and now live inside Silo Stays, which covers all lodging.
   { label: "Silo Stays", href: "/silos" },
-  { label: "Retreats", href: "/stay" },
   { label: "Design My Day", href: "/design-my-day" },
   { label: "Style Quiz", href: "/quiz" },
   { label: "Gallery", href: "/gallery" },

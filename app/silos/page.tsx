@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Star, Users, BedDouble, Bath, ArrowRight, ShieldCheck, Tag, Headset, TreePine, Quote } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
+import { FarmhouseStay } from "@/components/site/FarmhouseStay";
 import { Reveal } from "@/components/site/Reveal";
 import { VenueCrossLink } from "@/components/site/CrossPromo";
 import { silos, siloReviews } from "@/lib/silos";
@@ -10,8 +11,8 @@ import { listPhotos, heroOr } from "@/lib/images";
 import { formatCurrency } from "@/lib/utils";
 
 export const metadata = {
-  title: "Silo Stays — Vacation Rentals",
-  description: "Stay in one of four restored grain silos at The Farm 1893 — cozy vacation rentals in the Ohio countryside. Book direct and save.",
+  title: "Silo Stays — Vacation Rentals & Farmhouse Retreats",
+  description: "Stay in one of four restored grain silos at The Farm 1893, or rent the 25-sleeper farmhouse for retreats, reunions, and getaways. Ohio countryside, book direct.",
 };
 export const revalidate = 60;
 
@@ -34,7 +35,7 @@ export default async function SilosPage() {
         eyebrow="Silo Stays · Vacation Rentals"
         script="stay a while"
         title="Sleep in a restored silo"
-        subtitle="Four one-of-a-kind grain silos, reimagined as cozy countryside getaways — available to rent year-round, wedding or not."
+        subtitle="Four one-of-a-kind grain silos and a 25-sleeper farmhouse, available to rent year-round — wedding or not."
         image={heroImage}
       />
 
@@ -102,6 +103,8 @@ export default async function SilosPage() {
           </div>
         </div>
       </section>
+
+      <FarmhouseStay />
 
       <VenueCrossLink />
     </SiteShell>
